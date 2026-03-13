@@ -19,10 +19,13 @@ router.get('/health/db', async (_req, res) => {
       timestamp: result.rows[0].now,
     });
   } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown database error';
+    console.error('Database health check failed:', errorMessage);
     res.status(500).json({
       status: 'error',
       database: 'disconnected',
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: 'Internal server error',
     });
   }
 });
