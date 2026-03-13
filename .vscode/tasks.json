@@ -1,0 +1,65 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run Frontend",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": { "cwd": "${workspaceFolder}/front-end" },
+      "isBackground": true,
+      "problemMatcher": [],
+      "group": "none",
+      "icon": { "id": "play", "color": "terminal.ansiGreen" },
+      "runOptions": { "instanceLimit": 1 }
+    },
+    {
+      "label": "Run Backend",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": { "cwd": "${workspaceFolder}/back-end" },
+      "isBackground": true,
+      "problemMatcher": [],
+      "group": "none",
+      "icon": { "id": "play", "color": "terminal.ansiBlue" },
+      "runOptions": { "instanceLimit": 1 }
+    },
+    {
+      "label": "Build Frontend",
+      "type": "shell",
+      "command": "npm run build",
+      "options": { "cwd": "${workspaceFolder}/front-end" },
+      "problemMatcher": ["$tsc"],
+      "group": "build",
+      "icon": { "id": "package", "color": "terminal.ansiGreen" }
+    },
+    {
+      "label": "Build Backend",
+      "type": "shell",
+      "command": "npm run build",
+      "options": { "cwd": "${workspaceFolder}/back-end" },
+      "problemMatcher": ["$tsc"],
+      "group": "build",
+      "icon": { "id": "package", "color": "terminal.ansiBlue" }
+    },
+    {
+      "label": "Run All (FE + BE)",
+      "dependsOn": ["Run Frontend", "Run Backend"],
+      "dependsOrder": "parallel",
+      "problemMatcher": [],
+      "group": "none",
+      "icon": { "id": "run-all", "color": "terminal.ansiYellow" },
+      "runOptions": { "instanceLimit": 1 }
+    },
+    {
+      "label": "Build All (FE + BE)",
+      "dependsOn": ["Build Frontend", "Build Backend"],
+      "dependsOrder": "parallel",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "icon": { "id": "package", "color": "terminal.ansiYellow" }
+    }
+  ]
+}
