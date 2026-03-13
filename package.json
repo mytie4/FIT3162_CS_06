@@ -1,0 +1,19 @@
+{
+  "name": "fit3162-cs-06",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FIT3162 CS-06 Full-Stack Application",
+  "scripts": {
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:clean": "docker-compose down -v",
+    "install:all": "cd back-end && npm install && cd ../front-end && npm install",
+    "dev:backend": "cd back-end && npm run dev",
+    "dev:frontend": "cd front-end && npm run dev"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}

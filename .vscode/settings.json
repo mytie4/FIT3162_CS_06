@@ -1,0 +1,32 @@
+{
+  "actionButtons": {
+    "defaultColor": "#ffffff",
+    "reloadButton": null,
+    "loadNpmCommands": false,
+    "commands": [
+      {
+        "name": "$(run-all) Run All",
+        "color": "#f1c40f",
+        "singleInstance": true,
+        "command": "cd ${workspaceFolder}/front-end && npm run dev & cd ${workspaceFolder}/back-end && npm run dev"
+      },
+      {
+        "name": "$(play) Frontend",
+        "color": "#2ecc71",
+        "singleInstance": true,
+        "command": "cd ${workspaceFolder}/front-end && npm run dev"
+      },
+      {
+        "name": "$(play) Backend",
+        "color": "#3498db",
+        "singleInstance": true,
+        "command": "cd ${workspaceFolder}/back-end && npm run dev"
+      },
+      {
+        "name": "$(package) Build All",
+        "color": "#e67e22",
+        "command": "cd ${workspaceFolder}/front-end && npm run build && cd ${workspaceFolder}/back-end && npm run build"
+      }
+    ]
+  }
+}
