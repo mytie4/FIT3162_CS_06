@@ -43,12 +43,20 @@
     },
     {
       "label": "Run All (FE + BE)",
-      "dependsOn": ["Run Frontend", "Run Backend"],
+      "dependsOn": ["Run Frontend", "Run Backend", "Open Frontend + Swagger"],
       "dependsOrder": "parallel",
       "problemMatcher": [],
       "group": "none",
       "icon": { "id": "run-all", "color": "terminal.ansiYellow" },
       "runOptions": { "instanceLimit": 1 }
+    },
+    {
+      "label": "Open Frontend + Swagger",
+      "type": "shell",
+      "command": "sleep 6 && \"$BROWSER\" http://localhost:5173 && \"$BROWSER\" http://localhost:5000/api-docs",
+      "problemMatcher": [],
+      "group": "none",
+      "icon": { "id": "browser", "color": "terminal.ansiCyan" }
     },
     {
       "label": "Build All (FE + BE)",
