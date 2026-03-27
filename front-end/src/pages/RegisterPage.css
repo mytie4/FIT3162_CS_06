@@ -42,6 +42,14 @@
   width: 100%;
 }
 
+.register-brand-logo {
+  width: 48px;
+  height: 48px;
+  display: block;
+  margin: 0 auto 0.75rem;
+  object-fit: contain;
+}
+
 .register-title {
   font-size: 1.6rem;
   font-weight: 700;

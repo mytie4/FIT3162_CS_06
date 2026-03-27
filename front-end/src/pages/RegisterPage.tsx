@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import Footer from '../components/Footer'
+import Footer from '../components/common/Footer'
+import BrandLogo from '../components/common/BrandLogo'
 import './RegisterPage.css'
 
 export default function RegisterPage() {
@@ -44,6 +45,7 @@ export default function RegisterPage() {
 
         <div className="register-card">
           <form className="register-form" onSubmit={handleSubmit}>
+            <BrandLogo className="register-brand-logo" />
             <h1 className="register-title">Create Account</h1>
 
             <label className="form-label" htmlFor="fullName">Full Name</label>
