@@ -53,7 +53,7 @@
     {
       "label": "Open Frontend + Swagger",
       "type": "shell",
-      "command": "sleep 6 && \"$BROWSER\" http://localhost:5173 && \"$BROWSER\" http://localhost:5000/api-docs",
+      "command": "bash -lc 'sleep 6; for u in http://localhost:5173 http://localhost:5000/api-docs; do if [ -n \"$BROWSER\" ]; then \"$BROWSER\" \"$u\" || xdg-open \"$u\" || true; else xdg-open \"$u\" || true; fi; done'",
       "problemMatcher": [],
       "group": "none",
       "icon": { "id": "browser", "color": "terminal.ansiCyan" }

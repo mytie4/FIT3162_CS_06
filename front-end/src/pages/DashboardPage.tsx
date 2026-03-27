@@ -1,19 +1,24 @@
 import { useNavigate } from 'react-router-dom'
+import BrandLogo from '../components/common/BrandLogo'
+import { useAuth } from '../context/AuthContext'
 import './DashboardPage.css'
 
 export default function DashboardPage() {
   const navigate = useNavigate()
+  const { logout } = useAuth()
 
   const handleSignOut = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
+    logout()
     navigate('/login')
   }
 
   return (
     <div className="dashboard-page">
       <header className="dashboard-header">
-        <span className="dashboard-brand">Eventure</span>
+        <div className="dashboard-brand">
+          <BrandLogo className="dashboard-brand-logo" />
+          <span className="dashboard-brand-text">Eventure</span>
+        </div>
         <button className="btn-sign-out" onClick={handleSignOut}>
           Sign Out
         </button>

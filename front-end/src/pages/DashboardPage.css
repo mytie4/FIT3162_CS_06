@@ -15,6 +15,19 @@
 }
 
 .dashboard-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.dashboard-brand-logo {
+  width: 36px;
+  height: 36px;
+  display: block;
+  object-fit: contain;
+}
+
+.dashboard-brand-text {
   font-size: 1.25rem;
   font-weight: 700;
   color: #1a6b6e;

@@ -35,6 +35,8 @@
 .brand-icon {
   width: 32px;
   height: 32px;
+  display: block;
+  object-fit: contain;
 }
 
 .brand-name {
@@ -52,9 +54,12 @@
   max-width: 260px;
 }
 
-.login-illustration svg {
+.login-illustration-logo {
   width: 100%;
+  max-width: 220px;
   height: auto;
+  display: block;
+  object-fit: contain;
 }
 
 .login-tagline {
