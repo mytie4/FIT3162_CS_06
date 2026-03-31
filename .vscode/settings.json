@@ -5,22 +5,15 @@
     "loadNpmCommands": false,
     "commands": [
       {
+        "name": "$(cloud-download) Install Deps",
+        "color": "#9b59b6",
+        "command": "cd ${workspaceFolder}/back-end && npm install && cd ${workspaceFolder}/front-end && npm install && echo '✅ All dependencies installed!'"
+      },
+      {
         "name": "$(run-all) Run All",
         "color": "#f1c40f",
         "singleInstance": true,
         "command": "bash -lc 'cd \"${workspaceFolder}/front-end\" && npm run dev -- --host 0.0.0.0 & cd \"${workspaceFolder}/back-end\" && npm run dev & sleep 6; for u in http://localhost:5173 http://localhost:5000/api-docs; do if [ -n \"$BROWSER\" ]; then \"$BROWSER\" \"$u\" || xdg-open \"$u\" || true; else xdg-open \"$u\" || true; fi; done; wait'"
-      },
-      {
-        "name": "$(play) Frontend",
-        "color": "#2ecc71",
-        "singleInstance": true,
-        "command": "bash -lc 'cd \"${workspaceFolder}/front-end\" && npm run dev -- --host 0.0.0.0 & sleep 4; if [ -n \"$BROWSER\" ]; then \"$BROWSER\" http://localhost:5173 || xdg-open http://localhost:5173 || true; else xdg-open http://localhost:5173 || true; fi; wait'"
-      },
-      {
-        "name": "$(play) Backend",
-        "color": "#3498db",
-        "singleInstance": true,
-        "command": "bash -lc 'cd \"${workspaceFolder}/back-end\" && npm run dev & sleep 4; if [ -n \"$BROWSER\" ]; then \"$BROWSER\" http://localhost:5000/api-docs || xdg-open http://localhost:5000/api-docs || true; else xdg-open http://localhost:5000/api-docs || true; fi; wait'"
       },
       {
         "name": "$(package) Build All",

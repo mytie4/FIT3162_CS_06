@@ -1,0 +1,3 @@
+# Ensure shell scripts always use LF line endings (critical for dev containers on Mac/Linux)
+*.sh text eol=lf
+.devcontainer/** text eol=lf

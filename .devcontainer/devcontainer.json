@@ -16,7 +16,7 @@
     "5050": { "label": "pgAdmin", "onAutoForward": "notify" }
   },
 
-  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "postCreateCommand": "sed -i 's/\\r$//' .devcontainer/post-create.sh && bash .devcontainer/post-create.sh",
 
   "customizations": {
     "vscode": {
