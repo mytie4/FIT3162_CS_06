@@ -2,6 +2,7 @@
   padding: 32px 40px;
   flex: 1;
   background: #f5f0eb;
+  height: 100%;
 }
 
 .clubs-page-title {
@@ -76,7 +77,9 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: background 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
 }
 
 .clubs-btn-outline:hover {
