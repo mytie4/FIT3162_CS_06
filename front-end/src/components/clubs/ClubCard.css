@@ -1,0 +1,103 @@
+.club-card {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.club-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.club-card-banner {
+  height: 120px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.club-card-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.club-card-body {
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.club-card-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #222;
+  margin: 0;
+}
+
+.club-card-badge {
+  display: inline-block;
+  width: fit-content;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.club-card-badge--social {
+  background: #e0f2f1;
+  color: #1a6b6e;
+}
+
+.club-card-badge--hobby {
+  background: #fce4ec;
+  color: #c62828;
+}
+
+.club-card-badge--cultural {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.club-card-badge--academic {
+  background: #e8eaf6;
+  color: #283593;
+}
+
+.club-card-badge--sports {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.club-card-badge--technology {
+  background: #ede7f6;
+  color: #4527a0;
+}
+
+.club-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: #777;
+}
+
+.club-card-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.club-card-meta-item svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
