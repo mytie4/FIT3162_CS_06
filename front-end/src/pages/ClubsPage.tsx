@@ -86,6 +86,7 @@ export default function ClubsPage() {
           <input
             type="text"
             placeholder="Search clubs..."
+            aria-label="Search clubs"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
