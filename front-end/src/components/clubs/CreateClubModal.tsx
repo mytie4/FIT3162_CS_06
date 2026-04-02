@@ -72,6 +72,7 @@ export default function CreateClubModal({ onClose }: CreateClubModalProps) {
                 <button
                   className="create-member-remove"
                   onClick={() => removeMember(m.id)}
+                  aria-label={`Remove member ${m.name}`}
                 >
                   &times;
                 </button>

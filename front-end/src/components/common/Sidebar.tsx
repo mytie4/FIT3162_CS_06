@@ -21,9 +21,6 @@ type NavItem = {
 const NAV_ITEMS: NavItem[] = [
   { label: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={20} />, hasSubmenu: false },
   { label: 'Clubs',     path: '/clubs',     icon: <Users size={20} />,           hasSubmenu: false  },
-  { label: 'Events',    path: '/events',    icon: <CalendarDays size={20} />,    hasSubmenu: false  },
-  { label: 'Tasks',     path: '/tasks',     icon: <ClipboardList size={20} />,   hasSubmenu: false  },
-  { label: 'Timeline',  path: '/timeline',  icon: <SlidersHorizontal size={20} />, hasSubmenu: false },
 ]
 
 export default function Sidebar() {
