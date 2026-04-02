@@ -3,7 +3,9 @@ import { AuthProvider } from './context/AuthContext'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import DashboardPage from './pages/DashboardPage'
+import ClubsPage from './pages/ClubsPage'
 import ProtectedRoute from './components/common/ProtectedRoute'
+import AppLayout from './components/common/AppLayout'
 import './App.css'
 
 function App() {
@@ -13,15 +15,11 @@ function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/clubs" element={<ClubsPage />} />
+          </Route>
+          <Route path="*" element={<ProtectedRoute><Navigate to="/dashboard" replace /></ProtectedRoute>} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

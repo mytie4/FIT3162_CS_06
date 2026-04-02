@@ -1,0 +1,123 @@
+.clubs-page {
+  padding: 32px 40px;
+  flex: 1;
+  background: #f5f0eb;
+  height: 100%;
+}
+
+.clubs-page-title {
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: #222;
+  margin: 0 0 24px;
+}
+
+.clubs-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.clubs-search {
+  flex: 1;
+  min-width: 200px;
+  max-width: 360px;
+  position: relative;
+}
+
+.clubs-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: #999;
+  pointer-events: none;
+}
+
+.clubs-search input {
+  width: 100%;
+  padding: 9px 14px 9px 36px;
+  border: 1.5px solid #d5d5d5;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  color: #333;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.clubs-search input:focus {
+  border-color: #1a6b6e;
+}
+
+.clubs-search input::placeholder {
+  color: #aaa;
+}
+
+.clubs-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.clubs-btn-outline {
+  padding: 8px 18px;
+  border: 1.5px solid #ccc;
+  border-radius: 8px;
+  background: #fff;
+  color: #444;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+
+.clubs-btn-outline:hover {
+  background: #f0f0f0;
+  border-color: #bbb;
+}
+
+.clubs-btn-outline svg {
+  width: 14px;
+  height: 14px;
+}
+
+.clubs-btn-primary {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #1a6b6e;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.15s;
+}
+
+.clubs-btn-primary:hover {
+  background: #155758;
+}
+
+.clubs-btn-primary svg {
+  width: 14px;
+  height: 14px;
+}
+
+.clubs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 22px;
+}
