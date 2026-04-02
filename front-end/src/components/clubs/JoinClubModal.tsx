@@ -25,6 +25,7 @@ export default function JoinClubModal({ onClose }: JoinClubModalProps) {
           className="join-card-input"
           type="text"
           placeholder="Enter join code"
+          aria-label="Join code"
           value={joinCode}
           onChange={(e) => setJoinCode(e.target.value)}
         />
