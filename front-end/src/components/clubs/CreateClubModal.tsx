@@ -30,8 +30,9 @@ export default function CreateClubModal({ onClose }: CreateClubModalProps) {
     <div className="create-overlay" onClick={handleOverlayClick}>
       <div className="create-card">
         <div className="create-field">
-          <label className="create-label">Name</label>
+          <label className="create-label" htmlFor="club-name">Name</label>
           <input
+            id="club-name"
             className="create-input"
             type="text"
             placeholder="Enter name"
@@ -41,10 +42,11 @@ export default function CreateClubModal({ onClose }: CreateClubModalProps) {
         </div>
 
         <div className="create-field">
-          <label className="create-label">Type</label>
+          <label className="create-label" htmlFor="club-type">Type</label>
           <div className="create-type-select">
             <span className="create-type-badge">{type}</span>
             <select
+              id="club-type"
               className="create-type-native"
               value={type}
               onChange={(e) => setType(e.target.value)}
@@ -95,8 +97,9 @@ export default function CreateClubModal({ onClose }: CreateClubModalProps) {
         </div>
 
         <div className="create-field">
-          <label className="create-label">Description</label>
+          <label className="create-label" htmlFor="club-description">Description</label>
           <textarea
+            id="club-description"
             className="create-textarea"
             placeholder="Enter description"
             value={description}
