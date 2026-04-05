@@ -1,17 +1,16 @@
 import { useState } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Footer from '../components/common/Footer'
 import BrandLogo from '../components/common/BrandLogo'
-import { useAuth } from "../context/AuthContext";
 import './RegisterPage.css'
+import { registerRequest } from '../api/auth.api';
 
 export default function RegisterPage() {
   const [fullName, setFullName] = useState('')
-  const { register } = useAuth();
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [agreeTerms, setAgreeTerms] = useState(false)
   const navigate = useNavigate()
 
@@ -21,9 +20,8 @@ export default function RegisterPage() {
       alert('Passwords do not match')
       return
     }
-    // console.log('Register:', { fullName, email, password, agreeTerms })
     try { 
-      await register({name: fullName, email, password});
+      await registerRequest({name: fullName, email, password});
       navigate("/login");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to connect to server");
