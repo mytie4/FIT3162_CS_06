@@ -1,23 +1,34 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import Footer from '../components/common/Footer'
 import BrandLogo from '../components/common/BrandLogo'
+import { useAuth } from "../context/AuthContext";
 import './RegisterPage.css'
 
 export default function RegisterPage() {
   const [fullName, setFullName] = useState('')
+  const { register } = useAuth();
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [error, setError] = useState("");
   const [agreeTerms, setAgreeTerms] = useState(false)
+  const navigate = useNavigate()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (password !== confirmPassword) {
       alert('Passwords do not match')
       return
     }
-    console.log('Register:', { fullName, email, password, agreeTerms })
+    // console.log('Register:', { fullName, email, password, agreeTerms })
+    try { 
+      await register({name: fullName, email, password});
+      navigate("/login");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to connect to server");
+    }
+
   }
 
   return (
@@ -98,6 +109,8 @@ export default function RegisterPage() {
               />
               I agree to <Link to="/" className="terms-link">Terms &amp; Conditions</Link>
             </label>
+
+            {error && <p className="form-error">{error}</p>}
 
             <button type="submit" className="btn-primary btn-dark">
               Create Account

@@ -16,3 +16,15 @@ export interface LoginResponse {
   token: string;
   user: AuthUser;
 }
+
+export interface RegisterCredentials {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export interface RegisterResponse {
+  message: string;
+  token: string;
+  user: AuthUser;
+}
