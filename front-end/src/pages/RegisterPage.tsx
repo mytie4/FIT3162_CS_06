@@ -1,17 +1,17 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import Footer from "../components/common/Footer";
-import BrandLogo from "../components/common/BrandLogo";
-import "./RegisterPage.css";
-import { registerRequest, validateName } from "../api/auth.api";
-import { useAuth } from "../context/AuthContext";
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import Footer from '../components/common/Footer';
+import BrandLogo from '../components/common/BrandLogo';
+import './RegisterPage.css';
+import { registerRequest, validateName } from '../api/auth.api';
+import { useAuth } from '../context/AuthContext';
 
 export default function RegisterPage() {
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
   const [agreeTerms, setAgreeTerms] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -19,7 +19,7 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      alert("Passwords do not match");
+      alert('Passwords do not match');
       return;
     }
     try {
@@ -30,10 +30,10 @@ export default function RegisterPage() {
         password: password
       });
       await login({ email, password });
-      navigate("/dashboard");
+      navigate('/dashboard');
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Unable to connect to server"
+        err instanceof Error ? err.message : 'Unable to connect to server'
       );
     }
   };
