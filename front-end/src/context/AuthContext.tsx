@@ -24,8 +24,7 @@ function loadStoredUser(): AuthUser | null {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(loadStoredUser);
   const [token, setToken] = useState<string | null>(
-    () => localStorage.getItem('token'),
-  );
+    () => localStorage.getItem('token'));
 
   const login = useCallback(async (credentials: LoginCredentials) => {
     const data = await loginRequest(credentials);
@@ -46,7 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<AuthContextValue>(
     () => ({ user, token, isAuthenticated: !!token, login, logout }),
-    [user, token, login, logout],
+    [user, token, login, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
