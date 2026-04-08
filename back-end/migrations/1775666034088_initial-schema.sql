@@ -3,11 +3,13 @@
 CREATE TABLE "Users" (
   "user_id" SERIAL PRIMARY KEY,
   "name" VARCHAR(255) NOT NULL,
-  "email" VARCHAR(255) UNIQUE NOT NULL,
+  "email" VARCHAR(255) NOT NULL,
   "password_hash" VARCHAR(255) NOT NULL,
   "profile_pic_url" VARCHAR(2048),
   "wants_email_reminders" BOOLEAN NOT NULL DEFAULT FALSE
 );
+
+CREATE UNIQUE INDEX "users_email_lower_unique" ON "Users" (LOWER("email"));
 
 CREATE TABLE "Clubs" (
   "club_id" SERIAL PRIMARY KEY,
@@ -88,4 +90,5 @@ DROP TABLE IF EXISTS "Events";
 DROP TABLE IF EXISTS "Club_Members_Contributions";
 DROP TABLE IF EXISTS "Club_Members";
 DROP TABLE IF EXISTS "Clubs";
+DROP INDEX IF EXISTS "users_email_lower_unique";
 DROP TABLE IF EXISTS "Users";
