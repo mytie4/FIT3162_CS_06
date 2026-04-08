@@ -121,3 +121,19 @@
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 22px;
 }
+
+.clubs-status-message {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #444;
+  font-size: 0.95rem;
+  border: 1px solid #ddd;
+}
+
+.clubs-status-message--error {
+  color: #a12626;
+  border-color: #e7b4b4;
+  background: #fff5f5;
+}
