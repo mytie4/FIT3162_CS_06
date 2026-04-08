@@ -5,7 +5,7 @@ Full-stack application with React frontend, Express backend, and PostgreSQL data
 ## Prerequisites
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) — for PostgreSQL and pgAdmin
-- [Node.js 20+](https://nodejs.org/)
+- [Node.js 20.11.0+](https://nodejs.org/)
 
 ## Quick Start
 
@@ -29,19 +29,19 @@ This starts:
 | PostgreSQL | localhost:5432        | Database                 |
 | pgAdmin    | http://localhost:5050 | PostgreSQL web interface |
 
-### 3. Run database migrations
+### 3. Install dependencies
+
+```bash
+npm run install:all
+```
+
+### 4. Run database migrations
 
 ```bash
 cd back-end && npm run migrate:up
 ```
 
 This creates all required tables (Users, Clubs, Club_Members, Events, Tasks, etc.) in the PostgreSQL database.
-
-### 4. Install dependencies
-
-```bash
-npm run install:all
-```
 
 ### 5. Run the app
 
