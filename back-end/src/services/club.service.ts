@@ -87,6 +87,16 @@ export async function createClub(
   }
 }
 
+export async function getAllClubs() {
+  const result = await clubRepo.getAllClubs() 
+  
+  return result.map(club => ({
+    ...club, 
+    member_count: Number(club.member_count),
+    ongoing_event_count: Number(club.ongoing_event_count)
+  }));
+}
+
 export class ServiceError extends Error {
   constructor(
     public readonly statusCode: number,
