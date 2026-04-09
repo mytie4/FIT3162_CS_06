@@ -5,7 +5,7 @@ Full-stack application with React frontend, Express backend, and PostgreSQL data
 ## Prerequisites
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) — for PostgreSQL and pgAdmin
-- [Node.js 20+](https://nodejs.org/)
+- [Node.js 20.11.0+](https://nodejs.org/)
 
 ## Quick Start
 
@@ -35,7 +35,15 @@ This starts:
 npm run install:all
 ```
 
-### 4. Run the app
+### 4. Run database migrations
+
+```bash
+cd back-end && npm run migrate:up
+```
+
+This creates all required tables (Users, Clubs, Club_Members, Events, Tasks, etc.) in the PostgreSQL database.
+
+### 5. Run the app
 
 ```bash
 # Terminal 1 – Backend (http://localhost:5000)
@@ -54,6 +62,51 @@ npm run dev:frontend
    - **Port**: `5432`
    - **Username**: `postgres`
    - **Password**: `postgres`
+
+## Database Migrations
+
+Schema changes are managed with [node-pg-migrate](https://github.com/salsita/node-pg-migrate). Migration files live in `back-end/migrations/`.
+
+```bash
+# Apply all pending migrations
+cd back-end && npm run migrate:up
+
+# Roll back the last migration
+cd back-end && npm run migrate:down
+
+# Create a new migration file
+cd back-end && npm run migrate:create -- describe-the-change
+```
+
+After pulling new changes, always run `npm run migrate:up` from `back-end/` to apply any new migrations.
+
+### Making schema changes
+
+Never edit an existing migration file. Instead, create a new one:
+
+```bash
+# 1. Scaffold a new migration
+cd back-end && npm run migrate:create -- add-club-color
+
+# 2. Edit the generated file in back-end/migrations/, e.g.:
+```
+
+```sql
+-- Up Migration
+ALTER TABLE "Clubs" ADD COLUMN "club_color" VARCHAR(7);
+
+-- Down Migration
+ALTER TABLE "Clubs" DROP COLUMN "club_color";
+```
+
+```bash
+# 3. Apply it
+cd back-end && npm run migrate:up
+
+# 4. Commit the new migration file to git
+```
+
+Each migration is tracked by a `pgmigrations` table in the database, so `migrate:up` only applies migrations that haven't run yet. `migrate:down` rolls back the most recent one.
 
 ## Docker Commands
 
@@ -101,6 +154,7 @@ You can also use **Ctrl+Shift+D** to access the Run & Debug panel with the same 
 │   ├── settings.json   # Status bar buttons
 │   └── tasks.json      # Build & run tasks
 ├── back-end/           # Express.js + TypeScript API
+│   ├── migrations/     # SQL migration files (node-pg-migrate)
 │   ├── src/
 │   │   ├── app.ts
 │   │   ├── server.ts
