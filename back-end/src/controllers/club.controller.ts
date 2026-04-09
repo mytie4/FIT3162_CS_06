@@ -6,7 +6,7 @@ export async function createClub(req: Request, res: Response) {
   try {
     const clubData: CreateClubDTO = req.body;
     // temp. replace later with real UUID
-    const userId = "1e23f456-...";
+    const userId = "546e09d3-6df1-4db1-a535-dc8c76d54a77";
     const club = await clubService.createClub(clubData, userId);
 
     return res.status(201).json({
