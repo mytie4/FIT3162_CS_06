@@ -32,3 +32,20 @@ export async function createClub(req: AuthRequest, res: Response) {
     });
   }
 }
+
+
+export async function getAllClubs(req: Request, res: Response) {
+  try {
+    const clubs = await clubService.getAllClubs();
+
+    return res.status(200).json(clubs);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown server error.";
+    console.error("Fetch all clubs failed:", errorMessage);
+    
+    return res.status(500).json({
+      error: "Internal server error",
+    });
+
+  }
+}
