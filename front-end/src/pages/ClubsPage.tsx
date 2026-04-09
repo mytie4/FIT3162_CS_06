@@ -2,22 +2,27 @@ import { useEffect, useState } from "react";
 import ClubCard from "../components/clubs/ClubCard";
 import CreateClubModal from "../components/clubs/CreateClubModal";
 import JoinClubModal from "../components/clubs/JoinClubModal";
-import { getAllClubs } from "../api/clubs.api";
 import type { Club } from "../types/clubs.types";
 import "./ClubsPage.css";
 
-// set deafult banner (for banner feature later)
+// for mockdata testing, for actual testing, delete this line and uncomment the line below
+import { getAllClubs } from "../api/mockClubs.api";
+//import { getAllClubs } from "../api/clubs.api";
+
+// set deafult banner if not set by user
 function getBannerColor(id: number): string {
   const colors = [
-    "#a8d5ba",
-    "#f7c59f",
-    "#ffb6b6",
-    "#b6d4f7",
-    "#d4b6f7",
-    "#c8e6c9",
+    "#F36D8A",
+    "#25A9EF",
+    "#3942F4",
+    "#9B7CF3",
+    "#F4BF39",
+    "#FD59C0",
+    "#39F4D5",
+    "#8CF57E",
   ];
 
-  return colors[(id - 1) % colors.length];
+  return colors[id % colors.length];
 }
 
 export default function ClubsPage() {
@@ -170,12 +175,12 @@ export default function ClubsPage() {
               {filtered.map((club) => (
                 <ClubCard
                   key={club.club_id}
+                  bannerColor={club.club_color ?? getBannerColor(club.club_id)}
                   name={club.name}
-                  // for new feature, I have kept these as default for now
-                  bannerColor={getBannerColor(club.club_id)}
-                  categoryBadge={"default"}
-                  ongoingEvent={"default"}
-                  memberCount={123}
+                  // use default data for feature to add later on
+                  categoryBadge="Club"
+                  ongoingEvent={"no ongoing event"}
+                  memberCount={0}
                 />
               ))}
             </div>
