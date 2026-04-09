@@ -34,22 +34,8 @@ export async function createUser(
   passwordHash: string,
 ): Promise<Omit<User, 'password_hash'>> {
   const result = await pool.query(
-    `INSERT INTO "Users" (
-        "user_id",
-        "name",
-        "email",
-        "password_hash",
-        "profile_pic_url",
-        "wants_email_reminders"
-      )
-     VALUES (
-        (SELECT COALESCE(MAX("user_id"), 0) + 1 FROM "Users"),
-        $1,
-        $2,
-        $3,
-        NULL,
-        FALSE
-     )
+    `INSERT INTO "Users" ("name", "email", "password_hash")
+     VALUES ($1, $2, $3)
      RETURNING
         "user_id",
         "name",
