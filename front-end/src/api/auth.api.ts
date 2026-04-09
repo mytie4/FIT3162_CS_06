@@ -40,8 +40,8 @@ export async function registerRequest(credentials: RegisterCredentials): Promise
 
 export const validateName = (name: string) => {
   if (name.trim().length < 2 || name.trim().length > 30) throw new Error("Name must be between 2 and 30 characters");
-  if (!/^[A-Za-z0-9\-_]+( [A-Za-z0-9\-_]+)*$/.test(name)) {
-  throw new Error("Name contains invalid characters");
+  if (!/^[A-Za-z0-9\-_]+( [A-Za-z0-9\-_]+)*$/.test(name.trim())) {
+  throw new Error("Name contains invalid characters, or has more than one space between words.");
 }
   return null;
 };

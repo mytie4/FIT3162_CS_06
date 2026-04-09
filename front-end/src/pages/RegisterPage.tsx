@@ -25,7 +25,7 @@ export default function RegisterPage() {
     try {
       validateName(fullName);
       await registerRequest({
-        name: fullName,
+        name: fullName.trim(),
         email: email,
         password: password
       });
