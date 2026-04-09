@@ -1,12 +1,16 @@
 import type { Request, Response } from "express";
 import * as clubService from "../services/club.service";
 import type { CreateClubDTO } from "../entities/club.entity";
+import type { AuthRequest } from "../middlewares/auth.middleware";
 
-export async function createClub(req: Request, res: Response) {
+export async function createClub(req: AuthRequest, res: Response) {
   try {
     const clubData: CreateClubDTO = req.body;
-    // temp. replace later with real UUID
-    const userId = "546e09d3-6df1-4db1-a535-dc8c76d54a77";
+    const userId = req.user?.user_id;
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
     const club = await clubService.createClub(clubData, userId);
 
     return res.status(201).json({

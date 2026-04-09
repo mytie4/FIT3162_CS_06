@@ -1,5 +1,6 @@
 import { Router } from "express";
 import * as clubController from "../controllers/club.controller";
+import { authMiddleware } from "../middlewares/auth.middleware";
 
 const router = Router();
 
@@ -7,6 +8,8 @@ const router = Router();
  * @openapi
  * /api/clubs:
  *   post:
+ *     security:
+ *      - BearerAuth: []
  *     summary: Create a new club and assign the creator as admin
  *     tags:
  *       - Clubs
@@ -35,6 +38,12 @@ const router = Router();
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       500:
  *         description: Internal server error
  *         content:
@@ -42,6 +51,6 @@ const router = Router();
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post("/clubs", clubController.createClub);
+router.post("/clubs", authMiddleware, clubController.createClub);
 
 export default router;
