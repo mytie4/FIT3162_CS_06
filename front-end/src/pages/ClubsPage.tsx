@@ -10,19 +10,25 @@ import { getAllClubs } from "../api/mockClubs.api";
 //import { getAllClubs } from "../api/clubs.api";
 
 // set deafult banner if not set by user
-function getBannerColor(id: number): string {
-  const colors = [
-    "#F36D8A",
-    "#25A9EF",
-    "#3942F4",
-    "#9B7CF3",
-    "#F4BF39",
-    "#FD59C0",
-    "#39F4D5",
-    "#8CF57E",
-  ];
+const DEFAULT_COLORS = [
+  "#F36D8A",
+  "#25A9EF",
+  "#3942F4",
+  "#9B7CF3",
+  "#F4BF39",
+  "#FD59C0",
+  "#39F4D5",
+  "#8CF57E",
+];
 
-  return colors[id % colors.length];
+function getBannerColor(clubId: string): string {
+  let hash = 0;
+
+  for (let i = 0; i < clubId.length; i++) {
+    hash = (hash * 31 + clubId.charCodeAt(i)) >>> 0;
+  }
+
+  return DEFAULT_COLORS[hash % DEFAULT_COLORS.length];
 }
 
 export default function ClubsPage() {
@@ -177,10 +183,14 @@ export default function ClubsPage() {
                   key={club.club_id}
                   bannerColor={club.club_color ?? getBannerColor(club.club_id)}
                   name={club.name}
+                  ongoingEvent={
+                    club.ongoing_event_count === 0
+                      ? "No ongoing event"
+                      : `${club.ongoing_event_count} ongoing event${club.ongoing_event_count === 1 ? "" : "s"}`
+                  }
+                  memberCount={club.member_count}
                   // use default data for feature to add later on
                   categoryBadge="Club"
-                  ongoingEvent={"no ongoing event"}
-                  memberCount={0}
                 />
               ))}
             </div>
