@@ -1,7 +1,7 @@
 -- Up Migration
 
 CREATE TABLE "Users" (
-  "user_id" SERIAL PRIMARY KEY,
+  "user_id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "name" VARCHAR(255) NOT NULL,
   "email" VARCHAR(255) NOT NULL,
   "password_hash" VARCHAR(255) NOT NULL,
@@ -12,15 +12,15 @@ CREATE TABLE "Users" (
 CREATE UNIQUE INDEX "users_email_lower_unique" ON "Users" (LOWER("email"));
 
 CREATE TABLE "Clubs" (
-  "club_id" SERIAL PRIMARY KEY,
+  "club_id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "name" VARCHAR(255) NOT NULL,
   "description" TEXT,
   "shared_drive_link" VARCHAR(2048)
 );
 
 CREATE TABLE "Club_Members" (
-  "club_id" INT NOT NULL,
-  "user_id" INT NOT NULL,
+  "club_id" UUID NOT NULL,
+  "user_id" UUID NOT NULL,
   "role" VARCHAR(50) NOT NULL DEFAULT 'member',
   PRIMARY KEY ("club_id", "user_id"),
   FOREIGN KEY ("club_id") REFERENCES "Clubs" ("club_id") DEFERRABLE INITIALLY IMMEDIATE,
@@ -28,9 +28,9 @@ CREATE TABLE "Club_Members" (
 );
 
 CREATE TABLE "Club_Members_Contributions" (
-  "contribution_id" SERIAL PRIMARY KEY,
-  "club_id" INT NOT NULL,
-  "user_id" INT NOT NULL,
+  "contribution_id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "club_id" UUID NOT NULL,
+  "user_id" UUID NOT NULL,
   "contributions" TEXT,
   "date_logged" TIMESTAMP,
   FOREIGN KEY ("club_id") REFERENCES "Clubs" ("club_id") DEFERRABLE INITIALLY IMMEDIATE,
@@ -38,8 +38,8 @@ CREATE TABLE "Club_Members_Contributions" (
 );
 
 CREATE TABLE "Events" (
-  "event_id" SERIAL PRIMARY KEY,
-  "club_id" INT NOT NULL,
+  "event_id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "club_id" UUID NOT NULL,
   "title" VARCHAR(255),
   "type" VARCHAR(100),
   "date" TIMESTAMP,
@@ -52,7 +52,7 @@ CREATE TABLE "Events" (
 );
 
 CREATE TABLE "Event_Logistics" (
-  "event_id" INT NOT NULL PRIMARY KEY,
+  "event_id" UUID NOT NULL PRIMARY KEY,
   "health_check_link" VARCHAR(2048),
   "hazards_list" TEXT,
   "emergency_contacts" TEXT,
@@ -61,9 +61,9 @@ CREATE TABLE "Event_Logistics" (
 );
 
 CREATE TABLE "Tasks" (
-  "task_id" SERIAL PRIMARY KEY,
-  "event_id" INT NOT NULL,
-  "parent_task_id" INT,
+  "task_id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "event_id" UUID NOT NULL,
+  "parent_task_id" UUID,
   "title" VARCHAR(255),
   "due_date" TIMESTAMP,
   "priority" VARCHAR(50),
@@ -74,8 +74,8 @@ CREATE TABLE "Tasks" (
 );
 
 CREATE TABLE "Task_Assignees" (
-  "task_id" INT NOT NULL,
-  "user_id" INT NOT NULL,
+  "task_id" UUID NOT NULL,
+  "user_id" UUID NOT NULL,
   PRIMARY KEY ("task_id", "user_id"),
   FOREIGN KEY ("task_id") REFERENCES "Tasks" ("task_id") DEFERRABLE INITIALLY IMMEDIATE,
   FOREIGN KEY ("user_id") REFERENCES "Users" ("user_id") DEFERRABLE INITIALLY IMMEDIATE

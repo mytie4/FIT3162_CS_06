@@ -1,5 +1,5 @@
 export interface Club {
-  club_id: number;
+  club_id: string;
   name: string;
   description: string | null;
   shared_drive_link: string | null;

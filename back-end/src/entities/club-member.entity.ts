@@ -1,13 +1,13 @@
 export interface ClubMember {
-  club_id: number;
-  user_id: number;
+  club_id: string;
+  user_id: string;
   role: string;
 }
 
 export type ClubRole = 'president' | 'vice_president' | 'member';
 
 export interface AddClubMemberDTO {
-  user_id: number;
+  user_id: string;
   role: ClubRole;
 }
 
