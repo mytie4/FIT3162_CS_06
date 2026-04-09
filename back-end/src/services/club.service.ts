@@ -4,7 +4,7 @@ import type { CreateClubDTO, Club } from "../entities/club.entity";
 
 export async function createClub(
   data: CreateClubDTO,
-  userId: number,
+  userId: string,
 ): Promise<Club> {
   const name = data.name?.trim();
   const description = data.description?.trim() ?? null;
@@ -43,11 +43,26 @@ export async function createClub(
     // begin transaction
     await client.query("BEGIN");
 
+    const DEFAULT_COLORS = [
+      "#F36D8A",
+      "#25A9EF",
+      "#3942F4",
+      "#9B7CF3",
+      "#F4BF39",
+      "#FD59C0",
+      "#39F4D5",
+      "#8CF57E",
+    ];
+
+    const clubColor =
+      DEFAULT_COLORS[Math.floor(Math.random() * DEFAULT_COLORS.length)];
+
     const club = await clubRepo.createClub(
       client,
       name,
       description,
       sharedDriveLink,
+      clubColor,
     );
 
     await clubRepo.addClubAdmin(client, club.club_id, userId);

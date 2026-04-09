@@ -6,12 +6,13 @@ export async function createClub(
   name: string,
   description: string | null,
   sharedDriveLink: string | null,
+  clubColor: string,
 ): Promise<Club> {
   const result = await client.query(
-    `INSERT INTO "Clubs" (club_id, name, description, shared_drive_link) 
-    VALUES ((SELECT COALESCE(MAX("club_id"), 0) + 1 FROM "Clubs"), $1, $2, $3)
+    `INSERT INTO "Clubs" (name, description, shared_drive_link, club_color) 
+    VALUES ($1, $2, $3, $4)
     RETURNING *`,
-    [name, description, sharedDriveLink],
+    [name, description, sharedDriveLink, clubColor],
   );
 
   return result.rows[0];
@@ -19,8 +20,8 @@ export async function createClub(
 
 export async function addClubAdmin(
   client: PoolClient,
-  clubId: number,
-  userId: number,
+  clubId: string,
+  userId: string,
 ): Promise<void> {
   const result = await client.query(
     `INSERT INTO "Club_Members" (club_id, user_id, role) 

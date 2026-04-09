@@ -5,8 +5,8 @@ import type { CreateClubDTO } from "../entities/club.entity";
 export async function createClub(req: Request, res: Response) {
   try {
     const clubData: CreateClubDTO = req.body;
-    // temp. replace later
-    const userId = 1;
+    // temp. replace later with real UUID
+    const userId = "1e23f456-...";
     const club = await clubService.createClub(clubData, userId);
 
     return res.status(201).json({
