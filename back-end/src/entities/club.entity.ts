@@ -3,6 +3,7 @@ export interface Club {
   name: string;
   description: string | null;
   shared_drive_link: string | null;
+  club_color: string;
 }
 
 export interface CreateClubDTO {

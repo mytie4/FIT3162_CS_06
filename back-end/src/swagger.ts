@@ -15,20 +15,39 @@ const options: swaggerJSDoc.Options = {
       },
     ],
     components: {
+      securitySchemes: {
+        BearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
       schemas: {
         RegisterRequest: {
           type: 'object',
           required: ['name', 'email', 'password'],
           properties: {
             name: { type: 'string', example: 'Alice' },
-            email: { type: 'string', format: 'email', example: 'alice@example.com' },
-            password: { type: 'string', minLength: 8, example: 'StrongPass123' },
+            email: {
+              type: 'string',
+              format: 'email',
+              example: 'alice@example.com',
+            },
+            password: {
+              type: 'string',
+              minLength: 8,
+              example: 'StrongPass123',
+            },
           },
         },
         User: {
           type: 'object',
           properties: {
-            user_id: { type: 'string', format: 'uuid', example: '550e8400-e29b-41d4-a716-446655440000' },
+            user_id: {
+              type: 'string',
+              format: 'uuid',
+              example: '550e8400-e29b-41d4-a716-446655440000',
+            },
             name: { type: 'string', example: 'Alice' },
             email: { type: 'string', example: 'alice@example.com' },
             profile_pic_url: { type: 'string', nullable: true, example: null },
@@ -39,7 +58,11 @@ const options: swaggerJSDoc.Options = {
           type: 'object',
           required: ['email', 'password'],
           properties: {
-            email: { type: 'string', format: 'email', example: 'alice@example.com' },
+            email: {
+              type: 'string',
+              format: 'email',
+              example: 'alice@example.com',
+            },
             password: { type: 'string', example: 'StrongPass123' },
           },
         },
@@ -47,6 +70,40 @@ const options: swaggerJSDoc.Options = {
           type: 'object',
           properties: {
             error: { type: 'string', example: 'Internal server error' },
+          },
+        },
+        CreateClubRequest: {
+          type: 'object',
+          required: ['name'],
+          properties: {
+            name: { type: 'string', example: 'Running Club' },
+            description: {
+              type: 'string',
+              example: 'Running Club description',
+            },
+            shared_drive_link: {
+              type: 'string',
+              example: 'https://drive.google.com/running',
+            },
+          },
+        },
+        ClubResponse: {
+          type: 'object',
+          properties: {
+            club_id: {
+              type: 'string',
+              example: '550e8400-e29b-41d4-a716-446655440000',
+            },
+            name: { type: 'string', example: 'Running Club' },
+            description: {
+              type: 'string',
+              example: 'Running Club description',
+            },
+            shared_drive_link: {
+              type: 'string',
+              example: 'https://drive.google.com/running',
+            },
+            club_color: { type: 'string', example: '#FF5733' },
           },
         },
       },
