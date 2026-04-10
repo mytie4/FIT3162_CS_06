@@ -53,4 +53,29 @@ const router = Router();
  */
 router.post("/clubs", authMiddleware, clubController.createClub);
 
+/**
+ * @openapi
+ * /api/clubs:
+ *   get:
+ *     summary: Fetch all clubs
+ *     tags:
+ *       - Clubs
+ *     responses:
+ *       200:
+ *         description: A list of all clubs
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ClubWithStats'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.get('/clubs', clubController.getAllClubs);
+
 export default router;

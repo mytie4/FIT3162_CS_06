@@ -106,6 +106,40 @@ const options: swaggerJSDoc.Options = {
             club_color: { type: 'string', example: '#FF5733' },
           },
         },
+        ClubWithStats: {
+          type: 'object',
+          properties: {
+            club_id: {
+              type: 'string',
+              format: 'uuid',
+              example: '550e8400-e29b-41d4-a716-446655440000',
+            },
+            name: { type: 'string', example: 'Running Club' },
+            description: {
+              type: 'string',
+              nullable: true,
+              example: 'Running Club description',
+            },
+            shared_drive_link: {
+              type: 'string',
+              nullable: true,
+              example: 'https://drive.google.com/running',
+            },
+            club_color: {
+            type: 'string',
+            nullable: true,
+            example: '#FF5733',
+            },
+            member_count: {
+              type: 'number',
+              example: 10,
+            },
+            ongoing_event_count: {
+              type: 'number',
+              example: 2,
+            },
+          },
+        },
       },
     },
   },

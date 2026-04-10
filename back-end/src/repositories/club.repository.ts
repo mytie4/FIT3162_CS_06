@@ -1,5 +1,6 @@
 import type { PoolClient } from "pg";
 import type { Club } from "../entities/club.entity";
+import pool from '../db';
 
 export async function createClub(
   client: PoolClient,
@@ -28,4 +29,24 @@ export async function addClubAdmin(
     VALUES ($1, $2, 'admin')`,
     [clubId, userId],
   );
+}
+
+export async function getAllClubs() {
+  const result = await pool.query(
+    `SELECT
+        c.club_id,
+        c.name,
+        c.description,
+        c.shared_drive_link,
+        c.club_color,
+        COUNT (DISTINCT cm.user_id) AS member_count,
+        COUNT (DISTINCT e.event_id) FILTER (WHERE e.status = 'ongoing') AS ongoing_event_count
+    FROM "Clubs" c
+    LEFT JOIN "Club_Members" cm ON c.club_id = cm.club_id
+    LEFT JOIN "Events" e ON c.club_id = e.club_id
+    GROUP BY c.club_id
+    `
+  )
+
+  return result.rows;
 }
