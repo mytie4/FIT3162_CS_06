@@ -1,23 +1,23 @@
-import { useEffect, useState } from 'react';
-import ClubCard from '../components/clubs/ClubCard';
-import CreateClubModal from '../components/clubs/CreateClubModal';
-import JoinClubModal from '../components/clubs/JoinClubModal';
-import type { Club } from '../types/clubs.types';
-import './ClubsPage.css';
+import { useEffect, useState } from "react";
+import ClubCard from "../components/clubs/ClubCard";
+import CreateClubModal from "../components/clubs/CreateClubModal";
+import JoinClubModal from "../components/clubs/JoinClubModal";
+import type { Club } from "../types/clubs.types";
+import "./ClubsPage.css";
 
-import { getAllClubs } from '../api/clubs.api';
+import { getAllClubs } from "../api/clubs.api";
 
 // set deafult banner if not set by user
 // these colours the colours used in banner of the figma design
 const DEFAULT_COLORS = [
-  '#F36D8A', // Red
-  '#25A9EF', // Light blue
-  '#3942F4', // Navy
-  '#9B7CF3', // Purple
-  '#F4BF39', // Yellow
-  '#FD59C0', // Pink
-  '#39F4D5', // Cyan
-  '#8CF57E', // Green
+  "#F36D8A", // Red
+  "#25A9EF", // Light blue
+  "#3942F4", // Navy
+  "#9B7CF3", // Purple
+  "#F4BF39", // Yellow
+  "#FD59C0", // Pink
+  "#39F4D5", // Cyan
+  "#8CF57E", // Green
 ];
 
 function getBannerColor(clubId: string): string {
@@ -31,7 +31,7 @@ function getBannerColor(clubId: string): string {
 }
 
 export default function ClubsPage() {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
 
@@ -55,7 +55,7 @@ export default function ClubsPage() {
       } catch (err) {
         if (isMounted) {
           setError(
-            err instanceof Error ? err.message : 'Failed to fetch clubs',
+            err instanceof Error ? err.message : "Failed to fetch clubs",
           );
         }
       } finally {
@@ -77,84 +77,84 @@ export default function ClubsPage() {
   );
 
   return (
-    <div className='clubs-page'>
-      <h1 className='clubs-page-title'>Club Management</h1>
+    <div className="clubs-page">
+      <h1 className="clubs-page-title">Club Management</h1>
 
-      <div className='clubs-toolbar'>
-        <div className='clubs-search'>
+      <div className="clubs-toolbar">
+        <div className="clubs-search">
           <svg
-            className='clubs-search-icon'
-            viewBox='0 0 24 24'
-            fill='none'
-            stroke='currentColor'
-            strokeWidth='2'
-            strokeLinecap='round'
-            strokeLinejoin='round'
+            className="clubs-search-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
-            <circle cx='11' cy='11' r='8' />
-            <line x1='21' y1='21' x2='16.65' y2='16.65' />
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
           <input
-            type='text'
-            placeholder='Search clubs...'
-            aria-label='Search clubs'
+            type="text"
+            placeholder="Search clubs..."
+            aria-label="Search clubs"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
 
-        <div className='clubs-toolbar-actions'>
-          <button className='clubs-btn-outline'>
+        <div className="clubs-toolbar-actions">
+          <button className="clubs-btn-outline">
             <svg
-              viewBox='0 0 24 24'
-              fill='none'
-              stroke='currentColor'
-              strokeWidth='2'
-              strokeLinecap='round'
-              strokeLinejoin='round'
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              <polygon points='22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3' />
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
             </svg>
             Filter
           </button>
 
-          <button className='clubs-btn-outline'>
+          <button className="clubs-btn-outline">
             <svg
-              viewBox='0 0 24 24'
-              fill='none'
-              stroke='currentColor'
-              strokeWidth='2'
-              strokeLinecap='round'
-              strokeLinejoin='round'
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              <line x1='4' y1='6' x2='20' y2='6' />
-              <line x1='4' y1='12' x2='14' y2='12' />
-              <line x1='4' y1='18' x2='9' y2='18' />
+              <line x1="4" y1="6" x2="20" y2="6" />
+              <line x1="4" y1="12" x2="14" y2="12" />
+              <line x1="4" y1="18" x2="9" y2="18" />
             </svg>
             Sort by
           </button>
 
           <button
-            className='clubs-btn-outline'
+            className="clubs-btn-outline"
             onClick={() => setIsJoinModalOpen(true)}
           >
             Join club
           </button>
 
           <button
-            className='clubs-btn-primary'
+            className="clubs-btn-primary"
             onClick={() => setIsCreateModalOpen(true)}
           >
             <svg
-              viewBox='0 0 24 24'
-              fill='none'
-              stroke='currentColor'
-              strokeWidth='2.5'
-              strokeLinecap='round'
-              strokeLinejoin='round'
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              <line x1='12' y1='5' x2='12' y2='19' />
-              <line x1='5' y1='12' x2='19' y2='12' />
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
             Create club
           </button>
@@ -162,11 +162,11 @@ export default function ClubsPage() {
       </div>
 
       {isLoading && (
-        <div className='clubs-status-message'>Loading clubs...</div>
+        <div className="clubs-status-message">Loading clubs...</div>
       )}
 
       {error && (
-        <div className='clubs-status-message clubs-status-message--error'>
+        <div className="clubs-status-message clubs-status-message--error">
           {error}
         </div>
       )}
@@ -174,9 +174,9 @@ export default function ClubsPage() {
       {!isLoading && !error && (
         <>
           {filtered.length === 0 ? (
-            <div className='clubs-status-message'>No clubs found.</div>
+            <div className="clubs-status-message">No clubs found</div>
           ) : (
-            <div className='clubs-grid'>
+            <div className="clubs-grid">
               {filtered.map((club) => (
                 <ClubCard
                   key={club.club_id}
@@ -184,12 +184,12 @@ export default function ClubsPage() {
                   name={club.name}
                   ongoingEvent={
                     club.ongoing_event_count === 0
-                      ? 'No ongoing event'
-                      : `${club.ongoing_event_count} ongoing event${club.ongoing_event_count === 1 ? '' : 's'}`
+                      ? "No ongoing event"
+                      : `${club.ongoing_event_count} ongoing event${club.ongoing_event_count === 1 ? "" : "s"}`
                   }
                   memberCount={club.member_count}
                   // use default data for feature to add later on
-                  categoryBadge='Club'
+                  categoryBadge="Club"
                 />
               ))}
             </div>
