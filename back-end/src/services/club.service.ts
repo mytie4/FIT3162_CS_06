@@ -95,7 +95,7 @@ export async function joinClub(userID: string, joinCode: number) {
     }
 
     const clubID = club.club_id;
-    console.log("Joining club:", { userID, joinCode, clubID });
+
     const alreadyMember = await clubRepo.isUserInClub(userID, clubID);
     if (alreadyMember) {
         throw new Error("User is already a member of this club");

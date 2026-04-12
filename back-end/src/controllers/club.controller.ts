@@ -55,7 +55,6 @@ export async function joinClub(req: AuthRequest, res: Response) {
     try {
         const userID = req.user?.user_id;
         const { joinCode } = req.body;
-        console.log("userID:", userID, "joinCode:", joinCode);
 
          if (!userID) {
             return res.status(401).json({ error: "User not authenticated" });
@@ -76,7 +75,6 @@ export async function joinClub(req: AuthRequest, res: Response) {
             return res.status(400).json({ error: error.message });
         }
 
-        // Unexpected errors
         console.error(error);
         return res.status(500).json({ error: "Internal server error" });
     }
