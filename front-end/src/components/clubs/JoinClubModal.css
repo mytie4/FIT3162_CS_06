@@ -75,3 +75,15 @@
 .join-card-btn:hover {
   background: #155758;
 }
+
+.join-error {
+  color: #b00020;
+  margin-top: 8px;
+  font-size: 0.9rem;
+}
+
+.join-success {
+  color: #0f8a0f;
+  margin-top: 8px;
+  font-size: 0.9rem;
+}
