@@ -7,13 +7,41 @@ interface JoinClubModalProps {
 
 export default function JoinClubModal({ onClose }: JoinClubModalProps) {
   const [joinCode, setJoinCode] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) onClose()
   }
 
-  const handleJoin = () => {
-    onClose()
+    const handleJoin = async () => {
+    setError(null)
+    setLoading(true)
+
+    try {
+      const res = await fetch("/api/clubs/join", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        },
+        body: JSON.stringify({ joinCode })
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error)
+      }
+      onClose()
+      alert("Successfully joined club")
+    } catch (err: unknown) {
+  if (err instanceof Error) {
+    setError(err.message)
+  } else {
+    setError("Something went wrong")
+  }
+}
   }
 
   return (
