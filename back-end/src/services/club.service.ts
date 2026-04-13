@@ -1,6 +1,7 @@
 import pool from "../db";
 import * as clubRepo from "../repositories/club.repository";
 import type { CreateClubDTO, Club } from "../entities/club.entity";
+import { stringify } from 'querystring';
 
 export async function createClub(
   data: CreateClubDTO,
@@ -87,6 +88,29 @@ export async function createClub(
   }
 }
 
+export async function joinClub(userID: string, joinCode: number) {
+    const club = await clubRepo.getClubByJoinCode(joinCode);
+    if (!club) {
+        throw new Error("Invalid join code");
+    }
+
+    const clubID = club.club_id;
+
+    const alreadyMember = await clubRepo.isUserInClub(userID, clubID);
+    if (alreadyMember) {
+        throw new Error("User is already a member of this club");
+    }
+
+    clubRepo.joinClub(userID, clubID);
+}
+
+export async function leaveClub(userID: string, clubID: string){
+  const alreadyMember = await clubRepo.isUserInClub(userID, clubID);
+  if (!alreadyMember) {
+        throw new Error("User is not in this club");
+  }
+  clubRepo.leaveClub(userID, clubID);
+}
 export async function getAllClubs() {
   const result = await clubRepo.getAllClubs() 
   

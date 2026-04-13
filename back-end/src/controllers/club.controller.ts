@@ -49,3 +49,62 @@ export async function getAllClubs(req: Request, res: Response) {
 
   }
 }
+
+export async function joinClub(req: AuthRequest, res: Response) {
+
+    try {
+        const userID = req.user?.user_id;
+        const { joinCode } = req.body;
+
+         if (!userID) {
+            return res.status(401).json({ error: "User not authenticated" });
+        }
+
+        if (joinCode === undefined || joinCode === null || isNaN(Number(joinCode))) {
+          return res.status(400).json({ error: "Join code must be a valid number" });
+        }
+
+        await clubService.joinClub(userID, joinCode);
+
+        return res.status(200).json({ message: "Successfully joined club" });
+    } catch (error: any) {
+        if (
+            error.message === "Invalid join code" ||
+            error.message === "User is already a member of this club"
+        ) {
+            return res.status(400).json({ error: error.message });
+        }
+
+        console.error(error);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+}
+
+export async function leaveClub(req: AuthRequest, res: Response) {
+  try {
+    const userID = req.user?.user_id;
+    const { clubID } = req.body;
+
+    if (!userID) {
+      return res.status(401).json({ error: "User not authenticated" });
+    }
+
+    if (!clubID) {
+      return res.status(400).json({ error: "clubID is required" });
+    }
+
+    await clubService.leaveClub(userID, clubID);
+
+    return res.status(200).json({
+      message: "Successfully left the club"
+    });
+
+  } catch (error: any) {
+    if (error.message === "User is not in this club") {
+      return res.status(400).json({ error: error.message });
+    }
+
+    console.error("leaveClub error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}

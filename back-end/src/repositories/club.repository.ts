@@ -50,3 +50,41 @@ export async function getAllClubs() {
 
   return result.rows;
 }
+
+
+export async function getClubByJoinCode(joinCode: number): Promise<Club | null> {
+    const result = await pool.query(
+        `SELECT club_id, name, description, shared_drive_link, club_color
+         FROM "Clubs"
+         WHERE code = $1`,
+        [joinCode]
+    );
+
+    return result.rows[0] || null;
+}
+
+export async function isUserInClub(userID: string, clubID: string): Promise<boolean> {
+    const result = await pool.query(
+        `SELECT 1 
+         FROM "Club_Members"
+         WHERE user_id = $1 AND club_id = $2
+         LIMIT 1`,
+        [userID, clubID]
+    );
+
+    return result.rows.length > 0;
+}
+
+export async function joinClub(userID: string, clubID: string) {
+    await pool.query(
+        `INSERT INTO "Club_Members" ("club_id", "user_id", "role")
+         VALUES ($1, $2, 'Member')`,
+        [clubID, userID]
+    );
+}
+
+export async function leaveClub(userID: string, clubID: string){
+  const result = await pool.query(
+    `DELETE FROM "Club_Members" 
+    WHERE "user_id" = $1 AND "club_id" = $2`, [userID, clubID])   
+}

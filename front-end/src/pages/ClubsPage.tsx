@@ -141,6 +141,7 @@ export default function ClubsPage() {
             Join club
           </button>
 
+
           <button
             className="clubs-btn-primary"
             onClick={() => setIsCreateModalOpen(true)}
@@ -202,7 +203,8 @@ export default function ClubsPage() {
       )}
 
       {isJoinModalOpen && (
-        <JoinClubModal onClose={() => setIsJoinModalOpen(false)} />
+        <JoinClubModal onClose={() => setIsJoinModalOpen(false)} 
+        />
       )}
     </div>
   );
