@@ -19,11 +19,8 @@ export default function CreateClubModal({ onClose, onCreated }: CreateClubModalP
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const [type, setType] = useState('Social')
-  const [members, setMembers] = useState([
-    { id: 1, name: 'Team Member', color: '#e53935' },
-    { id: 2, name: 'Jane Doe', color: '#f9a825' },
-  ])
+  const [type, setType] = useState<string>('')
+  const [members, setMembers] = useState<{ id: number; name: string; color: string }[]>([])
 
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget && !isSubmitting) onClose()
