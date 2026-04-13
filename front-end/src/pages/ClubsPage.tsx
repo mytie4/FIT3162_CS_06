@@ -199,7 +199,10 @@ export default function ClubsPage() {
       )}
 
       {isCreateModalOpen && (
-        <CreateClubModal onClose={() => setIsCreateModalOpen(false)} />
+        <CreateClubModal 
+        onClose={() => setIsCreateModalOpen(false)}
+        onCreated={(club) => setClubs((prev) => [...prev, club])} 
+         />
       )}
 
       {isJoinModalOpen && (

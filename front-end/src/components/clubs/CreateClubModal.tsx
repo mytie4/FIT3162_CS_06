@@ -1,29 +1,59 @@
 import { useState } from 'react'
 import './CreateClubModal.css'
+import { useAuth } from '../../context/AuthContext'
+import { createClub } from '../../api/clubs.api'
+import type { Club } from '../../types/clubs.types'
 
 interface CreateClubModalProps {
   onClose: () => void
+  onCreated: (club: Club) => void  // NEW
 }
 
 const clubTypes = ['Social', 'Hobby', 'Cultural', 'Academic', 'Sports', 'Technology']
 
-const mockMembers = [
-  { id: 1, name: 'Team Member', color: '#e53935' },
-  { id: 2, name: 'Jane Doe', color: '#f9a825' },
-]
+export default function CreateClubModal({ onClose, onCreated }: CreateClubModalProps) {
+  const { token } = useAuth()
 
-export default function CreateClubModal({ onClose }: CreateClubModalProps) {
   const [name, setName] = useState('')
-  const [type, setType] = useState('Social')
-  const [members, setMembers] = useState(mockMembers)
   const [description, setDescription] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const [type, setType] = useState<string>('')
+  const [members, setMembers] = useState<{ id: number; name: string; color: string }[]>([])
 
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) onClose()
+    if (e.target === e.currentTarget && !isSubmitting) onClose()
   }
 
   const removeMember = (id: number) => {
     setMembers((prev) => prev.filter((m) => m.id !== id))
+  }
+
+  const handleCreate = async () => {
+    if (!token) {
+      setError('You must be logged in to create a club.')
+      return
+    }
+
+    setIsSubmitting(true)
+    setError(null)
+
+    try {
+      const club = await createClub(
+        {
+          name,
+          description: description || undefined,
+        },
+        token,
+      )
+      onCreated(club)
+      onClose()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -38,6 +68,7 @@ export default function CreateClubModal({ onClose }: CreateClubModalProps) {
             placeholder="Enter name"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            disabled={isSubmitting}
           />
         </div>
 
@@ -50,6 +81,7 @@ export default function CreateClubModal({ onClose }: CreateClubModalProps) {
               className="create-type-native"
               value={type}
               onChange={(e) => setType(e.target.value)}
+              disabled={isSubmitting}
             >
               {clubTypes.map((t) => (
                 <option key={t} value={t}>{t}</option>
@@ -75,6 +107,7 @@ export default function CreateClubModal({ onClose }: CreateClubModalProps) {
                   className="create-member-remove"
                   onClick={() => removeMember(m.id)}
                   aria-label={`Remove member ${m.name}`}
+                  disabled={isSubmitting}
                 >
                   &times;
                 </button>
@@ -86,7 +119,7 @@ export default function CreateClubModal({ onClose }: CreateClubModalProps) {
         <div className="create-field">
           <label className="create-label">Set banner</label>
           <div className="create-banner-upload">
-            <button className="create-banner-btn" type="button">
+            <button className="create-banner-btn" type="button" disabled={isSubmitting}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
                 <line x1="12" y1="8" x2="12" y2="16" />
@@ -104,11 +137,21 @@ export default function CreateClubModal({ onClose }: CreateClubModalProps) {
             placeholder="Enter description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-          />
+            disabled={isSubmitting} />
         </div>
 
-        <button className="create-submit-btn" onClick={onClose}>
-          Create
+        {error && (
+          <p style={{ color: 'red', fontSize: '0.85rem', margin: '0 0 8px' }}>
+            {error}
+          </p>
+        )}
+
+        <button
+          className="create-submit-btn"
+          onClick={handleCreate}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? 'Creating...' : 'Create'}
         </button>
       </div>
     </div>
