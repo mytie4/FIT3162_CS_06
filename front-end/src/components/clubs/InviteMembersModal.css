@@ -1,0 +1,348 @@
+.invite-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.invite-modal {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 512px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.invite-modal-header {
+  padding: 20px;
+  border-bottom: 1px solid #f3f4f6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(249, 250, 251, 0.5);
+}
+
+.invite-modal-header h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.invite-modal-header p {
+  font-size: 0.72rem;
+  color: #6b7280;
+  margin: 2px 0 0;
+}
+
+.invite-modal-close {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 6px;
+  cursor: pointer;
+  color: #9ca3af;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  display: flex;
+  transition: color 0.15s;
+}
+
+.invite-modal-close:hover {
+  color: #4b5563;
+}
+
+.invite-modal-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Join code section */
+.invite-code-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+}
+
+.invite-code-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.invite-code-display {
+  flex: 1;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 0.85rem;
+  font-family: monospace;
+  color: #374151;
+  letter-spacing: 0.15em;
+  text-align: center;
+  font-weight: 700;
+}
+
+.invite-code-copy-btn {
+  background: #f0fdfa;
+  color: #0f766e;
+  border: 1px solid #ccfbf1;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.invite-code-copy-btn:hover {
+  background: #ccfbf1;
+}
+
+.invite-code-hint {
+  font-size: 0.68rem;
+  color: #6b7280;
+  margin-top: 6px;
+}
+
+/* Divider */
+.invite-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.invite-divider-line {
+  flex: 1;
+  height: 1px;
+  background: #e5e7eb;
+}
+
+.invite-divider-text {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+}
+
+/* Search section */
+.invite-search-wrapper {
+  position: relative;
+}
+
+.invite-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.invite-search-input {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px 16px 10px 36px;
+  font-size: 0.85rem;
+  outline: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.invite-search-input:focus {
+  border-color: #1a6b6e;
+  box-shadow: 0 0 0 2px rgba(26, 107, 110, 0.15);
+}
+
+.invite-search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  z-index: 10;
+  max-height: 192px;
+  overflow-y: auto;
+}
+
+.invite-search-result {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid #fafafa;
+  transition: background 0.12s;
+}
+
+.invite-search-result:last-child {
+  border-bottom: none;
+}
+
+.invite-search-result:hover {
+  background: #f9fafb;
+}
+
+.invite-search-result img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.invite-search-result-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.invite-search-result-email {
+  font-size: 0.72rem;
+  color: #6b7280;
+}
+
+.invite-search-add-icon {
+  margin-left: auto;
+  color: #1a6b6e;
+}
+
+.invite-search-empty {
+  padding: 12px 16px;
+  font-size: 0.85rem;
+  color: #6b7280;
+  text-align: center;
+}
+
+/* Selected chips */
+.invite-selected-area {
+  background: #f9fafb;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #f3f4f6;
+}
+
+.invite-selected-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 12px;
+}
+
+.invite-selected-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.invite-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  padding: 4px 12px 4px 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.invite-chip img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+.invite-chip-name {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.invite-chip-remove {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 4px;
+  display: flex;
+  transition: color 0.15s;
+}
+
+.invite-chip-remove:hover {
+  color: #ef4444;
+}
+
+/* Footer */
+.invite-modal-footer {
+  padding: 16px;
+  border-top: 1px solid #f3f4f6;
+  background: #f9fafb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.invite-cancel-btn {
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4b5563;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.invite-cancel-btn:hover {
+  background: #e5e7eb;
+}
+
+.invite-send-btn {
+  background: #1a6b6e;
+  color: #fff;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: background 0.15s;
+}
+
+.invite-send-btn:hover {
+  background: #155758;
+}
+
+.invite-send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

@@ -108,3 +108,60 @@ export async function leaveClub(req: AuthRequest, res: Response) {
     return res.status(500).json({ error: "Internal server error" });
   }
 }
+
+export async function getClubById(req: Request, res: Response) {
+  try {
+    const { clubId } = req.params;
+    const club = await clubService.getClubById(clubId);
+
+    return res.status(200).json(club);
+  } catch (error) {
+    if (error instanceof clubService.ServiceError) {
+      return res.status(error.statusCode).json({ error: error.message });
+    }
+
+    const errorMessage = error instanceof Error ? error.message : "Unknown server error.";
+    console.error("getClubById failed:", errorMessage);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+export async function getClubMembers(req: Request, res: Response) {
+  try {
+    const { clubId } = req.params;
+    const members = await clubService.getClubMembers(clubId);
+
+    return res.status(200).json(members);
+  } catch (error) {
+    if (error instanceof clubService.ServiceError) {
+      return res.status(error.statusCode).json({ error: error.message });
+    }
+
+    const errorMessage = error instanceof Error ? error.message : "Unknown server error.";
+    console.error("getClubMembers failed:", errorMessage);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+export async function getUserRole(req: AuthRequest, res: Response) {
+  try {
+    const userId = req.user?.user_id;
+    const { clubId } = req.params;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const role = await clubService.getUserRoleInClub(userId, clubId);
+
+    return res.status(200).json({ role });
+  } catch (error) {
+    if (error instanceof clubService.ServiceError) {
+      return res.status(error.statusCode).json({ error: error.message });
+    }
+
+    const errorMessage = error instanceof Error ? error.message : "Unknown server error.";
+    console.error("getUserRole failed:", errorMessage);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
