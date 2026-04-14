@@ -172,7 +172,7 @@ export async function updateClub(clubId: string, data: UpdateClubDTO, userId: st
   }
 
   const updatableFields: (keyof UpdateClubDTO)[] = ['name', 'description', 'shared_drive_link', 'type', 'club_color'];
-  const hasUpdatableFields = updatableFields.some(f => f in data);
+  const hasUpdatableFields = updatableFields.some(f => data[f] !== undefined);
   if (!hasUpdatableFields) {
     throw new ServiceError(400, "No valid fields provided to update.");
   }
