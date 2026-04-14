@@ -9,7 +9,7 @@ interface CreateClubModalProps {
   onCreated: (club: Club) => void  // NEW
 }
 
-const clubTypes = ['Social', 'Hobby', 'Cultural', 'Academic', 'Sports', 'Technology']
+const clubTypes = ['Club', 'Social', 'Hobby', 'Cultural', 'Academic', 'Sports', 'Technology']
 
 export default function CreateClubModal({ onClose, onCreated }: CreateClubModalProps) {
   const { token } = useAuth()
@@ -19,7 +19,7 @@ export default function CreateClubModal({ onClose, onCreated }: CreateClubModalP
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const [type, setType] = useState<string>('')
+  const [type, setType] = useState<string>(clubTypes[0])
   const [members, setMembers] = useState<{ id: number; name: string; color: string }[]>([])
 
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -36,6 +36,11 @@ export default function CreateClubModal({ onClose, onCreated }: CreateClubModalP
       return
     }
 
+    if (!type) {
+      setError('Please choose a club type.')
+      return
+    }
+
     setIsSubmitting(true)
     setError(null)
 
@@ -44,6 +49,7 @@ export default function CreateClubModal({ onClose, onCreated }: CreateClubModalP
         {
           name,
           description: description || undefined,
+          type,
         },
         token,
       )
@@ -82,6 +88,7 @@ export default function CreateClubModal({ onClose, onCreated }: CreateClubModalP
               value={type}
               onChange={(e) => setType(e.target.value)}
               disabled={isSubmitting}
+              required
             >
               {clubTypes.map((t) => (
                 <option key={t} value={t}>{t}</option>
