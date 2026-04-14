@@ -14,6 +14,19 @@ ALTER TABLE "Clubs"
 ALTER TABLE "Club_Members"
   ADD COLUMN "joined_at" TIMESTAMP DEFAULT NOW();
 
+-- Normalize existing role values to the canonical set before adding constraint
+UPDATE "Club_Members"
+  SET role = CASE
+    WHEN LOWER(role) = 'president' THEN 'president'
+    WHEN LOWER(role) = 'vice_president' THEN 'vice_president'
+    WHEN LOWER(role) IN ('admin', 'administrator') THEN 'president'
+    ELSE 'member'
+  END;
+
+ALTER TABLE "Club_Members"
+  ADD CONSTRAINT "club_members_role_check"
+    CHECK (role IN ('president', 'vice_president', 'member'));
+
 -- 3. Extend Events table
 ALTER TABLE "Events"
   ADD COLUMN "end_date" TIMESTAMP,
@@ -94,6 +107,7 @@ ALTER TABLE "Events" DROP COLUMN IF EXISTS "created_by";
 ALTER TABLE "Events" DROP COLUMN IF EXISTS "created_at";
 ALTER TABLE "Events" ADD COLUMN "is_available_to_all" BOOLEAN DEFAULT FALSE;
 
+ALTER TABLE "Club_Members" DROP CONSTRAINT IF EXISTS "club_members_role_check";
 ALTER TABLE "Club_Members" DROP COLUMN IF EXISTS "joined_at";
 
 ALTER TABLE "Clubs" DROP COLUMN IF EXISTS "type";

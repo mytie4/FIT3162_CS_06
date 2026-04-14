@@ -26,7 +26,7 @@ export async function addClubAdmin(
 ): Promise<void> {
   const result = await client.query(
     `INSERT INTO "Club_Members" (club_id, user_id, role) 
-    VALUES ($1, $2, 'admin')`,
+    VALUES ($1, $2, 'president')`,
     [clubId, userId],
   );
 }
@@ -78,7 +78,7 @@ export async function isUserInClub(userID: string, clubID: string): Promise<bool
 export async function joinClub(userID: string, clubID: string) {
     await pool.query(
         `INSERT INTO "Club_Members" ("club_id", "user_id", "role")
-         VALUES ($1, $2, 'Member')`,
+         VALUES ($1, $2, 'member')`,
         [clubID, userID]
     );
 }
@@ -121,7 +121,11 @@ export async function getClubMembers(clubId: string) {
   const result = await pool.query(
     `SELECT
         cm.user_id,
-        cm.role,
+        CASE
+          WHEN LOWER(cm.role) = 'president' THEN 'president'
+          WHEN LOWER(cm.role) = 'vice_president' THEN 'vice_president'
+          ELSE 'member'
+        END AS role,
         cm.joined_at,
         u.name,
         u.email,
@@ -130,7 +134,7 @@ export async function getClubMembers(clubId: string) {
      JOIN "Users" u ON cm.user_id = u.user_id
      WHERE cm.club_id = $1
      ORDER BY
-       CASE cm.role
+       CASE LOWER(cm.role)
          WHEN 'president' THEN 0
          WHEN 'vice_president' THEN 1
          ELSE 2
@@ -144,7 +148,15 @@ export async function getClubMembers(clubId: string) {
 
 export async function getUserRoleInClub(userId: string, clubId: string): Promise<string | null> {
   const result = await pool.query(
-    `SELECT role FROM "Club_Members" WHERE user_id = $1 AND club_id = $2 LIMIT 1`,
+    `SELECT
+       CASE
+         WHEN LOWER(role) = 'president' THEN 'president'
+         WHEN LOWER(role) = 'vice_president' THEN 'vice_president'
+         ELSE 'member'
+       END AS role
+     FROM "Club_Members"
+     WHERE user_id = $1 AND club_id = $2
+     LIMIT 1`,
     [userId, clubId]
   );
 
