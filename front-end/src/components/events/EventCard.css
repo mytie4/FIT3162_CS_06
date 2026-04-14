@@ -1,0 +1,150 @@
+.event-card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.event-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.event-card-header {
+  height: 96px;
+  position: relative;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.event-card-header-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.event-card-club-badge {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.event-card-menu-btn {
+  background: rgba(0, 0, 0, 0.1);
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.event-card-menu-btn:hover {
+  background: rgba(0, 0, 0, 0.2);
+  color: #fff;
+}
+
+.event-card-body {
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.event-card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.3;
+  margin: 0 0 16px;
+  transition: color 0.15s;
+}
+
+.event-card:hover .event-card-title {
+  color: #1a6b6e;
+}
+
+.event-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+  flex: 1;
+}
+
+.event-card-info-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #4b5563;
+  font-weight: 500;
+}
+
+.event-card-info-item svg {
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+.event-card-footer {
+  padding-top: 16px;
+  border-top: 1px solid #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.event-card-status {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.event-card-status--published {
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
+.event-card-status--planning,
+.event-card-status--draft {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.event-card-status--in_progress,
+.event-card-status--ongoing {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.event-card-status--completed {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.event-card-status--cancelled {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.event-card-attendees {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+}

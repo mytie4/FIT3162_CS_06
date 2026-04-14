@@ -121,6 +121,45 @@ export async function getAllClubs() {
   }));
 }
 
+export async function getClubById(clubId: string) {
+  if (!clubId) {
+    throw new ServiceError(400, "Club ID is required.");
+  }
+
+  const club = await clubRepo.getClubById(clubId);
+  if (!club) {
+    throw new ServiceError(404, "Club not found.");
+  }
+
+  return {
+    ...club,
+    member_count: Number(club.member_count),
+    ongoing_event_count: Number(club.ongoing_event_count),
+  };
+}
+
+export async function getClubMembers(clubId: string) {
+  if (!clubId) {
+    throw new ServiceError(400, "Club ID is required.");
+  }
+
+  // Verify club exists
+  const club = await clubRepo.getClubById(clubId);
+  if (!club) {
+    throw new ServiceError(404, "Club not found.");
+  }
+
+  return await clubRepo.getClubMembers(clubId);
+}
+
+export async function getUserRoleInClub(userId: string, clubId: string) {
+  if (!userId || !clubId) {
+    throw new ServiceError(400, "User ID and Club ID are required.");
+  }
+
+  return await clubRepo.getUserRoleInClub(userId, clubId);
+}
+
 export class ServiceError extends Error {
   constructor(
     public readonly statusCode: number,

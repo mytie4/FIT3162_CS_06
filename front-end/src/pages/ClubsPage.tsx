@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ClubCard from "../components/clubs/ClubCard";
 import CreateClubModal from "../components/clubs/CreateClubModal";
 import JoinClubModal from "../components/clubs/JoinClubModal";
@@ -31,6 +32,7 @@ function getBannerColor(clubId: string): string {
 }
 
 export default function ClubsPage() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
@@ -179,19 +181,23 @@ export default function ClubsPage() {
           ) : (
             <div className="clubs-grid">
               {filtered.map((club) => (
-                <ClubCard
+                <div
                   key={club.club_id}
-                  bannerColor={club.club_color ?? getBannerColor(club.club_id)}
-                  name={club.name}
-                  ongoingEvent={
-                    club.ongoing_event_count === 0
-                      ? "No ongoing event"
-                      : `${club.ongoing_event_count} ongoing event${club.ongoing_event_count === 1 ? "" : "s"}`
-                  }
-                  memberCount={club.member_count}
-                  // use default data for feature to add later on
-                  categoryBadge="Club"
-                />
+                  onClick={() => navigate(`/clubs/${club.club_id}`)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <ClubCard
+                    bannerColor={club.club_color ?? getBannerColor(club.club_id)}
+                    name={club.name}
+                    ongoingEvent={
+                      club.ongoing_event_count === 0
+                        ? "No ongoing event"
+                        : `${club.ongoing_event_count} ongoing event${club.ongoing_event_count === 1 ? "" : "s"}`
+                    }
+                    memberCount={club.member_count}
+                    categoryBadge="Club"
+                  />
+                </div>
               ))}
             </div>
           )}

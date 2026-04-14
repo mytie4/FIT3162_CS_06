@@ -180,4 +180,134 @@ router.post("/clubs/join", authMiddleware, clubController.joinClub);
  */
 router.post("/clubs/leave", authMiddleware, clubController.leaveClub);
 
+/**
+ * @openapi
+ * /api/clubs/{clubId}:
+ *   get:
+ *     summary: Get a single club by ID (with member count and event stats)
+ *     tags:
+ *       - Clubs
+ *     parameters:
+ *       - in: path
+ *         name: clubId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Club details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ClubWithStats'
+ *       404:
+ *         description: Club not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.get("/clubs/:clubId", clubController.getClubById);
+
+/**
+ * @openapi
+ * /api/clubs/{clubId}/members:
+ *   get:
+ *     summary: Get all members of a club with their roles
+ *     tags:
+ *       - Clubs
+ *     parameters:
+ *       - in: path
+ *         name: clubId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: A list of club members
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   user_id:
+ *                     type: string
+ *                   name:
+ *                     type: string
+ *                   email:
+ *                     type: string
+ *                   avatar:
+ *                     type: string
+ *                   role:
+ *                     type: string
+ *                   joined_at:
+ *                     type: string
+ *       404:
+ *         description: Club not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.get("/clubs/:clubId/members", clubController.getClubMembers);
+
+/**
+ * @openapi
+ * /api/clubs/{clubId}/my-role:
+ *   get:
+ *     security:
+ *       - BearerAuth: []
+ *     summary: Get the current user's role in a specific club
+ *     tags:
+ *       - Clubs
+ *     parameters:
+ *       - in: path
+ *         name: clubId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: User's role in the club (null if not a member)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 role:
+ *                   type: string
+ *                   nullable: true
+ *                   example: president
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.get("/clubs/:clubId/my-role", authMiddleware, clubController.getUserRole);
+
 export default router;

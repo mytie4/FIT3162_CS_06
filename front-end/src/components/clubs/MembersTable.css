@@ -1,0 +1,203 @@
+.members-table-wrapper {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #f3f4f6;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  overflow: visible;
+}
+
+.members-table {
+  width: 100%;
+  text-align: left;
+  border-collapse: collapse;
+}
+
+.members-table thead tr {
+  background: #f9fafb;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.members-table th {
+  padding: 14px 24px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.members-table th:last-child {
+  text-align: right;
+}
+
+.members-table tbody tr {
+  transition: background 0.15s;
+}
+
+.members-table tbody tr:hover {
+  background: rgba(249, 250, 251, 0.5);
+}
+
+.members-table td {
+  padding: 14px 24px;
+  border-bottom: 1px solid rgba(249, 250, 251, 0.8);
+}
+
+.members-table td:last-child {
+  text-align: right;
+  position: relative;
+}
+
+/* Member cell */
+.member-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.member-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid #e5e7eb;
+  object-fit: cover;
+}
+
+.member-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.member-email {
+  font-size: 0.72rem;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Role badge */
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.role-badge--president {
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
+.role-badge--vice_president {
+  background: #f3e8ff;
+  color: #7c3aed;
+}
+
+.role-badge--member {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+/* Action menu */
+.member-action-btn {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.15s;
+  position: relative;
+  z-index: 10;
+}
+
+.member-action-btn:hover {
+  color: #1a6b6e;
+}
+
+.member-action-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+}
+
+.member-action-menu {
+  position: absolute;
+  right: 32px;
+  top: 40px;
+  width: 192px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border: 1px solid #f3f4f6;
+  z-index: 20;
+  padding: 4px 0;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  animation: menuFadeIn 0.1s ease-out;
+}
+
+@keyframes menuFadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.member-action-menu-label {
+  padding: 6px 12px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.member-action-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  color: #374151;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+
+.member-action-menu-item:hover {
+  background: #f0fdfa;
+  color: #0f766e;
+}
+
+.member-action-menu-item--vp:hover {
+  background: #faf5ff;
+  color: #7c3aed;
+}
+
+.member-action-menu-item--member:hover {
+  background: #f9fafb;
+  color: #374151;
+}
+
+.member-action-menu-item--danger {
+  color: #dc2626;
+  font-weight: 500;
+}
+
+.member-action-menu-item--danger:hover {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.member-action-menu-divider {
+  height: 1px;
+  background: #f3f4f6;
+  margin: 4px 0;
+}

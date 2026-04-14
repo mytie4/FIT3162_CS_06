@@ -69,8 +69,8 @@ export default function JoinClubModal({ onClose }: JoinClubModalProps) {
         />
         {error && <p className="join-error">{error}</p>}
         {success && <p className="join-success">{success}</p>}
-        <button className="join-card-btn" onClick={handleJoin}>
-          Join Club
+        <button className="join-card-btn" onClick={handleJoin} disabled={loading}>
+          {loading ? 'Joining...' : 'Join Club'}
         </button>
       </div>
     </div>

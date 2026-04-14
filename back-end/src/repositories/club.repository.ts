@@ -88,3 +88,66 @@ export async function leaveClub(userID: string, clubID: string){
     `DELETE FROM "Club_Members" 
     WHERE "user_id" = $1 AND "club_id" = $2`, [userID, clubID])   
 }
+
+export async function getClubById(clubId: string) {
+  const result = await pool.query(
+    `SELECT
+        c.club_id,
+        c.name,
+        c.description,
+        c.shared_drive_link,
+        c.club_color,
+        c.type,
+        c.banner_url,
+        c.logo_url,
+        c.discord_link,
+        c.instagram_link,
+        c.website_link,
+        c.code AS join_code,
+        COUNT(DISTINCT cm.user_id) AS member_count,
+        COUNT(DISTINCT e.event_id) FILTER (WHERE e.status = 'ongoing') AS ongoing_event_count
+     FROM "Clubs" c
+     LEFT JOIN "Club_Members" cm ON c.club_id = cm.club_id
+     LEFT JOIN "Events" e ON c.club_id = e.club_id
+     GROUP BY c.club_id`,
+    []
+  );
+
+  // Filter in JS since we already GROUP BY (adding WHERE before GROUP BY
+  // would require parameterising inside the aggregate query)
+  return result.rows.find((r: any) => r.club_id === clubId) ?? null;
+}
+
+export async function getClubMembers(clubId: string) {
+  const result = await pool.query(
+    `SELECT
+        cm.user_id,
+        cm.role,
+        cm.joined_at,
+        u.name,
+        u.email,
+        u.profile_pic_url AS avatar
+     FROM "Club_Members" cm
+     JOIN "Users" u ON cm.user_id = u.user_id
+     WHERE cm.club_id = $1
+     ORDER BY
+       CASE cm.role
+         WHEN 'president' THEN 0
+         WHEN 'vice_president' THEN 1
+         ELSE 2
+       END,
+       cm.joined_at ASC`,
+    [clubId]
+  );
+
+  return result.rows;
+}
+
+export async function getUserRoleInClub(userId: string, clubId: string): Promise<string | null> {
+  const result = await pool.query(
+    `SELECT role FROM "Club_Members" WHERE user_id = $1 AND club_id = $2 LIMIT 1`,
+    [userId, clubId]
+  );
+
+  return result.rows[0]?.role ?? null;
+}
