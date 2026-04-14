@@ -109,13 +109,12 @@ export async function getClubById(clubId: string) {
      FROM "Clubs" c
      LEFT JOIN "Club_Members" cm ON c.club_id = cm.club_id
      LEFT JOIN "Events" e ON c.club_id = e.club_id
+     WHERE c.club_id = $1
      GROUP BY c.club_id`,
-    []
+    [clubId]
   );
 
-  // Filter in JS since we already GROUP BY (adding WHERE before GROUP BY
-  // would require parameterising inside the aggregate query)
-  return result.rows.find((r: any) => r.club_id === clubId) ?? null;
+  return result.rows[0] ?? null;
 }
 
 export async function getClubMembers(clubId: string) {
