@@ -8,12 +8,13 @@ export async function createClub(
   description: string | null,
   sharedDriveLink: string | null,
   clubColor: string,
+  type: string,
 ): Promise<Club> {
   const result = await client.query(
-    `INSERT INTO "Clubs" (name, description, shared_drive_link, club_color) 
-    VALUES ($1, $2, $3, $4)
+    `INSERT INTO "Clubs" (name, description, shared_drive_link, club_color, type) 
+    VALUES ($1, $2, $3, $4, $5)
     RETURNING *`,
-    [name, description, sharedDriveLink, clubColor],
+    [name, description, sharedDriveLink, clubColor, type],
   );
 
   return result.rows[0];
@@ -39,6 +40,7 @@ export async function getAllClubs() {
         c.description,
         c.shared_drive_link,
         c.club_color,
+        c.type,
         COUNT (DISTINCT cm.user_id) AS member_count,
         COUNT (DISTINCT e.event_id) FILTER (WHERE e.status = 'ongoing') AS ongoing_event_count
     FROM "Clubs" c
@@ -54,7 +56,7 @@ export async function getAllClubs() {
 
 export async function getClubByJoinCode(joinCode: number): Promise<Club | null> {
     const result = await pool.query(
-        `SELECT club_id, name, description, shared_drive_link, club_color
+        `SELECT club_id, name, description, shared_drive_link, club_color, type
          FROM "Clubs"
          WHERE code = $1`,
         [joinCode]

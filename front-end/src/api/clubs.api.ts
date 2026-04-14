@@ -29,7 +29,12 @@ export async function getAllClubs(): Promise<Club[]> {
 
 //Create club based on data from front-end
 export async function createClub(
-  data: { name: string; description?: string; shared_drive_link?: string },
+  data: {
+    name: string;
+    description?: string;
+    shared_drive_link?: string;
+    type?: string;
+  },
   token: string,
 ): Promise<Club> {
   const res = await fetch(`${API_BASE}/api/clubs`, {

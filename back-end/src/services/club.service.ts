@@ -10,6 +10,7 @@ export async function createClub(
   const name = data.name?.trim();
   const description = data.description?.trim() ?? null;
   const sharedDriveLink = data.shared_drive_link?.trim() ?? null;
+  const type = data.type?.trim();
 
   if (!name) {
     throw new ServiceError(400, "Club name is required.");
@@ -64,6 +65,7 @@ export async function createClub(
       description,
       sharedDriveLink,
       clubColor,
+      type,
     );
 
     await clubRepo.addClubAdmin(client, club.club_id, userId);

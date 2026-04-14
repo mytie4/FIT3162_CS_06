@@ -3,12 +3,13 @@ import './ClubCard.css'
 interface ClubCardProps {
   bannerColor: string
   name: string
-  categoryBadge: string
+  type: string
   ongoingEvent: string
   memberCount: number
 }
 
 const badgeClass: Record<string, string> = {
+  Club: 'club-card-badge--social',
   Social: 'club-card-badge--social',
   Hobby: 'club-card-badge--hobby',
   Cultural: 'club-card-badge--cultural',
@@ -20,7 +21,7 @@ const badgeClass: Record<string, string> = {
 export default function ClubCard({
   bannerColor,
   name,
-  categoryBadge,
+  type,
   ongoingEvent,
   memberCount,
 }: ClubCardProps) {
@@ -35,9 +36,9 @@ export default function ClubCard({
         <h3 className="club-card-name">{name}</h3>
 
         <span
-          className={`club-card-badge ${badgeClass[categoryBadge] ?? 'club-card-badge--social'}`}
+          className={`club-card-badge ${badgeClass[type] ?? 'club-card-badge--social'}`}
         >
-          {categoryBadge}
+          {type}
         </span>
 
         <div className="club-card-meta">

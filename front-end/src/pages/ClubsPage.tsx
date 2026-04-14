@@ -189,13 +189,13 @@ export default function ClubsPage() {
                   <ClubCard
                     bannerColor={club.club_color ?? getBannerColor(club.club_id)}
                     name={club.name}
+                    type={club.type ?? 'Club'}
                     ongoingEvent={
                       club.ongoing_event_count === 0
                         ? "No ongoing event"
                         : `${club.ongoing_event_count} ongoing event${club.ongoing_event_count === 1 ? "" : "s"}`
                     }
                     memberCount={club.member_count}
-                    categoryBadge="Club"
                   />
                 </div>
               ))}
