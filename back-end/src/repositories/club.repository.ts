@@ -1,5 +1,5 @@
 import type { PoolClient } from "pg";
-import type { Club } from "../entities/club.entity";
+import type { Club, UpdateClubDTO } from "../entities/club.entity";
 import pool from '../db';
 
 export async function createClub(
@@ -42,7 +42,7 @@ export async function getAllClubs() {
         c.club_color,
         c.type,
         COUNT (DISTINCT cm.user_id) AS member_count,
-        COUNT (DISTINCT e.event_id) FILTER (WHERE e.status = 'ongoing') AS ongoing_event_count
+        COUNT (DISTINCT e.event_id) FILTER (WHERE e.status IN ('ongoing', 'in_progress')) AS ongoing_event_count
     FROM "Clubs" c
     LEFT JOIN "Club_Members" cm ON c.club_id = cm.club_id
     LEFT JOIN "Events" e ON c.club_id = e.club_id
@@ -107,7 +107,7 @@ export async function getClubById(clubId: string) {
         c.website_link,
         c.code AS join_code,
         COUNT(DISTINCT cm.user_id) AS member_count,
-        COUNT(DISTINCT e.event_id) FILTER (WHERE e.status = 'in_progress') AS ongoing_event_count
+        COUNT(DISTINCT e.event_id) FILTER (WHERE e.status IN ('ongoing', 'in_progress')) AS ongoing_event_count
      FROM "Clubs" c
      LEFT JOIN "Club_Members" cm ON c.club_id = cm.club_id
      LEFT JOIN "Events" e ON c.club_id = e.club_id
@@ -163,4 +163,69 @@ export async function getUserRoleInClub(userId: string, clubId: string): Promise
   );
 
   return result.rows[0]?.role ?? null;
+}
+
+export async function updateClub(clubId: string, data: UpdateClubDTO) {
+  const allowedFields: Record<string, string> = {
+    name: 'name',
+    description: 'description',
+    shared_drive_link: 'shared_drive_link',
+    type: 'type',
+    club_color: 'club_color',
+    banner_url: 'banner_url',
+    logo_url: 'logo_url',
+    discord_link: 'discord_link',
+    instagram_link: 'instagram_link',
+    website_link: 'website_link',
+  };
+
+  const setClauses: string[] = [];
+  const values: unknown[] = [];
+  let paramIndex = 1;
+
+  for (const [key, column] of Object.entries(allowedFields)) {
+    if (key in data) {
+      setClauses.push(`"${column}" = $${paramIndex}`);
+      values.push((data as Record<string, unknown>)[key] ?? null);
+      paramIndex++;
+    }
+  }
+
+  if (setClauses.length === 0) return null;
+
+  values.push(clubId);
+
+  const result = await pool.query(
+    `UPDATE "Clubs" SET ${setClauses.join(', ')} WHERE club_id = $${paramIndex} RETURNING *`,
+    values
+  );
+
+  return result.rows[0] ?? null;
+}
+
+export async function deleteClub(client: PoolClient, clubId: string): Promise<void> {
+  await client.query(`DELETE FROM "Club_Members_Contributions" WHERE club_id = $1`, [clubId]);
+  await client.query(`DELETE FROM "Task_Assignees" WHERE task_id IN (SELECT task_id FROM "Tasks" WHERE event_id IN (SELECT event_id FROM "Events" WHERE club_id = $1))`, [clubId]);
+  await client.query(`DELETE FROM "Tasks" WHERE event_id IN (SELECT event_id FROM "Events" WHERE club_id = $1)`, [clubId]);
+  await client.query(`DELETE FROM "Event_Logistics" WHERE event_id IN (SELECT event_id FROM "Events" WHERE club_id = $1)`, [clubId]);
+  await client.query(`DELETE FROM "Event_Attendees" WHERE event_id IN (SELECT event_id FROM "Events" WHERE club_id = $1)`, [clubId]);
+  await client.query(`DELETE FROM "Events" WHERE club_id = $1`, [clubId]);
+  await client.query(`DELETE FROM "Club_Members" WHERE club_id = $1`, [clubId]);
+  await client.query(`DELETE FROM "Clubs" WHERE club_id = $1`, [clubId]);
+}
+
+export async function updateMemberRole(clubId: string, userId: string, role: string): Promise<boolean> {
+  const result = await pool.query(
+    `UPDATE "Club_Members" SET role = $1 WHERE club_id = $2 AND user_id = $3`,
+    [role, clubId, userId]
+  );
+  return (result.rowCount ?? 0) > 0;
+}
+
+export async function removeMember(clubId: string, userId: string): Promise<boolean> {
+  const result = await pool.query(
+    `DELETE FROM "Club_Members" WHERE club_id = $1 AND user_id = $2`,
+    [clubId, userId]
+  );
+  return (result.rowCount ?? 0) > 0;
 }

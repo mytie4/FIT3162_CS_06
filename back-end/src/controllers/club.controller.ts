@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import * as clubService from "../services/club.service";
-import type { CreateClubDTO } from "../entities/club.entity";
+import type { CreateClubDTO, UpdateClubDTO } from "../entities/club.entity";
 import type { AuthRequest } from "../middlewares/auth.middleware";
 
 export async function createClub(req: AuthRequest, res: Response) {
@@ -60,7 +60,8 @@ export async function joinClub(req: AuthRequest, res: Response) {
             return res.status(401).json({ error: "User not authenticated" });
         }
 
-        if (joinCode === undefined || joinCode === null || isNaN(Number(joinCode))) {
+        const joinCodeStr = String(joinCode ?? '').trim();
+        if (!joinCodeStr || isNaN(Number(joinCodeStr))) {
           return res.status(400).json({ error: "Join code must be a valid number" });
         }
 
@@ -162,6 +163,100 @@ export async function getUserRole(req: AuthRequest, res: Response) {
 
     const errorMessage = error instanceof Error ? error.message : "Unknown server error.";
     console.error("getUserRole failed:", errorMessage);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+export async function updateClub(req: AuthRequest, res: Response) {
+  try {
+    const userId = req.user?.user_id;
+    const { clubId } = req.params;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const data: UpdateClubDTO = req.body;
+    const updated = await clubService.updateClub(clubId, data, userId);
+
+    return res.status(200).json({ message: "Club updated successfully.", club: updated });
+  } catch (error) {
+    if (error instanceof clubService.ServiceError) {
+      return res.status(error.statusCode).json({ error: error.message });
+    }
+
+    const errorMessage = error instanceof Error ? error.message : "Unknown server error.";
+    console.error("updateClub failed:", errorMessage);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+export async function deleteClub(req: AuthRequest, res: Response) {
+  try {
+    const userId = req.user?.user_id;
+    const { clubId } = req.params;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    await clubService.deleteClub(clubId, userId);
+
+    return res.status(200).json({ message: "Club deleted successfully." });
+  } catch (error) {
+    if (error instanceof clubService.ServiceError) {
+      return res.status(error.statusCode).json({ error: error.message });
+    }
+
+    const errorMessage = error instanceof Error ? error.message : "Unknown server error.";
+    console.error("deleteClub failed:", errorMessage);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+export async function updateMemberRole(req: AuthRequest, res: Response) {
+  try {
+    const requesterId = req.user?.user_id;
+    const { clubId, userId } = req.params;
+    const { role } = req.body;
+
+    if (!requesterId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    await clubService.updateMemberRole(clubId, userId, role, requesterId);
+
+    return res.status(200).json({ message: "Role updated successfully." });
+  } catch (error) {
+    if (error instanceof clubService.ServiceError) {
+      return res.status(error.statusCode).json({ error: error.message });
+    }
+
+    const errorMessage = error instanceof Error ? error.message : "Unknown server error.";
+    console.error("updateMemberRole failed:", errorMessage);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+export async function removeMember(req: AuthRequest, res: Response) {
+  try {
+    const requesterId = req.user?.user_id;
+    const { clubId, userId } = req.params;
+
+    if (!requesterId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    await clubService.removeMember(clubId, userId, requesterId);
+
+    return res.status(200).json({ message: "Member removed successfully." });
+  } catch (error) {
+    if (error instanceof clubService.ServiceError) {
+      return res.status(error.statusCode).json({ error: error.message });
+    }
+
+    const errorMessage = error instanceof Error ? error.message : "Unknown server error.";
+    console.error("removeMember failed:", errorMessage);
     return res.status(500).json({ error: "Internal server error" });
   }
 }
