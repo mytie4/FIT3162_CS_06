@@ -53,7 +53,6 @@ export default function CreateClubModal({ onClose, onCreated }: CreateClubModalP
         },
         token,
       )
-      console.info("Club created:", club)
       onCreated(club)
       onClose()
     } catch (err) {
