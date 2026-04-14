@@ -105,7 +105,7 @@ export async function getClubById(clubId: string) {
         c.website_link,
         c.code AS join_code,
         COUNT(DISTINCT cm.user_id) AS member_count,
-        COUNT(DISTINCT e.event_id) FILTER (WHERE e.status = 'ongoing') AS ongoing_event_count
+        COUNT(DISTINCT e.event_id) FILTER (WHERE e.status = 'in_progress') AS ongoing_event_count
      FROM "Clubs" c
      LEFT JOIN "Club_Members" cm ON c.club_id = cm.club_id
      LEFT JOIN "Events" e ON c.club_id = e.club_id
