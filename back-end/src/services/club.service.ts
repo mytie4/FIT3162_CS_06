@@ -171,6 +171,12 @@ export async function updateClub(clubId: string, data: UpdateClubDTO, userId: st
     throw new ServiceError(403, "Only the president can update club settings.");
   }
 
+  const updatableFields: (keyof UpdateClubDTO)[] = ['name', 'description', 'shared_drive_link', 'type', 'club_color'];
+  const hasUpdatableFields = updatableFields.some(f => f in data);
+  if (!hasUpdatableFields) {
+    throw new ServiceError(400, "No valid fields provided to update.");
+  }
+
   if (data.name !== undefined) {
     const trimmed = data.name.trim();
     if (!trimmed) throw new ServiceError(400, "Club name is required.");
@@ -183,7 +189,7 @@ export async function updateClub(clubId: string, data: UpdateClubDTO, userId: st
   }
 
   const updated = await clubRepo.updateClub(clubId, data);
-  if (!updated) throw new ServiceError(404, "Club not found or no fields to update.");
+  if (!updated) throw new ServiceError(404, "Club not found.");
 
   return updated;
 }
