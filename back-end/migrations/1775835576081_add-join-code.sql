@@ -26,6 +26,11 @@ EXECUTE FUNCTION generate_club_code();
 ALTER TABLE "Clubs"
 ADD CONSTRAINT code_unique UNIQUE (code);
 -- Down Migration
-ALTER TABLE "Clubs" 
-DROP CONSTRAINT IF EXISTS code_six_digits,
-DROP COLUMN IF EXISTS "code";
+ALTER TABLE "Clubs" DROP CONSTRAINT IF EXISTS code_six_digits;
+ALTER TABLE "Clubs" DROP COLUMN IF EXISTS code;
+
+DROP TRIGGER IF EXISTS set_club_code ON "Clubs";
+
+ALTER TABLE "Clubs" DROP CONSTRAINT IF EXISTS code_unique;
+
+DROP FUNCTION IF EXISTS generate_club_code();
