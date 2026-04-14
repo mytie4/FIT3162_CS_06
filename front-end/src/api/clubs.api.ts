@@ -1,4 +1,13 @@
-import type { Club, ClubMember } from '../types/clubs.types';
+import type { Club, ClubMember, ClubRole } from '../types/clubs.types';
+
+const VALID_CLUB_ROLES: ClubRole[] = ['president', 'vice_president', 'member'];
+
+function toClubRole(value: unknown): ClubRole | null {
+  if (typeof value === 'string' && (VALID_CLUB_ROLES as string[]).includes(value)) {
+    return value as ClubRole;
+  }
+  return null;
+}
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:5000';
 
@@ -65,7 +74,7 @@ export async function fetchClubMembers(clubId: string): Promise<ClubMember[]> {
   return data as ClubMember[];
 }
 
-export async function fetchMyRole(clubId: string, token: string): Promise<string | null> {
+export async function fetchMyRole(clubId: string, token: string): Promise<ClubRole | null> {
   const res = await fetch(`${API_BASE}/api/clubs/${clubId}/my-role`, {
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -80,5 +89,5 @@ export async function fetchMyRole(clubId: string, token: string): Promise<string
     throw new Error(data.error ?? 'Failed to fetch role');
   }
 
-  return data.role ?? null;
+  return toClubRole(data.role);
 }

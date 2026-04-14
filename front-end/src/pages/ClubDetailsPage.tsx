@@ -68,7 +68,7 @@ export default function ClubDetailsPage() {
         ])
 
         // Fetch role only if user has a token
-        let role: string | null = null
+        let role: ClubRole | null = null
         if (token) {
           role = await fetchMyRole(clubId!, token)
         }
@@ -76,7 +76,7 @@ export default function ClubDetailsPage() {
         if (isMounted) {
           setClub(clubData)
           setMembers(membersData)
-          setCurrentUserRole((role as ClubRole) ?? null)
+          setCurrentUserRole(role)
         }
       } catch (err) {
         if (isMounted) {
