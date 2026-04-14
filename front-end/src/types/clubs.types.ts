@@ -6,13 +6,13 @@ export interface Club {
   description: string | null;
   shared_drive_link: string | null;
   club_color: string | null;
-  type: string | null;
-  banner_url: string | null;
-  logo_url: string | null;
-  discord_link: string | null;
-  instagram_link: string | null;
-  website_link: string | null;
-  join_code: string | null;
+  type?: string | null;
+  banner_url?: string | null;
+  logo_url?: string | null;
+  discord_link?: string | null;
+  instagram_link?: string | null;
+  website_link?: string | null;
+  join_code?: string | null;
   ongoing_event_count: number;
   member_count: number;
 }
