@@ -33,7 +33,7 @@ export async function createClub(
     name: string;
     description?: string;
     shared_drive_link?: string;
-    type?: string;
+    type: string;
   },
   token: string,
 ): Promise<Club> {
