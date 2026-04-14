@@ -29,7 +29,7 @@ ALTER TABLE "Events"
 
 ALTER TABLE "Events"
   ADD CONSTRAINT "events_status_check"
-    CHECK ("status" IN ('draft', 'published', 'in_progress', 'completed', 'cancelled'));
+    CHECK ("status" IN ('draft', 'published', 'in_progress', 'ongoing', 'completed', 'cancelled'));
 
 ALTER TABLE "Events"
   ADD CONSTRAINT "events_created_by_fkey"
