@@ -218,6 +218,79 @@ router.get("/clubs/:clubId", clubController.getClubById);
 
 /**
  * @openapi
+ * /api/clubs/{clubId}:
+ *   patch:
+ *     security:
+ *       - BearerAuth: []
+ *     summary: Update club details (president only)
+ *     tags:
+ *       - Clubs
+ *     parameters:
+ *       - in: path
+ *         name: clubId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               type:
+ *                 type: string
+ *               shared_drive_link:
+ *                 type: string
+ *               discord_link:
+ *                 type: string
+ *               instagram_link:
+ *                 type: string
+ *               website_link:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Club updated successfully
+ *       403:
+ *         description: Forbidden — only the president can update
+ *       404:
+ *         description: Club not found
+ */
+router.patch("/clubs/:clubId", authMiddleware, clubController.updateClub);
+
+/**
+ * @openapi
+ * /api/clubs/{clubId}:
+ *   delete:
+ *     security:
+ *       - BearerAuth: []
+ *     summary: Delete a club and all associated data (president only)
+ *     tags:
+ *       - Clubs
+ *     parameters:
+ *       - in: path
+ *         name: clubId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Club deleted successfully
+ *       403:
+ *         description: Forbidden — only the president can delete
+ *       404:
+ *         description: Club not found
+ */
+router.delete("/clubs/:clubId", authMiddleware, clubController.deleteClub);
+
+/**
+ * @openapi
  * /api/clubs/{clubId}/members:
  *   get:
  *     summary: Get all members of a club with their roles
@@ -309,5 +382,79 @@ router.get("/clubs/:clubId/members", clubController.getClubMembers);
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get("/clubs/:clubId/my-role", authMiddleware, clubController.getUserRole);
+
+/**
+ * @openapi
+ * /api/clubs/{clubId}/members/{userId}/role:
+ *   patch:
+ *     security:
+ *       - BearerAuth: []
+ *     summary: Change a member's role in a club (president only)
+ *     tags:
+ *       - Clubs
+ *     parameters:
+ *       - in: path
+ *         name: clubId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               role:
+ *                 type: string
+ *                 enum: [president, vice_president, member]
+ *     responses:
+ *       200:
+ *         description: Role updated successfully
+ *       403:
+ *         description: Forbidden — only the president can change roles
+ *       404:
+ *         description: User is not a member of this club
+ */
+router.patch("/clubs/:clubId/members/:userId/role", authMiddleware, clubController.updateMemberRole);
+
+/**
+ * @openapi
+ * /api/clubs/{clubId}/members/{userId}:
+ *   delete:
+ *     security:
+ *       - BearerAuth: []
+ *     summary: Remove a member from a club (president only)
+ *     tags:
+ *       - Clubs
+ *     parameters:
+ *       - in: path
+ *         name: clubId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Member removed successfully
+ *       403:
+ *         description: Forbidden — only the president can remove members
+ *       404:
+ *         description: User is not a member of this club
+ */
+router.delete("/clubs/:clubId/members/:userId", authMiddleware, clubController.removeMember);
 
 export default router;
