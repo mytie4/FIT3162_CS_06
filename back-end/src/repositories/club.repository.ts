@@ -42,7 +42,7 @@ export async function getAllClubs() {
         c.club_color,
         c.type,
         COUNT (DISTINCT cm.user_id) AS member_count,
-        COUNT (DISTINCT e.event_id) FILTER (WHERE e.status IN ('ongoing', 'in_progress')) AS ongoing_event_count
+        COUNT (DISTINCT e.event_id) FILTER (WHERE e.status = 'ongoing') AS ongoing_event_count
     FROM "Clubs" c
     LEFT JOIN "Club_Members" cm ON c.club_id = cm.club_id
     LEFT JOIN "Events" e ON c.club_id = e.club_id
@@ -54,7 +54,7 @@ export async function getAllClubs() {
 }
 
 
-export async function getClubByJoinCode(joinCode: number): Promise<Club | null> {
+export async function getClubByJoinCode(joinCode: string): Promise<Club | null> {
     const result = await pool.query(
         `SELECT club_id, name, description, shared_drive_link, club_color, type
          FROM "Clubs"
@@ -107,7 +107,7 @@ export async function getClubById(clubId: string) {
         c.website_link,
         c.code AS join_code,
         COUNT(DISTINCT cm.user_id) AS member_count,
-        COUNT(DISTINCT e.event_id) FILTER (WHERE e.status IN ('ongoing', 'in_progress')) AS ongoing_event_count
+        COUNT(DISTINCT e.event_id) FILTER (WHERE e.status = 'ongoing') AS ongoing_event_count
      FROM "Clubs" c
      LEFT JOIN "Club_Members" cm ON c.club_id = cm.club_id
      LEFT JOIN "Events" e ON c.club_id = e.club_id
@@ -220,6 +220,34 @@ export async function updateMemberRole(clubId: string, userId: string, role: str
     [role, clubId, userId]
   );
   return (result.rowCount ?? 0) > 0;
+}
+
+export async function updateMemberRoleTx(
+  client: PoolClient,
+  clubId: string,
+  userId: string,
+  role: string,
+): Promise<boolean> {
+  const result = await client.query(
+    `UPDATE "Club_Members" SET role = $1 WHERE club_id = $2 AND user_id = $3`,
+    [role, clubId, userId]
+  );
+  return (result.rowCount ?? 0) > 0;
+}
+
+export async function demoteOtherPresidents(
+  client: PoolClient,
+  clubId: string,
+  excludeUserId: string,
+): Promise<void> {
+  await client.query(
+    `UPDATE "Club_Members"
+       SET role = 'vice_president'
+     WHERE club_id = $1
+       AND role = 'president'
+       AND user_id <> $2`,
+    [clubId, excludeUserId]
+  );
 }
 
 export async function removeMember(clubId: string, userId: string): Promise<boolean> {

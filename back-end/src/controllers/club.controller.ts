@@ -61,11 +61,11 @@ export async function joinClub(req: AuthRequest, res: Response) {
         }
 
         const joinCodeStr = String(joinCode ?? '').trim();
-        if (!joinCodeStr || isNaN(Number(joinCodeStr))) {
-          return res.status(400).json({ error: "Join code must be a valid number" });
+        if (!/^\d{6}$/.test(joinCodeStr)) {
+          return res.status(400).json({ error: "Join code must be a 6-digit number" });
         }
 
-        await clubService.joinClub(userID, joinCode);
+        await clubService.joinClub(userID, joinCodeStr);
 
         return res.status(200).json({ message: "Successfully joined club" });
     } catch (error: any) {
