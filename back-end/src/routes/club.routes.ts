@@ -366,6 +366,7 @@ router.get("/clubs/:clubId/members", clubController.getClubMembers);
  *               properties:
  *                 role:
  *                   type: string
+ *                   enum: [president, vice_president, member]
  *                   nullable: true
  *                   example: president
  *       401:
