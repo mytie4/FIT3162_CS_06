@@ -89,7 +89,7 @@ export async function createClub(
   }
 }
 
-export async function joinClub(userID: string, joinCode: number) {
+export async function joinClub(userID: string, joinCode: string) {
     const club = await clubRepo.getClubByJoinCode(joinCode);
     if (!club) {
         throw new Error("Invalid join code");
@@ -236,6 +236,27 @@ export async function updateMemberRole(clubId: string, targetUserId: string, new
   const targetInClub = await clubRepo.isUserInClub(targetUserId, clubId);
   if (!targetInClub) {
     throw new ServiceError(404, "User is not a member of this club.");
+  }
+
+  // Promoting to president is a transfer: demote every existing president in the
+  // club first so the single-president partial unique index is never violated.
+  if (newRole === 'president') {
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      await clubRepo.demoteOtherPresidents(client, clubId, targetUserId);
+      const updated = await clubRepo.updateMemberRoleTx(client, clubId, targetUserId, newRole);
+      if (!updated) {
+        throw new ServiceError(500, "Failed to update role.");
+      }
+      await client.query("COMMIT");
+    } catch (error) {
+      try { await client.query("ROLLBACK"); } catch (e) { console.error("Rollback failed:", e); }
+      throw error instanceof Error ? error : new Error("Unknown error occurred.");
+    } finally {
+      client.release();
+    }
+    return;
   }
 
   const updated = await clubRepo.updateMemberRole(clubId, targetUserId, newRole);
