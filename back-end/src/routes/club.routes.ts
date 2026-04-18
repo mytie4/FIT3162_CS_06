@@ -223,7 +223,7 @@ router.get("/clubs/:clubId", clubController.getClubById);
  *   patch:
  *     security:
  *       - BearerAuth: []
- *     summary: Update club details (president only)
+ *     summary: Update club details (president & vice-president only)
  *     tags:
  *       - Clubs
  *     parameters:
@@ -260,11 +260,11 @@ router.get("/clubs/:clubId", clubController.getClubById);
  *       401:
  *        description: Unauthorized - missing or invalid JWT
  *       403:
- *         description: Forbidden — only the president can update
+ *         description: Forbidden — only the president & vice-president can update
  *       404:
  *         description: Club not found
  */
-router.patch("/clubs/:clubId", authMiddleware, requireClubRole('president'), clubController.updateClub);
+router.patch("/clubs/:clubId", authMiddleware, requireClubRole('president', 'vice_president'), clubController.updateClub);
 
 /**
  * @openapi
