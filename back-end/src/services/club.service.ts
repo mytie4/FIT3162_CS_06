@@ -166,9 +166,10 @@ const VALID_ROLES = ['president', 'vice_president', 'member'] as const;
 export async function updateClub(clubId: string, data: UpdateClubDTO, userId: string) {
   if (!clubId) throw new ServiceError(400, "Club ID is required.");
 
+  const ALLOWED_EDIT_ROLES = ['president', 'vice_president'];
   const role = await clubRepo.getUserRoleInClub(userId, clubId);
-  if (role !== 'president') {
-    throw new ServiceError(403, "Only the president can update club settings.");
+  if (!role || !ALLOWED_EDIT_ROLES.includes(role)) {
+    throw new ServiceError(403, "Only the president or vice president can update club settings.");
   }
 
   const updatableFields: (keyof UpdateClubDTO)[] = ['name', 'description', 'shared_drive_link', 'type', 'club_color'];

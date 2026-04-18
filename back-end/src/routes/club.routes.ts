@@ -1,6 +1,7 @@
 import { Router } from "express";
 import * as clubController from "../controllers/club.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
+import { requireClubRole } from "../middlewares/rbac.middleware";
 
 const router = Router();
 
@@ -222,7 +223,7 @@ router.get("/clubs/:clubId", clubController.getClubById);
  *   patch:
  *     security:
  *       - BearerAuth: []
- *     summary: Update club details (president only)
+ *     summary: Update club details (president & vice-president only)
  *     tags:
  *       - Clubs
  *     parameters:
@@ -256,12 +257,14 @@ router.get("/clubs/:clubId", clubController.getClubById);
  *     responses:
  *       200:
  *         description: Club updated successfully
+ *       401:
+ *        description: Unauthorized - missing or invalid JWT
  *       403:
- *         description: Forbidden — only the president can update
+ *         description: Forbidden — only the president & vice-president can update
  *       404:
  *         description: Club not found
  */
-router.patch("/clubs/:clubId", authMiddleware, clubController.updateClub);
+router.patch("/clubs/:clubId", authMiddleware, requireClubRole('president', 'vice_president'), clubController.updateClub);
 
 /**
  * @openapi
@@ -282,12 +285,14 @@ router.patch("/clubs/:clubId", authMiddleware, clubController.updateClub);
  *     responses:
  *       200:
  *         description: Club deleted successfully
+ *       401:
+ *        description: Unauthorized - missing or invalid JWT
  *       403:
  *         description: Forbidden — only the president can delete
  *       404:
  *         description: Club not found
  */
-router.delete("/clubs/:clubId", authMiddleware, clubController.deleteClub);
+router.delete("/clubs/:clubId", authMiddleware, requireClubRole('president'), clubController.deleteClub);
 
 /**
  * @openapi
@@ -366,6 +371,7 @@ router.get("/clubs/:clubId/members", clubController.getClubMembers);
  *               properties:
  *                 role:
  *                   type: string
+ *                   enum: [president, vice_president, member]
  *                   nullable: true
  *                   example: president
  *       401:
@@ -418,12 +424,14 @@ router.get("/clubs/:clubId/my-role", authMiddleware, clubController.getUserRole)
  *     responses:
  *       200:
  *         description: Role updated successfully
+ *       401:
+ *         description: Unauthorized - missing or invalid JWT
  *       403:
  *         description: Forbidden — only the president can change roles
  *       404:
  *         description: User is not a member of this club
  */
-router.patch("/clubs/:clubId/members/:userId/role", authMiddleware, clubController.updateMemberRole);
+router.patch("/clubs/:clubId/members/:userId/role", authMiddleware, requireClubRole('president'), clubController.updateMemberRole);
 
 /**
  * @openapi
@@ -450,11 +458,13 @@ router.patch("/clubs/:clubId/members/:userId/role", authMiddleware, clubControll
  *     responses:
  *       200:
  *         description: Member removed successfully
+ *       401:
+ *         description: Unauthorized - missing or invalid JWT
  *       403:
  *         description: Forbidden — only the president can remove members
  *       404:
  *         description: User is not a member of this club
  */
-router.delete("/clubs/:clubId/members/:userId", authMiddleware, clubController.removeMember);
+router.delete("/clubs/:clubId/members/:userId", authMiddleware, requireClubRole('president'), clubController.removeMember);
 
 export default router;

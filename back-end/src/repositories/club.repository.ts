@@ -1,6 +1,7 @@
 import type { PoolClient } from "pg";
 import type { Club, UpdateClubDTO } from "../entities/club.entity";
 import pool from '../db';
+import { ClubRole } from "../entities/club-member.entity";
 
 export async function createClub(
   client: PoolClient,
@@ -148,7 +149,7 @@ export async function getClubMembers(clubId: string) {
   return result.rows;
 }
 
-export async function getUserRoleInClub(userId: string, clubId: string): Promise<string | null> {
+export async function getUserRoleInClub(userId: string, clubId: string): Promise<ClubRole | null> {
   const result = await pool.query(
     `SELECT
        CASE
@@ -162,7 +163,7 @@ export async function getUserRoleInClub(userId: string, clubId: string): Promise
     [userId, clubId]
   );
 
-  return result.rows[0]?.role ?? null;
+  return (result.rows[0]?.role as ClubRole) ?? null;
 }
 
 export async function updateClub(clubId: string, data: UpdateClubDTO) {
