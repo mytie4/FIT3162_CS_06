@@ -19,6 +19,7 @@ export interface Event {
 
 export interface EventWithClubName extends Event {
   club_name: string;
+  attendee_count: number;
 }
 
 export interface CreateEventDTO {

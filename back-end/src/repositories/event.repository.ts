@@ -28,10 +28,12 @@ export async function createEvent(dto: CreateEventDTO, createdBy: string): Promi
 
 export async function getEventById(eventId: string): Promise<EventWithClubName | null> {
     const result = await pool.query(
-        `SELECT e.*, c.name AS club_name
+        `SELECT e.*, c.name AS club_name, COUNT(DISTINCT ea.user_id) AS attendee_count
         FROM "Events" e
         JOIN "Clubs" c ON e.club_id = c.club_id
-        WHERE e.event_id = $1`,
+        LEFT JOIN "Event_Attendees" ea ON e.event_id = ea.event_id AND ea.rsvp_status = 'going'
+        WHERE e.event_id = $1
+        GROUP BY e.event_id, c.club_id, c.name`,
         [eventId]
     );
 
