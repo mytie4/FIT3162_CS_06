@@ -17,6 +17,10 @@ export interface Event {
   created_at: string;
 }
 
+export interface EventWithClubName extends Event {
+  club_name: string;
+}
+
 export interface CreateEventDTO {
   club_id: string;
   title: string;
