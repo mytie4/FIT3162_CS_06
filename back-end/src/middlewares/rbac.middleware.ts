@@ -1,5 +1,6 @@
 import { Response, NextFunction } from "express";
 import { getUserRoleInClub } from "../repositories/club.repository";
+import { getEventById } from "../repositories/event.repository";
 import { ClubRole } from "../entities/club-member.entity";
 import { AuthRequest } from "./auth.middleware";
 
@@ -15,7 +16,16 @@ export function requireClubRole(...allowedRoles: ClubRole[]) {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const clubId = req.params.clubId || req.body.club_id;
+      let clubId = req.params.clubId || req.body.club_id;
+
+      if (!clubId && req.params.id) {
+        const event = await getEventById(req.params.id);
+        if (!event) {
+          return res.status(404).json({ message: "Event not found" });
+        }
+        clubId = event.club_id;
+      }
+
       if (!clubId) {
         return res.status(400).json({ message: "club_id is required" });
       }
