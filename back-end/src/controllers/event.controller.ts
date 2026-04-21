@@ -4,7 +4,7 @@ import { AuthRequest } from '../middlewares/auth.middleware';
 import { CreateEventDTO, UpdateEventDTO } from '../entities/event.entity';
 import { ServiceError } from '../services/club.service';
 
-export async function create(req: AuthRequest, res: Response) {
+export async function createEvent(req: AuthRequest, res: Response) {
     try {
         const userId = req.user?.user_id;
         if (!userId) {
@@ -32,7 +32,7 @@ export async function create(req: AuthRequest, res: Response) {
     }
 }
 
-export async function getById(req: AuthRequest, res: Response) {
+export async function getEventById(req: AuthRequest, res: Response) {
     try {
         const {id} = req.params;
         const event = await eventService.getEventById(id);
@@ -51,7 +51,7 @@ export async function getById(req: AuthRequest, res: Response) {
     }
 }
 
-export async function getAll(req: AuthRequest, res: Response) {
+export async function getAllEvents(req: AuthRequest, res: Response) {
     try {
         const events = await eventService.getAllEvents();
         return res.status(200).json(events);
@@ -63,7 +63,7 @@ export async function getAll(req: AuthRequest, res: Response) {
     }
 }
 
-export async function getByClubId(req: AuthRequest, res: Response) {
+export async function getEventsByClubId(req: AuthRequest, res: Response) {
     try {
         const {clubId} = req.params;
         const events = await eventService.getEventsByClubId(clubId);
@@ -82,7 +82,7 @@ export async function getByClubId(req: AuthRequest, res: Response) {
     }
 }
 
-export async function update(req: AuthRequest, res: Response) {
+export async function updateEvent(req: AuthRequest, res: Response) {
     try {
         const {id} = req.params;
         const dto : UpdateEventDTO = req.body;

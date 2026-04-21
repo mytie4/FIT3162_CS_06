@@ -43,7 +43,7 @@ const router = Router();
  *      description: Internal server error
  * 
  */
-router.post('/events', authMiddleware, requireClubRole('president', 'vice_president'), eventController.create);
+router.post('/events', authMiddleware, requireClubRole('president', 'vice_president'), eventController.createEvent);
 
 
 /**
@@ -66,7 +66,7 @@ router.post('/events', authMiddleware, requireClubRole('president', 'vice_presid
  *      description: Internal server error
  * 
  */
-router.get('/events', eventController.getAll);
+router.get('/events', eventController.getAllEvents);
 
 /**
  * @openapi
@@ -94,7 +94,7 @@ router.get('/events', eventController.getAll);
  *     500:
  *      description: Internal server error
  */
-router.get('/events/:id', eventController.getById);
+router.get('/events/:id', eventController.getEventById);
 
 
 /**
@@ -127,7 +127,7 @@ router.get('/events/:id', eventController.getById);
  *     500:
  *      description: Internal server error
  */
-router.get('/clubs/:clubId/events', eventController.getByClubId);
+router.get('/clubs/:clubId/events', eventController.getEventsByClubId);
 
 /**
  * @openapi
@@ -175,7 +175,7 @@ router.get('/clubs/:clubId/events', eventController.getByClubId);
  *     500:
  *      description: Internal server error
  */
-router.put('/events/:id', authMiddleware, requireClubRole('president', 'vice_president'), eventController.update);
+router.put('/events/:id', authMiddleware, requireClubRole('president', 'vice_president'), eventController.updateEvent);
 
 /**
  * @openapi
