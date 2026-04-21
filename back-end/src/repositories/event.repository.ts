@@ -39,16 +39,6 @@ export async function getEventById(eventId: string): Promise<EventWithClubName |
     return result.rows[0] ?? null;
 }
 
-export async function getAllEvents(): Promise<Event[]> {
-    const result = await pool.query(
-        `SELECT *
-        FROM "Events"
-        ORDER BY date DESC NULLS LAST`
-    );
-
-    return result.rows;
-}
-
 export async function getEventsByClubId(clubId: string): Promise<Event[]> {
     const result = await pool.query(
         `SELECT *

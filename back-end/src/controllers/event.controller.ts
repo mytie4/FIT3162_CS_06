@@ -51,18 +51,6 @@ export async function getEventById(req: AuthRequest, res: Response) {
     }
 }
 
-export async function getAllEvents(req: AuthRequest, res: Response) {
-    try {
-        const events = await eventService.getAllEvents();
-        return res.status(200).json(events);
-    } catch (error) {
-        console.error("Get all events failed:", error instanceof Error ? error.message : error);
-        return res.status(500).json({
-            error: "Internal server error",
-        });
-    }
-}
-
 export async function getEventsByClubId(req: AuthRequest, res: Response) {
     try {
         const {clubId} = req.params;

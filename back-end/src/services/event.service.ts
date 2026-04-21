@@ -65,10 +65,6 @@ export async function getEventById(eventId: string): Promise<EventWithClubName> 
   };
 }
 
-export async function getAllEvents(): Promise<Event[]> {
-  return await eventRepo.getAllEvents();
-}
-
 export async function getEventsByClubId(clubId: string): Promise<Event[]> {
   if (!clubId) {
     throw new ServiceError(400, "Club ID is required.");

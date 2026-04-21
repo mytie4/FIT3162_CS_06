@@ -45,29 +45,6 @@ const router = Router();
  */
 router.post('/events', authMiddleware, requireClubRole('president', 'vice_president'), eventController.createEvent);
 
-
-/**
- * @openapi
- * /api/events:
- *   get:
- *    summary: Get all public events
- *    tags:
- *     - Events
- *    responses:
- *     200:
- *      description: A list of events
- *      content:
- *       application/json:
- *        schema:
- *         type: array
- *         items:
- *          $ref: '#/components/schemas/EventResponse'
- *     500:
- *      description: Internal server error
- * 
- */
-router.get('/events', eventController.getAllEvents);
-
 /**
  * @openapi
  * /api/events/{id}:
