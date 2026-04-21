@@ -1,5 +1,5 @@
 import { Response, NextFunction } from "express";
-import { getUserRoleInClub } from "../repositories/club.repository";
+import { getUserRoleInClub, getClubById } from "../repositories/club.repository";
 import { getEventById } from "../repositories/event.repository";
 import { ClubRole } from "../entities/club-member.entity";
 import { AuthRequest } from "./auth.middleware";
@@ -28,6 +28,11 @@ export function requireClubRole(...allowedRoles: ClubRole[]) {
 
       if (!clubId) {
         return res.status(400).json({ message: "club_id is required" });
+      }
+
+      const club = await getClubById(clubId);
+      if (!club) {
+        return res.status(404).json({ message: "Club not found" });
       }
 
       const role = await getUserRoleInClub(userId, clubId);
