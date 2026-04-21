@@ -4,9 +4,9 @@ import { Event, EventWithClubName, CreateEventDTO, UpdateEventDTO } from '../ent
 export async function createEvent(dto: CreateEventDTO, createdBy: string): Promise<Event> {
     const result = await pool.query(
         `INSERT INTO "Events" 
-            (club_id, title, type, date, end_date, location, description, banner_url, visibility, budget, status, created_by)
+            (club_id, title, type, date, end_date, location, description, banner_url, budget, status, created_by)
         VALUES 
-            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
         RETURNING *`,
         [
         dto.club_id, 
@@ -17,7 +17,6 @@ export async function createEvent(dto: CreateEventDTO, createdBy: string): Promi
         dto.location ?? null, 
         dto.description ?? null, 
         dto.banner_url ?? null, 
-        dto.visibility ?? 'public', 
         dto.budget ?? null, 
         dto.status ?? 'draft', 
         createdBy]
@@ -44,7 +43,6 @@ export async function getAllEvents(): Promise<Event[]> {
     const result = await pool.query(
         `SELECT *
         FROM "Events"
-        WHERE visibility = 'public'
         ORDER BY date DESC NULLS LAST`
     );
 
@@ -72,7 +70,6 @@ export async function updateEvent(eventId: string, dto: UpdateEventDTO): Promise
         location: 'location',
         description: 'description',
         banner_url: 'banner_url',
-        visibility: 'visibility',
         budget: 'budget',
         status: 'status',
     };

@@ -182,12 +182,6 @@ const options: swaggerJSDoc.Options = {
               example: 'https://example.com/event-banner.jpg',
               nullable: true,
             },
-            visibility: {
-              type: 'string',
-              enum: ['public', 'members_only'],
-              example: 'public',
-              nullable: true,
-            },
             budget: {
               type: 'number',
               example: 100,
@@ -230,11 +224,6 @@ const options: swaggerJSDoc.Options = {
             banner_url: {
               type: 'string',
               example: 'https://example.com/event-banner.jpg',
-            },
-            visibility: {
-              type: 'string',
-              enum: ['public', 'members_only'],
-              example: 'public',
             },
             budget: {
               type: 'number',
@@ -292,11 +281,6 @@ const options: swaggerJSDoc.Options = {
               type: 'string',
               example: 'https://example.com/event-banner.jpg',
               nullable: true,
-            },
-            visibility: {
-              type: 'string',
-              enum: ['public', 'members_only'],
-              example: 'public',
             },
             budget: {
               type: 'number',

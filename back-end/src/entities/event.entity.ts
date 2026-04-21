@@ -8,7 +8,6 @@ export interface Event {
   location: string | null;
   description: string | null;
   banner_url: string | null;
-  visibility: 'public' | 'members_only';
   budget: number | null;
   // changed in_progress to ongoing
   status: 'draft' | 'published' | 'ongoing' | 'completed' | 'cancelled';
@@ -31,7 +30,6 @@ export interface CreateEventDTO {
   location?: string;
   description?: string;
   banner_url?: string;
-  visibility?: 'public' | 'members_only';
   budget?: number;
   status?: 'draft' | 'published' | 'ongoing' | 'completed' | 'cancelled';
 }
