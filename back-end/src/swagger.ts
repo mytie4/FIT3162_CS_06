@@ -140,6 +140,187 @@ const options: swaggerJSDoc.Options = {
             },
           },
         },
+        CreateEventRequest: {
+          type: 'object',
+          required: ['club_id', 'title'],
+          properties: {
+            club_id: {
+              type: 'string',
+              format: 'uuid',
+              example: '550e8400-e29b-41d4-a716-446655440000',
+            },
+            title: { type: 'string', example: 'Morning Run' },
+            description: {
+              type: 'string',
+              example: 'Join us for a refreshing morning run!',
+              nullable: true,
+            },
+            type: {
+              type: 'string',
+              example: 'In-Person',
+              nullable: true,
+            },
+            date: {
+              type: 'string',
+              format: 'date-time',
+              example: '2026-10-15T07:00:00Z',
+              nullable: true,
+            },
+            end_date: {
+              type: 'string',
+              format: 'date-time',
+              example: '2026-10-16T07:00:00Z',
+              nullable: true,
+            },
+            location: {
+              type: 'string',
+              example: 'Monash Oval',
+              nullable: true,
+            },
+            banner_url: {
+              type: 'string',
+              example: 'https://example.com/event-banner.jpg',
+              nullable: true,
+            },
+            budget: {
+              type: 'number',
+              example: 100,
+              nullable: true,
+            },
+            status: {
+              type: 'string',
+              enum: ['draft', 'published', 'ongoing', 'completed', 'cancelled'],
+              example: 'draft',
+              nullable: true,
+            }
+          },
+        },
+        UpdateEventRequest: {
+          type: 'object',
+          properties: {
+            title: { type: 'string', example: 'Morning Run' },
+            description: {
+              type: 'string',
+              example: 'Join us for a refreshing morning run!',
+            },
+            type: {
+              type: 'string',
+              example: 'In-Person',
+            },
+            date: {
+              type: 'string',
+              format: 'date-time',
+              example: '2026-10-15T07:00:00Z',
+            },
+            end_date: {
+              type: 'string',
+              format: 'date-time',
+              example: '2026-10-16T07:00:00Z',
+            },
+            location: {
+              type: 'string',
+              example: 'Monash Oval',
+            },
+            banner_url: {
+              type: 'string',
+              example: 'https://example.com/event-banner.jpg',
+            },
+            budget: {
+              type: 'number',
+              example: 100,
+            },
+            status: {
+              type: 'string',
+              enum: ['draft', 'published', 'ongoing', 'completed', 'cancelled'],
+              example: 'draft',
+            }
+          },
+        },
+        EventResponse: {
+          type: 'object',
+          properties: {
+            event_id: {
+              type: 'string',
+              format: 'uuid',
+              example: '550e8400-e29b-41d4-a716-446655440000',
+            },
+            club_id: {
+              type: 'string',
+              format: 'uuid',
+              example: '550e8400-e29b-41d4-a716-446655440000',
+            },
+            title: { type: 'string', example: 'Morning Run' },
+            description: {
+              type: 'string',
+              example: 'Join us for a refreshing morning run!',
+              nullable: true,
+            },
+            type: {
+              type: 'string',
+              example: 'In-Person',
+              nullable: true,
+            },
+            date: {
+              type: 'string',
+              format: 'date-time',
+              example: '2026-10-15T07:00:00Z',
+              nullable: true,
+            },
+            end_date: {
+              type: 'string',
+              format: 'date-time',
+              example: '2026-10-16T07:00:00Z',
+              nullable: true,
+            },
+            location: {
+              type: 'string',
+              example: 'Monash Oval',
+              nullable: true,
+            },
+            banner_url: {
+              type: 'string',
+              example: 'https://example.com/event-banner.jpg',
+              nullable: true,
+            },
+            budget: {
+              type: 'number',
+              example: 100,
+              nullable: true,
+            },
+            status: {
+              type: 'string',
+              enum: ['draft', 'published', 'ongoing', 'completed', 'cancelled'],
+              example: 'draft',
+            },
+            money_used: {
+              type: 'number',
+              example: 50,
+              nullable: true,
+            },
+            created_by: {
+              type: 'string',
+              format: 'uuid',
+              example: '550e8400-e29b-41d4-a716-446655440000',
+            },
+            created_at: {
+              type: 'string',
+              format: 'date-time',
+              example: '2026-10-01T12:00:00Z',
+            }
+          },
+        },
+        EventWithClubName: {
+          allOf: [
+            { $ref: '#/components/schemas/EventResponse' },
+            {
+              type: 'object',
+              properties: {
+                club_name: { type: 'string', example: 'Running Club' },
+                attendee_count: { type: 'number', example: 20 },
+              },
+            },
+          ],
+        },
       },
     },
   },
