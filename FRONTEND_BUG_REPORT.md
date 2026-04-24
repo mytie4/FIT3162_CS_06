@@ -1,6 +1,6 @@
 # Frontend Bug Audit — Eventure (`front-end`)
 
-**Scope:** `c:\Users\quank\Downloads\FIT3162_CS_06\front-end`
+**Scope:** `front-end/`
 **Stack:** React 19, React Router 7, Vite 7, TypeScript 5.9 (no test runner configured).
 
 ## Summary — counts by severity
