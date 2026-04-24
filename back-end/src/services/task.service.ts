@@ -23,7 +23,7 @@ export async function createTask(dto: CreateTaskDTO, userId: string): Promise<Ta
         throw new ServiceError(400, "Event ID is required.");
     }
 
-    if (dto.title === undefined || !dto.title.trim()) {
+    if (typeof dto.title !== "string" || !dto.title.trim()) {
         throw new ServiceError(400, "Task title is required.");
     }
 
@@ -212,6 +212,10 @@ function sanitizeAndValidateTaskDTO(
     const cleaned: CreateTaskDTO | UpdateTaskDTO = { ...dto };
 
     if (cleaned.title !== undefined) {
+        if (typeof cleaned.title !== 'string') {
+            throw new ServiceError(400, "Task title must be a string.");
+        }
+
         cleaned.title = cleaned.title.trim();
 
         if (!cleaned.title) {
@@ -224,6 +228,10 @@ function sanitizeAndValidateTaskDTO(
     }
 
     if (cleaned.description !== undefined && cleaned.description !== null) {
+        if (typeof cleaned.description !== 'string') {
+            throw new ServiceError(400, "Task description must be a string.");
+        }
+
         cleaned.description = cleaned.description.trim();
 
         if (cleaned.description.length > 2000) {
@@ -232,6 +240,10 @@ function sanitizeAndValidateTaskDTO(
     }
 
     if (cleaned.tag !== undefined && cleaned.tag !== null) {
+        if (typeof cleaned.tag !== 'string') {
+            throw new ServiceError(400, "Task tag must be a string.");
+        }
+
         cleaned.tag = cleaned.tag.trim();
 
         if (cleaned.tag.length > 50) {
