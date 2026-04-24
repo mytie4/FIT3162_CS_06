@@ -1,6 +1,7 @@
 import { Response, NextFunction } from "express";
 import { getUserRoleInClub, getClubById } from "../repositories/club.repository";
 import { getEventById } from "../repositories/event.repository";
+import { getTaskClubContext } from "../repositories/task.repository";
 import { ClubRole } from "../entities/club-member.entity";
 import { AuthRequest } from "./auth.middleware";
 
@@ -17,6 +18,22 @@ export function requireClubRole(...allowedRoles: ClubRole[]) {
       }
 
       let clubId = req.params.clubId || req.body.club_id;
+
+      if (!clubId && req.params.eventId) {
+        const event = await getEventById(req.params.eventId);
+        if (!event) {
+          return res.status(404).json({ message: "Event not found" });
+        }
+        clubId = event.club_id;
+      }
+
+      if (!clubId && req.params.taskId) {
+        const ctx = await getTaskClubContext(req.params.taskId);
+        if (!ctx) {
+          return res.status(404).json({ message: "Task not found" });
+        }
+        clubId = ctx.club_id;
+      }
 
       if (!clubId && req.params.id) {
         const event = await getEventById(req.params.id);

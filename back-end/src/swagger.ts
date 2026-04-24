@@ -321,6 +321,198 @@ const options: swaggerJSDoc.Options = {
             },
           ],
         },
+        CreateTaskRequest: {
+          type: 'object',
+          required: ['title'],
+          properties: {
+            title: { type: 'string', example: 'Book venue for event' },
+            parent_task_id: {
+              type: 'string',
+              format: 'uuid',
+              nullable: true,
+              example: null,
+            },
+            due_date: {
+              type: 'string',
+              format: 'date-time',
+              nullable: true,
+              example: '2026-10-10T17:00:00Z',
+            },
+            priority: {
+              type: 'string',
+              enum: ['low', 'medium', 'high'],
+              nullable: true,
+              example: 'medium',
+            },
+            status: {
+              type: 'string',
+              enum: ['todo', 'in_progress', 'done', 'blocked'],
+              nullable: true,
+              example: 'todo',
+            },
+            is_public: {
+              type: 'boolean',
+              nullable: true,
+              example: false,
+            },
+            tag: {
+              type: 'string',
+              nullable: true,
+              example: 'logistics',
+            },
+            description: {
+              type: 'string',
+              nullable: true,
+              example: 'Confirm booking with venue manager and pay deposit.',
+            },
+          },
+        },
+        UpdateTaskRequest: {
+          type: 'object',
+          properties: {
+            title: { type: 'string', example: 'Book venue for event' },
+            parent_task_id: {
+              type: 'string',
+              format: 'uuid',
+              nullable: true,
+            },
+            due_date: {
+              type: 'string',
+              format: 'date-time',
+              nullable: true,
+            },
+            priority: {
+              type: 'string',
+              enum: ['low', 'medium', 'high'],
+            },
+            status: {
+              type: 'string',
+              enum: ['todo', 'in_progress', 'done', 'blocked'],
+            },
+            is_public: {
+              type: 'boolean',
+            },
+            tag: {
+              type: 'string',
+              nullable: true,
+            },
+            description: {
+              type: 'string',
+              nullable: true,
+            },
+          },
+        },
+        TaskResponse: {
+          type: 'object',
+          properties: {
+            task_id: {
+              type: 'string',
+              format: 'uuid',
+              example: '550e8400-e29b-41d4-a716-446655440000',
+            },
+            event_id: {
+              type: 'string',
+              format: 'uuid',
+              example: '550e8400-e29b-41d4-a716-446655440000',
+            },
+            parent_task_id: {
+              type: 'string',
+              format: 'uuid',
+              nullable: true,
+              example: null,
+            },
+            title: {
+              type: 'string',
+              nullable: true,
+              example: 'Book venue for event',
+            },
+            description: {
+              type: 'string',
+              nullable: true,
+              example: 'Confirm booking with venue manager and pay deposit.',
+            },
+            tag: {
+              type: 'string',
+              nullable: true,
+              example: 'logistics',
+            },
+            due_date: {
+              type: 'string',
+              format: 'date-time',
+              nullable: true,
+              example: '2026-10-10T17:00:00Z',
+            },
+            priority: {
+              type: 'string',
+              enum: ['low', 'medium', 'high'],
+              nullable: true,
+              example: 'medium',
+            },
+            status: {
+              type: 'string',
+              enum: ['todo', 'in_progress', 'done', 'blocked'],
+              nullable: true,
+              example: 'todo',
+            },
+            is_public: {
+              type: 'boolean',
+              example: false,
+            },
+            created_by: {
+              type: 'string',
+              format: 'uuid',
+              nullable: true,
+              example: '550e8400-e29b-41d4-a716-446655440000',
+            },
+            created_at: {
+              type: 'string',
+              format: 'date-time',
+              example: '2026-10-01T12:00:00Z',
+            },
+          },
+        },
+        TaskAssignee: {
+          type: 'object',
+          properties: {
+            user_id: {
+              type: 'string',
+              format: 'uuid',
+              example: '550e8400-e29b-41d4-a716-446655440000',
+            },
+            name: { type: 'string', example: 'Alice' },
+            email: { type: 'string', example: 'alice@example.com' },
+            profile_pic_url: {
+              type: 'string',
+              nullable: true,
+              example: null,
+            },
+          },
+        },
+        TaskWithAssignees: {
+          allOf: [
+            { $ref: '#/components/schemas/TaskResponse' },
+            {
+              type: 'object',
+              properties: {
+                assignees: {
+                  type: 'array',
+                  items: { $ref: '#/components/schemas/TaskAssignee' },
+                },
+              },
+            },
+          ],
+        },
+        AssignUserRequest: {
+          type: 'object',
+          required: ['user_id'],
+          properties: {
+            user_id: {
+              type: 'string',
+              format: 'uuid',
+              example: '550e8400-e29b-41d4-a716-446655440000',
+            },
+          },
+        },
       },
     },
   },
