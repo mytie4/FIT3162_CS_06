@@ -384,13 +384,16 @@ const options: swaggerJSDoc.Options = {
             priority: {
               type: 'string',
               enum: ['low', 'medium', 'high'],
+              nullable: true,
             },
             status: {
               type: 'string',
               enum: ['todo', 'in_progress', 'done', 'blocked'],
+              nullable: true,
             },
             is_public: {
               type: 'boolean',
+              nullable: true,
             },
             tag: {
               type: 'string',

@@ -140,7 +140,7 @@ The DB enforces a **single president per club** via a partial unique index.
 ### 4.6 Task workflow
 
 - Tasks live under an event (`Tasks.event_id`).
-- Each task has: title, description, due date, priority (low/med/high), tag, status (todo/doing/done), optional parent task.
+- Each task has: title, description, due date, priority (low/medium/high), tag, status (todo/in_progress/done/blocked), optional parent task.
 - `Task_Assignees` is a many-to-many link to `Users`.
 - Kanban board groups tasks by status; assignees see "My Tasks" in notifications / dashboard.
 - Tasks can be `is_public` so non-assignees in the club can see progress.
