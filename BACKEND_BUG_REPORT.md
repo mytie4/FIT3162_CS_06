@@ -1,6 +1,6 @@
 # Backend Bug Audit — `FIT3162_CS_06/back-end`
 
-**Scope:** `c:\Users\quank\Downloads\FIT3162_CS_06\back-end`
+**Scope:** `FIT3162_CS_06/back-end`
 **Stack:** Node.js + Express + TypeScript, PostgreSQL (`pg`), JWT auth, `node-pg-migrate`.
 
 ## Summary — counts by severity
