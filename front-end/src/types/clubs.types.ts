@@ -1,4 +1,4 @@
-export type ClubRole = 'president' | 'vice_president' | 'member';
+export type ClubRole = "president" | "vice_president" | "member";
 
 export interface Club {
   club_id: string;
@@ -24,4 +24,17 @@ export interface ClubMember {
   avatar: string | null;
   role: ClubRole;
   joined_at: string | null;
+}
+
+export interface UpdateClub {
+  name?: string;
+  description?: string | null;
+  shared_drive_link?: string | null;
+  club_color?: string | null;
+  type?: string | null;
+  banner_url?: string | null;
+  logo_url?: string | null;
+  discord_link?: string | null;
+  instagram_link?: string | null;
+  website_link?: string | null;
 }
