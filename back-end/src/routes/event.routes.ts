@@ -69,7 +69,7 @@ router.post(
  *     500:
  *      description: Internal server error
  */
-router.get("/events", eventController.getAllEvents);
+router.get("/events", authMiddleware, eventController.getAllEvents);
 
 /**
  * @openapi

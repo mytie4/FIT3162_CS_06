@@ -4,6 +4,7 @@ import { Search, Filter, Plus } from "lucide-react";
 import EventCard from "../components/events/EventCard";
 import { fetchAllEvents } from "../api/events.api";
 import type { Event } from "../types/events.types";
+import { useAuth } from "../context/AuthContext";
 import "./EventsPage.css";
 
 const TABS = ["All Events", "Upcoming", "Drafts", "Past"] as const;
@@ -45,6 +46,7 @@ function formatEventDate(date: string | null): string {
 
 export default function EventsPage() {
   const navigate = useNavigate();
+  const { token } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<Tab>("All Events");
@@ -59,7 +61,14 @@ export default function EventsPage() {
         setIsLoading(true);
         setError(null);
 
-        const data = await fetchAllEvents();
+        if (!token) {
+          setEvents([]);
+          setError("Please log in to view your events");
+          setIsLoading(false);
+          return;
+        }
+
+        const data = await fetchAllEvents(token);
 
         if (isMounted) {
           setEvents(data);

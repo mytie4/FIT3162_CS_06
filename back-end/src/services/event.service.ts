@@ -52,8 +52,15 @@ export async function getEventById(
     attendee_count: Number(event.attendee_count),
   };
 }
-export async function getAllEvents(): Promise<EventWithClubName[]> {
-  const events = await eventRepo.getAllEvents();
+
+export async function getAllEvents(
+  userId: string,
+): Promise<EventWithClubName[]> {
+  if (!userId) {
+    throw new ServiceError(401, "Unauthorized");
+  }
+
+  const events = await eventRepo.getAllEvents(userId);
 
   return events.map((event) => ({
     ...event,

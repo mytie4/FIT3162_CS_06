@@ -119,20 +119,26 @@ export async function deleteEvent(eventId: string): Promise<void> {
   await pool.query(`DELETE FROM "Events" WHERE event_id = $1`, [eventId]);
 }
 
-export async function getAllEvents(): Promise<EventWithClubName[]> {
+export async function getAllEvents(
+  userId: string,
+): Promise<EventWithClubName[]> {
   const result = await pool.query(
     `SELECT
         e.*,
         c.name AS club_name,
-        COUNT(DISTINCT ea.user_id) AS attendee_count
+        COUNT(DISTINCT ea.user_id) FILTER (WHERE ea.rsvp_status = 'going') AS attendee_count
      FROM "Events" e
      JOIN "Clubs" c ON e.club_id = c.club_id
      LEFT JOIN "Event_Attendees" ea
        ON e.event_id = ea.event_id
-      AND ea.rsvp_status = 'going'
-     WHERE LOWER(COALESCE(e.status, '')) <> 'draft'
+     LEFT JOIN "Event_Attendees" my_ea
+       ON e.event_id = my_ea.event_id
+      AND my_ea.user_id = $1
+     WHERE my_ea.user_id IS NOT NULL
+        OR e.created_by = $1
      GROUP BY e.event_id, c.club_id, c.name
      ORDER BY e.date DESC NULLS LAST`,
+    [userId],
   );
 
   return result.rows;

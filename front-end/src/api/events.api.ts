@@ -10,8 +10,13 @@ async function parseJson<T>(res: Response): Promise<T> {
   return data as T;
 }
 
-export async function fetchAllEvents(): Promise<Event[]> {
-  const res = await fetch(`${API_BASE}/api/events`);
+export async function fetchAllEvents(token: string): Promise<Event[]> {
+  const res = await fetch(`${API_BASE}/api/events`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
   return parseJson<Event[]>(res);
 }
 

@@ -129,7 +129,13 @@ export async function deleteEvent(req: AuthRequest, res: Response) {
 
 export async function getAllEvents(req: AuthRequest, res: Response) {
   try {
-    const events = await eventService.getAllEvents();
+    const userId = req.user?.user_id;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const events = await eventService.getAllEvents(userId);
     return res.status(200).json(events);
   } catch (error) {
     if (error instanceof ServiceError) {
