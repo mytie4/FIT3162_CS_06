@@ -19,31 +19,36 @@ import InviteMembersModal from "../components/clubs/InviteMembersModal";
 import LeaveClubModal from "../components/clubs/LeaveClubModal";
 import { fetchClubById, fetchClubMembers, fetchMyRole } from "../api/clubs.api";
 import { useAuth } from "../context/AuthContext";
+import { fetchClubEvents } from "../api/events.api";
+import type { Event } from "../types/events.types";
 import type { Club, ClubMember, ClubRole } from "../types/clubs.types";
+
 import "./ClubDetailsPage.css";
 
-// ── Mock events (will be replaced when Events API is built in EVE-52) ──
-
-const MOCK_EVENTS = [
-  {
-    id: "1",
-    title: "Annual Tech Summit 2025",
-    date: "Nov 12-14, 2025",
-    location: "Caulfield Campus, Building H",
-    status: "in_progress",
-    attendees: 124,
-    color: "#3b82f6",
-  },
-  {
-    id: "2",
-    title: "Code to Create Hackathon",
-    date: "Oct 20, 2025",
-    location: "Clayton Woodside Building",
-    status: "published",
-    attendees: 85,
-    color: "#14b8a6",
-  },
+const DEFAULT_COLORS = [
+  "#F36D8A",
+  "#25A9EF",
+  "#3942F4",
+  "#9B7CF3",
+  "#F4BF39",
+  "#FD59C0",
+  "#39F4D5",
+  "#8CF57E",
 ];
+
+function hashString(value: string): number {
+  let hash = 0;
+
+  for (let i = 0; i < value.length; i++) {
+    hash = (hash * 31 + value.charCodeAt(i)) >>> 0;
+  }
+
+  return hash;
+}
+
+function getEventColor(event: Event): string {
+  return DEFAULT_COLORS[hashString(event.club_id) % DEFAULT_COLORS.length];
+}
 
 // ── Tabs ──
 
@@ -64,6 +69,7 @@ export default function ClubDetailsPage() {
   // API state
   const [club, setClub] = useState<Club | null>(null);
   const [members, setMembers] = useState<ClubMember[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
   const [currentUserRole, setCurrentUserRole] = useState<ClubRole | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -78,9 +84,10 @@ export default function ClubDetailsPage() {
         setIsLoading(true);
         setError(null);
 
-        const [clubData, membersData] = await Promise.all([
+        const [clubData, membersData, eventsData] = await Promise.all([
           fetchClubById(clubId!),
           fetchClubMembers(clubId!),
+          fetchClubEvents(clubId!),
         ]);
 
         // Fetch role only if user has a token
@@ -92,6 +99,7 @@ export default function ClubDetailsPage() {
         if (isMounted) {
           setClub(clubData);
           setMembers(membersData);
+          setEvents(eventsData);
           setCurrentUserRole(role);
         }
       } catch (err) {
@@ -303,19 +311,19 @@ export default function ClubDetailsPage() {
                 )}
               </div>
               {/* TODO: replace with real events from GET /api/clubs/:id/events (EVE-52) */}
-              {MOCK_EVENTS.length > 0 ? (
+              {events.length > 0 ? (
                 <div className="cd-events-grid">
-                  {MOCK_EVENTS.map((event) => (
+                  {events.map((event) => (
                     <EventCard
-                      key={event.id}
+                      key={event.event_id}
                       title={event.title}
-                      date={event.date}
-                      location={event.location}
+                      date={event.date ?? "No date set"}
+                      location={event.location ?? "No location set"}
                       status={event.status}
-                      attendees={event.attendees}
-                      color={event.color}
+                      attendees={event.attendee_count ?? 0}
+                      color={getEventColor(event)}
                       onClick={() =>
-                        navigate(`/clubs/${clubId}/events/${event.id}`)
+                        navigate(`/clubs/${clubId}/events/${event.event_id}`)
                       }
                     />
                   ))}
