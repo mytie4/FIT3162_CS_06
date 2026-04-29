@@ -1,9 +1,17 @@
 import * as eventRepo from "../repositories/event.repository";
 import * as clubService from "./club.service";
-import { CreateEventDTO, Event, EventWithClubName, UpdateEventDTO } from "../entities/event.entity";
+import {
+  CreateEventDTO,
+  Event,
+  EventWithClubName,
+  UpdateEventDTO,
+} from "../entities/event.entity";
 import { ServiceError } from "../services/club.service";
 
-export async function createEvent(dto: CreateEventDTO, userId: string): Promise<Event> {
+export async function createEvent(
+  dto: CreateEventDTO,
+  userId: string,
+): Promise<Event> {
   if (!userId) {
     throw new ServiceError(401, "Unauthorized. User ID is required.");
   }
@@ -26,7 +34,9 @@ export async function createEvent(dto: CreateEventDTO, userId: string): Promise<
   return event;
 }
 
-export async function getEventById(eventId: string): Promise<EventWithClubName> {
+export async function getEventById(
+  eventId: string,
+): Promise<EventWithClubName> {
   if (!eventId) {
     throw new ServiceError(400, "Event ID is required.");
   }
@@ -36,26 +46,42 @@ export async function getEventById(eventId: string): Promise<EventWithClubName> 
   if (!event) {
     throw new ServiceError(404, "Event not found.");
   }
-  
-    return {
+
+  return {
     ...event,
     attendee_count: Number(event.attendee_count),
   };
 }
+export async function getAllEvents(): Promise<EventWithClubName[]> {
+  const events = await eventRepo.getAllEvents();
 
-export async function getEventsByClubId(clubId: string): Promise<Event[]> {
+  return events.map((event) => ({
+    ...event,
+    attendee_count: Number(event.attendee_count),
+  }));
+}
+
+export async function getEventsByClubId(
+  clubId: string,
+): Promise<EventWithClubName[]> {
   if (!clubId) {
     throw new ServiceError(400, "Club ID is required.");
   }
 
-  // validate club exists
   await clubService.getClubById(clubId);
 
-  return await eventRepo.getEventsByClubId(clubId);
+  const events = await eventRepo.getEventsByClubId(clubId);
+
+  return events.map((event) => ({
+    ...event,
+    attendee_count: Number(event.attendee_count),
+  }));
 }
 
-export async function updateEvent(eventId: string, dto: UpdateEventDTO): Promise<Event> {
-
+export async function updateEvent(
+  eventId: string,
+  dto: UpdateEventDTO,
+): Promise<Event> {
   if (!eventId) {
     throw new ServiceError(400, "Event ID is required.");
   }
@@ -68,11 +94,11 @@ export async function updateEvent(eventId: string, dto: UpdateEventDTO): Promise
   const sanitizedDTO = sanitizeAndValidateEventDTO(dto) as UpdateEventDTO;
 
   const updatedEvent = await eventRepo.updateEvent(eventId, sanitizedDTO);
-  
+
   if (!updatedEvent) {
     throw new ServiceError(500, "Failed to update event.");
   }
-  
+
   return updatedEvent;
 }
 
@@ -80,7 +106,7 @@ export async function deleteEvent(eventId: string): Promise<void> {
   if (!eventId) {
     throw new ServiceError(400, "Event ID is required.");
   }
-  
+
   const existingEvent = await eventRepo.getEventById(eventId);
   if (!existingEvent) {
     throw new ServiceError(404, "Event not found.");
@@ -89,9 +115,11 @@ export async function deleteEvent(eventId: string): Promise<void> {
   await eventRepo.deleteEvent(eventId);
 }
 
-function sanitizeAndValidateEventDTO(dto: CreateEventDTO | UpdateEventDTO): CreateEventDTO | UpdateEventDTO {
-  const cleaned: CreateEventDTO | UpdateEventDTO = { ...dto };  
-  
+function sanitizeAndValidateEventDTO(
+  dto: CreateEventDTO | UpdateEventDTO,
+): CreateEventDTO | UpdateEventDTO {
+  const cleaned: CreateEventDTO | UpdateEventDTO = { ...dto };
+
   if (cleaned.title !== undefined) {
     cleaned.title = cleaned.title.trim();
 
@@ -112,7 +140,11 @@ function sanitizeAndValidateEventDTO(dto: CreateEventDTO | UpdateEventDTO): Crea
     throw new ServiceError(400, "Valid event end date is required.");
   }
 
-  if (cleaned.date && cleaned.end_date && new Date(cleaned.date) > new Date(cleaned.end_date)) {
+  if (
+    cleaned.date &&
+    cleaned.end_date &&
+    new Date(cleaned.date) > new Date(cleaned.end_date)
+  ) {
     throw new ServiceError(400, "Event start date cannot be after end date.");
   }
 
@@ -136,7 +168,10 @@ function sanitizeAndValidateEventDTO(dto: CreateEventDTO | UpdateEventDTO): Crea
     }
 
     if (cleaned.description.length > 500) {
-      throw new ServiceError(400, "Event description cannot exceed 500 characters.");
+      throw new ServiceError(
+        400,
+        "Event description cannot exceed 500 characters.",
+      );
     }
   }
 
@@ -147,13 +182,19 @@ function sanitizeAndValidateEventDTO(dto: CreateEventDTO | UpdateEventDTO): Crea
       throw new ServiceError(400, "Event location cannot be empty.");
     }
     if (cleaned.location.length > 100) {
-      throw new ServiceError(400, "Event location cannot exceed 100 characters.");
+      throw new ServiceError(
+        400,
+        "Event location cannot exceed 100 characters.",
+      );
     }
   }
 
   if (cleaned.budget !== undefined) {
     if (typeof cleaned.budget !== "number" || cleaned.budget < 0) {
-      throw new ServiceError(400, "Event budget must be a non-negative number.");
+      throw new ServiceError(
+        400,
+        "Event budget must be a non-negative number.",
+      );
     }
   }
 
@@ -172,7 +213,13 @@ function sanitizeAndValidateEventDTO(dto: CreateEventDTO | UpdateEventDTO): Crea
   }
 
   if (cleaned.status !== undefined) {
-    const VALID_STATUSES = ['draft', 'published', 'ongoing', 'completed', 'cancelled'];
+    const VALID_STATUSES = [
+      "draft",
+      "published",
+      "ongoing",
+      "completed",
+      "cancelled",
+    ];
     if (!VALID_STATUSES.includes(cleaned.status)) {
       throw new ServiceError(400, "Invalid event status.");
     }

@@ -1,7 +1,7 @@
-import { Router } from 'express';
-import * as eventController from '../controllers/event.controller';
-import { authMiddleware } from '../middlewares/auth.middleware';
-import { requireClubRole } from '../middlewares/rbac.middleware';
+import { Router } from "express";
+import * as eventController from "../controllers/event.controller";
+import { authMiddleware } from "../middlewares/auth.middleware";
+import { requireClubRole } from "../middlewares/rbac.middleware";
 
 const router = Router();
 
@@ -14,8 +14,8 @@ const router = Router();
  *    summary: Create a new event (president or vice president only)
  *    tags:
  *     - Events
- *    requestBody: 
- *     required: true 
+ *    requestBody:
+ *     required: true
  *     content:
  *      application/json:
  *       schema:
@@ -41,9 +41,35 @@ const router = Router();
  *      description: Forbidden (e.g., insufficient permissions)
  *     500:
  *      description: Internal server error
- * 
+ *
  */
-router.post('/events', authMiddleware, requireClubRole('president', 'vice_president'), eventController.createEvent);
+router.post(
+  "/events",
+  authMiddleware,
+  requireClubRole("president", "vice_president"),
+  eventController.createEvent,
+);
+
+/**
+ * @openapi
+ * /api/events:
+ *   get:
+ *    summary: Get all events
+ *    tags:
+ *     - Events
+ *    responses:
+ *     200:
+ *      description: A list of events
+ *      content:
+ *       application/json:
+ *        schema:
+ *         type: array
+ *         items:
+ *          $ref: '#/components/schemas/EventWithClubName'
+ *     500:
+ *      description: Internal server error
+ */
+router.get("/events", eventController.getAllEvents);
 
 /**
  * @openapi
@@ -71,8 +97,7 @@ router.post('/events', authMiddleware, requireClubRole('president', 'vice_presid
  *     500:
  *      description: Internal server error
  */
-router.get('/events/:id', eventController.getEventById);
-
+router.get("/events/:id", eventController.getEventById);
 
 /**
  * @openapi
@@ -104,7 +129,7 @@ router.get('/events/:id', eventController.getEventById);
  *     500:
  *      description: Internal server error
  */
-router.get('/clubs/:clubId/events', eventController.getEventsByClubId);
+router.get("/clubs/:clubId/events", eventController.getEventsByClubId);
 
 /**
  * @openapi
@@ -122,8 +147,8 @@ router.get('/clubs/:clubId/events', eventController.getEventsByClubId);
  *       schema:
  *        type: string
  *        format: uuid
- *    requestBody: 
- *     required: true 
+ *    requestBody:
+ *     required: true
  *     content:
  *      application/json:
  *       schema:
@@ -152,7 +177,12 @@ router.get('/clubs/:clubId/events', eventController.getEventsByClubId);
  *     500:
  *      description: Internal server error
  */
-router.put('/events/:id', authMiddleware, requireClubRole('president', 'vice_president'), eventController.updateEvent);
+router.put(
+  "/events/:id",
+  authMiddleware,
+  requireClubRole("president", "vice_president"),
+  eventController.updateEvent,
+);
 
 /**
  * @openapi
@@ -184,6 +214,11 @@ router.put('/events/:id', authMiddleware, requireClubRole('president', 'vice_pre
  *     500:
  *      description: Internal server error
  */
-router.delete('/events/:id', authMiddleware, requireClubRole('president'), eventController.deleteEvent);
+router.delete(
+  "/events/:id",
+  authMiddleware,
+  requireClubRole("president"),
+  eventController.deleteEvent,
+);
 
 export default router;
