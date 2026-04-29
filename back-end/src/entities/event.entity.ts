@@ -10,7 +10,7 @@ export interface Event {
   banner_url: string | null;
   budget: number | null;
   // changed in_progress to ongoing
-  status: "draft" | "published" | "ongoing" | "completed" | "cancelled";
+  status: 'draft' | 'published' | 'ongoing' | 'completed' | 'cancelled';
   money_used: number;
   created_by: string;
   created_at: string;
@@ -31,7 +31,7 @@ export interface CreateEventDTO {
   description?: string;
   banner_url?: string;
   budget?: number;
-  status?: "draft" | "published" | "ongoing" | "completed" | "cancelled";
+  status?: 'draft' | 'published' | 'ongoing' | 'completed' | 'cancelled';
 }
 
 export interface UpdateEventDTO extends Partial<CreateEventDTO> {}

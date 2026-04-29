@@ -94,7 +94,7 @@ export async function joinClub(userID: string, clubID: string) {
   await pool.query(
     `INSERT INTO "Club_Members" ("club_id", "user_id", "role")
      VALUES ($1, $2, 'member')`,
-    [clubID, userID],
+    [clubID, userID]
   );
 }
 
@@ -159,7 +159,7 @@ export async function getClubMembers(clubId: string) {
          ELSE 2
        END,
        cm.joined_at ASC`,
-    [clubId],
+    [clubId]
   );
 
   return result.rows;
