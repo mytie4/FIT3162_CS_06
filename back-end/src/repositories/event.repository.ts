@@ -1,17 +1,17 @@
-import pool from "../db";
+import pool from '../db';
 import {
   Event,
   EventWithClubName,
   CreateEventDTO,
   UpdateEventDTO,
-} from "../entities/event.entity";
+} from '../entities/event.entity';
 
 export async function createEvent(
   dto: CreateEventDTO,
   createdBy: string,
 ): Promise<Event> {
   const result = await pool.query(
-    `INSERT INTO "Events" 
+    `INSERT INTO 'Events' 
             (club_id, title, type, date, end_date, location, description, banner_url, budget, status, created_by)
         VALUES 
             ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
@@ -26,7 +26,7 @@ export async function createEvent(
       dto.description ?? null,
       dto.banner_url ?? null,
       dto.budget ?? null,
-      dto.status ?? "draft",
+      dto.status ?? 'draft',
       createdBy,
     ],
   );
@@ -39,9 +39,9 @@ export async function getEventById(
 ): Promise<EventWithClubName | null> {
   const result = await pool.query(
     `SELECT e.*, c.name AS club_name, COUNT(DISTINCT ea.user_id) AS attendee_count
-        FROM "Events" e
-        JOIN "Clubs" c ON e.club_id = c.club_id
-        LEFT JOIN "Event_Attendees" ea ON e.event_id = ea.event_id AND ea.rsvp_status = 'going'
+        FROM 'Events' e
+        JOIN 'Clubs' c ON e.club_id = c.club_id
+        LEFT JOIN 'Event_Attendees' ea ON e.event_id = ea.event_id AND ea.rsvp_status = 'going'
         WHERE e.event_id = $1
         GROUP BY e.event_id, c.club_id, c.name`,
     [eventId],
@@ -58,9 +58,9 @@ export async function getEventsByClubId(
         e.*,
         c.name AS club_name,
         COUNT(DISTINCT ea.user_id) AS attendee_count
-     FROM "Events" e
-     JOIN "Clubs" c ON e.club_id = c.club_id
-     LEFT JOIN "Event_Attendees" ea
+     FROM 'Events' e
+     JOIN 'Clubs' c ON e.club_id = c.club_id
+     LEFT JOIN 'Event_Attendees' ea
        ON e.event_id = ea.event_id
       AND ea.rsvp_status = 'going'
      WHERE e.club_id = $1
@@ -77,15 +77,15 @@ export async function updateEvent(
   dto: UpdateEventDTO,
 ): Promise<Event | null> {
   const allowedFields: Record<string, string> = {
-    title: "title",
-    type: "type",
-    date: "date",
-    end_date: "end_date",
-    location: "location",
-    description: "description",
-    banner_url: "banner_url",
-    budget: "budget",
-    status: "status",
+    title: 'title',
+    type: 'type',
+    date: 'date',
+    end_date: 'end_date',
+    location: 'location',
+    description: 'description',
+    banner_url: 'banner_url',
+    budget: 'budget',
+    status: 'status',
   };
 
   const setClauses: string[] = [];
@@ -94,7 +94,7 @@ export async function updateEvent(
 
   for (const [key, column] of Object.entries(allowedFields)) {
     if (key in dto) {
-      setClauses.push(`"${column}" = $${paramIndex}`);
+      setClauses.push(`'${column}' = $${paramIndex}`);
       values.push((dto as Record<string, unknown>)[key] ?? null);
       paramIndex++;
     }
@@ -105,8 +105,8 @@ export async function updateEvent(
   values.push(eventId);
 
   const result = await pool.query(
-    `UPDATE "Events"
-         SET ${setClauses.join(", ")}
+    `UPDATE 'Events'
+         SET ${setClauses.join(', ')}
          WHERE event_id = $${paramIndex}
          RETURNING *`,
     values,
@@ -116,7 +116,7 @@ export async function updateEvent(
 }
 
 export async function deleteEvent(eventId: string): Promise<void> {
-  await pool.query(`DELETE FROM "Events" WHERE event_id = $1`, [eventId]);
+  await pool.query(`DELETE FROM 'Events' WHERE event_id = $1`, [eventId]);
 }
 
 export async function getAllEvents(
@@ -127,11 +127,11 @@ export async function getAllEvents(
         e.*,
         c.name AS club_name,
         COUNT(DISTINCT ea.user_id) FILTER (WHERE ea.rsvp_status = 'going') AS attendee_count
-     FROM "Events" e
-     JOIN "Clubs" c ON e.club_id = c.club_id
-     LEFT JOIN "Event_Attendees" ea
+     FROM 'Events' e
+     JOIN 'Clubs' c ON e.club_id = c.club_id
+     LEFT JOIN 'Event_Attendees' ea
        ON e.event_id = ea.event_id
-     LEFT JOIN "Event_Attendees" my_ea
+     LEFT JOIN 'Event_Attendees' my_ea
        ON e.event_id = my_ea.event_id
       AND my_ea.user_id = $1
      WHERE my_ea.user_id IS NOT NULL

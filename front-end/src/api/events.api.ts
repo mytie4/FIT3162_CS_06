@@ -1,11 +1,11 @@
-import type { Event, CreateEvent, UpdateEvent } from "../types/events.types";
+import type { Event, CreateEvent, UpdateEvent } from '../types/events.types';
 
-const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:5000";
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:5000';
 
 async function parseJson<T>(res: Response): Promise<T> {
   const data = await res.json();
   if (!res.ok) {
-    throw new Error(data?.error ?? "Request failed");
+    throw new Error(data?.error ?? 'Request failed');
   }
   return data as T;
 }
@@ -35,9 +35,9 @@ export async function createEvent(
   token: string,
 ): Promise<Event> {
   const res = await fetch(`${API_BASE}/api/events`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(dto),
@@ -52,9 +52,9 @@ export async function updateEvent(
   token: string,
 ): Promise<Event> {
   const res = await fetch(`${API_BASE}/api/events/${eventId}`, {
-    method: "PUT",
+    method: 'PUT',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(dto),
@@ -68,7 +68,7 @@ export async function deleteEvent(
   token: string,
 ): Promise<void> {
   const res = await fetch(`${API_BASE}/api/events/${eventId}`, {
-    method: "DELETE",
+    method: 'DELETE',
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -76,6 +76,6 @@ export async function deleteEvent(
 
   if (!res.ok) {
     const data = await res.json();
-    throw new Error(data?.error ?? "Failed to delete event");
+    throw new Error(data?.error ?? 'Failed to delete event');
   }
 }

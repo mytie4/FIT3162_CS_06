@@ -1,7 +1,7 @@
-import { Router } from "express";
-import * as eventController from "../controllers/event.controller";
-import { authMiddleware } from "../middlewares/auth.middleware";
-import { requireClubRole } from "../middlewares/rbac.middleware";
+import { Router } from 'express';
+import * as eventController from '../controllers/event.controller';
+import { authMiddleware } from '../middlewares/auth.middleware';
+import { requireClubRole } from '../middlewares/rbac.middleware';
 
 const router = Router();
 
@@ -44,9 +44,9 @@ const router = Router();
  *
  */
 router.post(
-  "/events",
+  '/events',
   authMiddleware,
-  requireClubRole("president", "vice_president"),
+  requireClubRole('president', 'vice_president'),
   eventController.createEvent,
 );
 
@@ -69,7 +69,7 @@ router.post(
  *     500:
  *      description: Internal server error
  */
-router.get("/events", authMiddleware, eventController.getAllEvents);
+router.get('/events', authMiddleware, eventController.getAllEvents);
 
 /**
  * @openapi
@@ -97,7 +97,7 @@ router.get("/events", authMiddleware, eventController.getAllEvents);
  *     500:
  *      description: Internal server error
  */
-router.get("/events/:id", eventController.getEventById);
+router.get('/events/:id', eventController.getEventById);
 
 /**
  * @openapi
@@ -129,7 +129,7 @@ router.get("/events/:id", eventController.getEventById);
  *     500:
  *      description: Internal server error
  */
-router.get("/clubs/:clubId/events", eventController.getEventsByClubId);
+router.get('/clubs/:clubId/events', eventController.getEventsByClubId);
 
 /**
  * @openapi
@@ -178,9 +178,9 @@ router.get("/clubs/:clubId/events", eventController.getEventsByClubId);
  *      description: Internal server error
  */
 router.put(
-  "/events/:id",
+  '/events/:id',
   authMiddleware,
-  requireClubRole("president", "vice_president"),
+  requireClubRole('president', 'vice_president'),
   eventController.updateEvent,
 );
 
@@ -215,9 +215,9 @@ router.put(
  *      description: Internal server error
  */
 router.delete(
-  "/events/:id",
+  '/events/:id',
   authMiddleware,
-  requireClubRole("president"),
+  requireClubRole('president'),
   eventController.deleteEvent,
 );
 

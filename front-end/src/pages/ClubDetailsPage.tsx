@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
   LogOut,
@@ -12,28 +12,28 @@ import {
   Trash2,
   Image as ImageIcon,
   Link as LinkIcon,
-} from "lucide-react";
-import EventCard from "../components/events/EventCard";
-import MembersTable from "../components/clubs/MembersTable";
-import InviteMembersModal from "../components/clubs/InviteMembersModal";
-import LeaveClubModal from "../components/clubs/LeaveClubModal";
-import { fetchClubById, fetchClubMembers, fetchMyRole } from "../api/clubs.api";
-import { useAuth } from "../context/AuthContext";
-import { fetchClubEvents } from "../api/events.api";
-import type { Event } from "../types/events.types";
-import type { Club, ClubMember, ClubRole } from "../types/clubs.types";
+} from 'lucide-react';
+import EventCard from '../components/events/EventCard';
+import MembersTable from '../components/clubs/MembersTable';
+import InviteMembersModal from '../components/clubs/InviteMembersModal';
+import LeaveClubModal from '../components/clubs/LeaveClubModal';
+import { fetchClubById, fetchClubMembers, fetchMyRole } from '../api/clubs.api';
+import { useAuth } from '../context/AuthContext';
+import { fetchClubEvents } from '../api/events.api';
+import type { Event } from '../types/events.types';
+import type { Club, ClubMember, ClubRole } from '../types/clubs.types';
 
-import "./ClubDetailsPage.css";
+import './ClubDetailsPage.css';
 
 const DEFAULT_COLORS = [
-  "#F36D8A",
-  "#25A9EF",
-  "#3942F4",
-  "#9B7CF3",
-  "#F4BF39",
-  "#FD59C0",
-  "#39F4D5",
-  "#8CF57E",
+  '#F36D8A',
+  '#25A9EF',
+  '#3942F4',
+  '#9B7CF3',
+  '#F4BF39',
+  '#FD59C0',
+  '#39F4D5',
+  '#8CF57E',
 ];
 
 function hashString(value: string): number {
@@ -52,7 +52,7 @@ function getEventColor(event: Event): string {
 
 // ── Tabs ──
 
-const TABS = ["Overview", "Events", "Members", "Settings"] as const;
+const TABS = ['Overview', 'Events', 'Members', 'Settings'] as const;
 type Tab = (typeof TABS)[number];
 
 // ── Component ──
@@ -62,7 +62,7 @@ export default function ClubDetailsPage() {
   const navigate = useNavigate();
   const { token } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<Tab>("Overview");
+  const [activeTab, setActiveTab] = useState<Tab>('Overview');
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [isLeaveOpen, setIsLeaveOpen] = useState(false);
 
@@ -104,7 +104,7 @@ export default function ClubDetailsPage() {
         }
       } catch (err) {
         if (isMounted) {
-          setError(err instanceof Error ? err.message : "Failed to load club");
+          setError(err instanceof Error ? err.message : 'Failed to load club');
         }
       } finally {
         if (isMounted) {
@@ -121,8 +121,8 @@ export default function ClubDetailsPage() {
   }, [clubId, token]);
 
   const canManageEvents =
-    currentUserRole === "president" || currentUserRole === "vice_president";
-  const isPresident = currentUserRole === "president";
+    currentUserRole === 'president' || currentUserRole === 'vice_president';
+  const isPresident = currentUserRole === 'president';
 
   const handleRoleChange = (userId: string, newRole: ClubRole) => {
     setMembers(

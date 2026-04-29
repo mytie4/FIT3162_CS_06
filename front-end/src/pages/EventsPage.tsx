@@ -1,24 +1,24 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Search, Filter, Plus } from "lucide-react";
-import EventCard from "../components/events/EventCard";
-import { fetchAllEvents } from "../api/events.api";
-import type { Event } from "../types/events.types";
-import { useAuth } from "../context/AuthContext";
-import "./EventsPage.css";
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Search, Filter, Plus } from 'lucide-react';
+import EventCard from '../components/events/EventCard';
+import { fetchAllEvents } from '../api/events.api';
+import type { Event } from '../types/events.types';
+import { useAuth } from '../context/AuthContext';
+import './EventsPage.css';
 
-const TABS = ["All Events", "Upcoming", "Drafts", "Past"] as const;
+const TABS = ['All Events', 'Upcoming', 'Drafts', 'Past'] as const;
 type Tab = (typeof TABS)[number];
 
 const DEFAULT_COLORS = [
-  "#F36D8A", // Red
-  "#25A9EF", // Light blue
-  "#3942F4", // Navy
-  "#9B7CF3", // Purple
-  "#F4BF39", // Yellow
-  "#FD59C0", // Pink
-  "#39F4D5", // Cyan
-  "#8CF57E", // Green
+  '#F36D8A', // Red
+  '#25A9EF', // Light blue
+  '#3942F4', // Navy
+  '#9B7CF3', // Purple
+  '#F4BF39', // Yellow
+  '#FD59C0', // Pink
+  '#39F4D5', // Cyan
+  '#8CF57E', // Green
 ];
 
 function hashString(value: string): number {
@@ -36,10 +36,10 @@ function getEventColor(event: Event): string {
 }
 
 function formatEventDate(date: string | null): string {
-  if (!date) return "No date set";
+  if (!date) return 'No date set';
 
   const parsed = new Date(date);
-  if (Number.isNaN(parsed.getTime())) return "Invalid date";
+  if (Number.isNaN(parsed.getTime())) return 'Invalid date';
 
   return parsed.toLocaleDateString();
 }
@@ -49,7 +49,7 @@ export default function EventsPage() {
   const { token } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState<Tab>("All Events");
+  const [activeTab, setActiveTab] = useState<Tab>('All Events');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -63,7 +63,7 @@ export default function EventsPage() {
 
         if (!token) {
           setEvents([]);
-          setError("Please log in to view your events");
+          setError('Please log in to view your events');
           setIsLoading(false);
           return;
         }
@@ -76,7 +76,7 @@ export default function EventsPage() {
       } catch (err) {
         if (isMounted) {
           setError(
-            err instanceof Error ? err.message : "Failed to load events",
+            err instanceof Error ? err.message : 'Failed to load events',
           );
         }
       } finally {
@@ -101,22 +101,22 @@ export default function EventsPage() {
     if (!matchesSearch) return false;
 
     switch (activeTab) {
-      case "Upcoming":
+      case 'Upcoming':
         return (
-          event.status === "published" ||
-          event.status === "in_progress" ||
-          event.status === "ongoing"
+          event.status === 'published' ||
+          event.status === 'in_progress' ||
+          event.status === 'ongoing'
         );
-      case "Drafts":
-        return event.status === "draft";
-      case "Past":
-        return event.status === "completed" || event.status === "cancelled";
+      case 'Drafts':
+        return event.status === 'draft';
+      case 'Past':
+        return event.status === 'completed' || event.status === 'cancelled';
       default:
         return true;
     }
   });
 
-  return (
+return (
     <div className="events-page">
       <div className="events-page-header">
         <div>

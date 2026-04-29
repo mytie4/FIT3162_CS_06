@@ -1,25 +1,25 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import ClubCard from "../components/clubs/ClubCard";
-import CreateClubModal from "../components/clubs/CreateClubModal";
-import JoinClubModal from "../components/clubs/JoinClubModal";
-import type { Club } from "../types/clubs.types";
-import "./ClubsPage.css";
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import ClubCard from '../components/clubs/ClubCard';
+import CreateClubModal from '../components/clubs/CreateClubModal';
+import JoinClubModal from '../components/clubs/JoinClubModal';
+import type { Club } from '../types/clubs.types';
+import './ClubsPage.css';
 
-import { getAllClubs } from "../api/clubs.api";
-import { useAuth } from "../context/AuthContext";
+import { getAllClubs } from '../api/clubs.api';
+import { useAuth } from '../context/AuthContext';
 
 // set deafult banner if not set by user
 // these colours the colours used in banner of the figma design
 const DEFAULT_COLORS = [
-  "#F36D8A", // Red
-  "#25A9EF", // Light blue
-  "#3942F4", // Navy
-  "#9B7CF3", // Purple
-  "#F4BF39", // Yellow
-  "#FD59C0", // Pink
-  "#39F4D5", // Cyan
-  "#8CF57E", // Green
+  '#F36D8A', // Red
+  '#25A9EF', // Light blue
+  '#3942F4', // Navy
+  '#9B7CF3', // Purple
+  '#F4BF39', // Yellow
+  '#FD59C0', // Pink
+  '#39F4D5', // Cyan
+  '#8CF57E', // Green
 ];
 
 function getBannerColor(clubId: string): string {
@@ -51,7 +51,7 @@ export default function ClubsPage() {
       if (!token) {
         if (isMounted) {
           setClubs([]);
-          setError("Please log in to view your clubs");
+          setError('Please log in to view your clubs');
           setIsLoading(false);
         }
         return;
@@ -69,7 +69,7 @@ export default function ClubsPage() {
       } catch (err) {
         if (isMounted) {
           setError(
-            err instanceof Error ? err.message : "Failed to fetch clubs",
+            err instanceof Error ? err.message : 'Failed to fetch clubs',
           );
         }
       } finally {
@@ -89,7 +89,7 @@ export default function ClubsPage() {
     club.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  return (
+return (
     <div className="clubs-page">
       <h1 className="clubs-page-title">Club Management</h1>
 
