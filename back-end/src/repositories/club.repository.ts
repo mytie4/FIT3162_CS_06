@@ -187,16 +187,16 @@ export async function getUserRoleInClub(
 
 export async function updateClub(clubId: string, data: UpdateClubDTO) {
   const allowedFields: Record<string, string> = {
-    name: "name",
-    description: "description",
-    shared_drive_link: "shared_drive_link",
-    type: "type",
-    club_color: "club_color",
-    banner_url: "banner_url",
-    logo_url: "logo_url",
-    discord_link: "discord_link",
-    instagram_link: "instagram_link",
-    website_link: "website_link",
+    name: 'name',
+    description: 'description',
+    shared_drive_link: 'shared_drive_link',
+    type: 'type',
+    club_color: 'club_color',
+    banner_url: 'banner_url',
+    logo_url: 'logo_url',
+    discord_link: 'discord_link',
+    instagram_link: 'instagram_link',
+    website_link: 'website_link',
   };
 
   const setClauses: string[] = [];
@@ -217,7 +217,7 @@ export async function updateClub(clubId: string, data: UpdateClubDTO) {
 
   const result = await pool.query(
     `UPDATE "Clubs"
-     SET ${setClauses.join(", ")}
+     SET ${setClauses.join(', ')}
      WHERE club_id = $${paramIndex}
      RETURNING *`,
     values,

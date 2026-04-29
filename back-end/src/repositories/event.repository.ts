@@ -96,15 +96,15 @@ export async function updateEvent(
   dto: UpdateEventDTO,
 ): Promise<Event | null> {
   const allowedFields: Record<string, string> = {
-    title: "title",
-    type: "type",
-    date: "date",
-    end_date: "end_date",
-    location: "location",
-    description: "description",
-    banner_url: "banner_url",
-    budget: "budget",
-    status: "status",
+    title: 'title',
+    type: 'type',
+    date: 'date',
+    end_date: 'end_date',
+    location: 'location',
+    description: 'description',
+    banner_url: 'banner_url',
+    budget: 'budget',
+    status: 'status',
   };
 
   const setClauses: string[] = [];
