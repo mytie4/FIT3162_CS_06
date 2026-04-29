@@ -19,6 +19,10 @@ export interface Event {
   banner_url: string | null;
   created_by: string | null;
   created_at: string | null;
+
+  attendee_count?: number;
+  club_name?: string;
+  club_color?: string | null;
 }
 
 export interface CreateEvent {
