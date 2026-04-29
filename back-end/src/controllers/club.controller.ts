@@ -33,52 +33,64 @@ export async function createClub(req: AuthRequest, res: Response) {
   }
 }
 
-
-export async function getAllClubs(req: Request, res: Response) {
+export async function getAllClubs(req: AuthRequest, res: Response) {
   try {
-    const clubs = await clubService.getAllClubs();
+    const userId = req.user?.user_id;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const clubs = await clubService.getAllClubsForUser(userId);
 
     return res.status(200).json(clubs);
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown server error.";
+    if (error instanceof clubService.ServiceError) {
+      return res.status(error.statusCode).json({
+        error: error.message,
+      });
+    }
+
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown server error.";
     console.error("Fetch all clubs failed:", errorMessage);
-    
+
     return res.status(500).json({
       error: "Internal server error",
     });
-
   }
 }
 
 export async function joinClub(req: AuthRequest, res: Response) {
+  try {
+    const userID = req.user?.user_id;
+    const { joinCode } = req.body;
 
-    try {
-        const userID = req.user?.user_id;
-        const { joinCode } = req.body;
-
-         if (!userID) {
-            return res.status(401).json({ error: "User not authenticated" });
-        }
-
-        const joinCodeStr = String(joinCode ?? '').trim();
-        if (!/^\d{6}$/.test(joinCodeStr)) {
-          return res.status(400).json({ error: "Join code must be a 6-digit number" });
-        }
-
-        await clubService.joinClub(userID, joinCodeStr);
-
-        return res.status(200).json({ message: "Successfully joined club" });
-    } catch (error: any) {
-        if (
-            error.message === "Invalid join code" ||
-            error.message === "User is already a member of this club"
-        ) {
-            return res.status(400).json({ error: error.message });
-        }
-
-        console.error(error);
-        return res.status(500).json({ error: "Internal server error" });
+    if (!userID) {
+      return res.status(401).json({ error: "User not authenticated" });
     }
+
+    const joinCodeStr = String(joinCode ?? "").trim();
+    if (!/^\d{6}$/.test(joinCodeStr)) {
+      return res
+        .status(400)
+        .json({ error: "Join code must be a 6-digit number" });
+    }
+
+    await clubService.joinClub(userID, joinCodeStr);
+
+    return res.status(200).json({ message: "Successfully joined club" });
+  } catch (error: any) {
+    if (
+      error.message === "Invalid join code" ||
+      error.message === "User is already a member of this club"
+    ) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
 }
 
 export async function leaveClub(req: AuthRequest, res: Response) {
@@ -97,9 +109,8 @@ export async function leaveClub(req: AuthRequest, res: Response) {
     await clubService.leaveClub(userID, clubID);
 
     return res.status(200).json({
-      message: "Successfully left the club"
+      message: "Successfully left the club",
     });
-
   } catch (error: any) {
     if (error.message === "User is not in this club") {
       return res.status(400).json({ error: error.message });
@@ -121,7 +132,8 @@ export async function getClubById(req: Request, res: Response) {
       return res.status(error.statusCode).json({ error: error.message });
     }
 
-    const errorMessage = error instanceof Error ? error.message : "Unknown server error.";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown server error.";
     console.error("getClubById failed:", errorMessage);
     return res.status(500).json({ error: "Internal server error" });
   }
@@ -138,7 +150,8 @@ export async function getClubMembers(req: Request, res: Response) {
       return res.status(error.statusCode).json({ error: error.message });
     }
 
-    const errorMessage = error instanceof Error ? error.message : "Unknown server error.";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown server error.";
     console.error("getClubMembers failed:", errorMessage);
     return res.status(500).json({ error: "Internal server error" });
   }
@@ -161,7 +174,8 @@ export async function getUserRole(req: AuthRequest, res: Response) {
       return res.status(error.statusCode).json({ error: error.message });
     }
 
-    const errorMessage = error instanceof Error ? error.message : "Unknown server error.";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown server error.";
     console.error("getUserRole failed:", errorMessage);
     return res.status(500).json({ error: "Internal server error" });
   }
@@ -179,13 +193,16 @@ export async function updateClub(req: AuthRequest, res: Response) {
     const data: UpdateClubDTO = req.body;
     const updated = await clubService.updateClub(clubId, data, userId);
 
-    return res.status(200).json({ message: "Club updated successfully.", club: updated });
+    return res
+      .status(200)
+      .json({ message: "Club updated successfully.", club: updated });
   } catch (error) {
     if (error instanceof clubService.ServiceError) {
       return res.status(error.statusCode).json({ error: error.message });
     }
 
-    const errorMessage = error instanceof Error ? error.message : "Unknown server error.";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown server error.";
     console.error("updateClub failed:", errorMessage);
     return res.status(500).json({ error: "Internal server error" });
   }
@@ -208,7 +225,8 @@ export async function deleteClub(req: AuthRequest, res: Response) {
       return res.status(error.statusCode).json({ error: error.message });
     }
 
-    const errorMessage = error instanceof Error ? error.message : "Unknown server error.";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown server error.";
     console.error("deleteClub failed:", errorMessage);
     return res.status(500).json({ error: "Internal server error" });
   }
@@ -232,7 +250,8 @@ export async function updateMemberRole(req: AuthRequest, res: Response) {
       return res.status(error.statusCode).json({ error: error.message });
     }
 
-    const errorMessage = error instanceof Error ? error.message : "Unknown server error.";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown server error.";
     console.error("updateMemberRole failed:", errorMessage);
     return res.status(500).json({ error: "Internal server error" });
   }
@@ -255,7 +274,8 @@ export async function removeMember(req: AuthRequest, res: Response) {
       return res.status(error.statusCode).json({ error: error.message });
     }
 
-    const errorMessage = error instanceof Error ? error.message : "Unknown server error.";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown server error.";
     console.error("removeMember failed:", errorMessage);
     return res.status(500).json({ error: "Internal server error" });
   }

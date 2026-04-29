@@ -7,6 +7,7 @@ import type { Club } from "../types/clubs.types";
 import "./ClubsPage.css";
 
 import { getAllClubs } from "../api/clubs.api";
+import { useAuth } from "../context/AuthContext";
 
 // set deafult banner if not set by user
 // these colours the colours used in banner of the figma design
@@ -41,15 +42,26 @@ export default function ClubsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const { token } = useAuth();
+
   useEffect(() => {
     let isMounted = true;
 
     async function loadClubs() {
+      if (!token) {
+        if (isMounted) {
+          setClubs([]);
+          setError("Please log in to view your clubs");
+          setIsLoading(false);
+        }
+        return;
+      }
+
       try {
         setIsLoading(true);
         setError(null);
 
-        const fetchedClubs = await getAllClubs();
+        const fetchedClubs = await getAllClubs(token);
 
         if (isMounted) {
           setClubs(fetchedClubs);
@@ -72,8 +84,7 @@ export default function ClubsPage() {
     return () => {
       isMounted = false;
     };
-  }, []);
-
+  }, [token]);
   const filtered = clubs.filter((club) =>
     club.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
@@ -143,7 +154,6 @@ export default function ClubsPage() {
             Join club
           </button>
 
-
           <button
             className="clubs-btn-primary"
             onClick={() => setIsCreateModalOpen(true)}
@@ -184,12 +194,14 @@ export default function ClubsPage() {
                 <div
                   key={club.club_id}
                   onClick={() => navigate(`/clubs/${club.club_id}`)}
-                  style={{ cursor: 'pointer' }}
+                  style={{ cursor: "pointer" }}
                 >
                   <ClubCard
-                    bannerColor={club.club_color ?? getBannerColor(club.club_id)}
+                    bannerColor={
+                      club.club_color ?? getBannerColor(club.club_id)
+                    }
                     name={club.name}
-                    type={club.type ?? 'Club'}
+                    type={club.type ?? "Club"}
                     ongoingEvent={
                       club.ongoing_event_count === 0
                         ? "No ongoing event"
@@ -205,15 +217,14 @@ export default function ClubsPage() {
       )}
 
       {isCreateModalOpen && (
-        <CreateClubModal 
-        onClose={() => setIsCreateModalOpen(false)}
-        onCreated={(club) => setClubs((prev) => [...prev, club])} 
-         />
+        <CreateClubModal
+          onClose={() => setIsCreateModalOpen(false)}
+          onCreated={(club) => setClubs((prev) => [...prev, club])}
+        />
       )}
 
       {isJoinModalOpen && (
-        <JoinClubModal onClose={() => setIsJoinModalOpen(false)} 
-        />
+        <JoinClubModal onClose={() => setIsJoinModalOpen(false)} />
       )}
     </div>
   );

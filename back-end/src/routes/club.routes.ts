@@ -77,7 +77,7 @@ router.post("/clubs", authMiddleware, clubController.createClub);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.get('/clubs', clubController.getAllClubs);
+router.get("/clubs", authMiddleware, clubController.getAllClubs);
 
 /**
  * @openapi
@@ -264,7 +264,12 @@ router.get("/clubs/:clubId", clubController.getClubById);
  *       404:
  *         description: Club not found
  */
-router.patch("/clubs/:clubId", authMiddleware, requireClubRole('president', 'vice_president'), clubController.updateClub);
+router.patch(
+  "/clubs/:clubId",
+  authMiddleware,
+  requireClubRole("president", "vice_president"),
+  clubController.updateClub,
+);
 
 /**
  * @openapi
@@ -292,7 +297,12 @@ router.patch("/clubs/:clubId", authMiddleware, requireClubRole('president', 'vic
  *       404:
  *         description: Club not found
  */
-router.delete("/clubs/:clubId", authMiddleware, requireClubRole('president'), clubController.deleteClub);
+router.delete(
+  "/clubs/:clubId",
+  authMiddleware,
+  requireClubRole("president"),
+  clubController.deleteClub,
+);
 
 /**
  * @openapi
@@ -387,7 +397,11 @@ router.get("/clubs/:clubId/members", clubController.getClubMembers);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.get("/clubs/:clubId/my-role", authMiddleware, clubController.getUserRole);
+router.get(
+  "/clubs/:clubId/my-role",
+  authMiddleware,
+  clubController.getUserRole,
+);
 
 /**
  * @openapi
@@ -431,7 +445,12 @@ router.get("/clubs/:clubId/my-role", authMiddleware, clubController.getUserRole)
  *       404:
  *         description: User is not a member of this club
  */
-router.patch("/clubs/:clubId/members/:userId/role", authMiddleware, requireClubRole('president'), clubController.updateMemberRole);
+router.patch(
+  "/clubs/:clubId/members/:userId/role",
+  authMiddleware,
+  requireClubRole("president"),
+  clubController.updateMemberRole,
+);
 
 /**
  * @openapi
@@ -465,6 +484,11 @@ router.patch("/clubs/:clubId/members/:userId/role", authMiddleware, requireClubR
  *       404:
  *         description: User is not a member of this club
  */
-router.delete("/clubs/:clubId/members/:userId", authMiddleware, requireClubRole('president'), clubController.removeMember);
+router.delete(
+  "/clubs/:clubId/members/:userId",
+  authMiddleware,
+  requireClubRole("president"),
+  clubController.removeMember,
+);
 
 export default router;

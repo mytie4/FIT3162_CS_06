@@ -1,6 +1,6 @@
 import type { PoolClient } from "pg";
 import type { Club, UpdateClubDTO } from "../entities/club.entity";
-import pool from '../db';
+import pool from "../db";
 import { ClubRole } from "../entities/club-member.entity";
 
 export async function createClub(
@@ -33,7 +33,7 @@ export async function addClubAdmin(
   );
 }
 
-export async function getAllClubs() {
+export async function getAllClubsForUser(userId: string) {
   const result = await pool.query(
     `SELECT
         c.club_id,
@@ -42,54 +42,68 @@ export async function getAllClubs() {
         c.shared_drive_link,
         c.club_color,
         c.type,
-        COUNT (DISTINCT cm.user_id) AS member_count,
-        COUNT (DISTINCT e.event_id) FILTER (WHERE e.status = 'ongoing') AS ongoing_event_count
-    FROM "Clubs" c
-    LEFT JOIN "Club_Members" cm ON c.club_id = cm.club_id
-    LEFT JOIN "Events" e ON c.club_id = e.club_id
-    GROUP BY c.club_id
-    `
-  )
+        COUNT(DISTINCT cm.user_id) AS member_count,
+        COUNT(DISTINCT e.event_id) FILTER (
+          WHERE LOWER(COALESCE(e.status, '')) = 'ongoing'
+        ) AS ongoing_event_count
+     FROM "Clubs" c
+     JOIN "Club_Members" my_cm
+       ON c.club_id = my_cm.club_id
+      AND my_cm.user_id = $1
+     LEFT JOIN "Club_Members" cm
+       ON c.club_id = cm.club_id
+     LEFT JOIN "Events" e
+       ON c.club_id = e.club_id
+     GROUP BY c.club_id
+     ORDER BY c.name`,
+    [userId],
+  );
 
   return result.rows;
 }
 
-
-export async function getClubByJoinCode(joinCode: string): Promise<Club | null> {
-    const result = await pool.query(
-        `SELECT club_id, name, description, shared_drive_link, club_color, type
+export async function getClubByJoinCode(
+  joinCode: string,
+): Promise<Club | null> {
+  const result = await pool.query(
+    `SELECT club_id, name, description, shared_drive_link, club_color, type
          FROM "Clubs"
          WHERE code = $1`,
-        [joinCode]
-    );
+    [joinCode],
+  );
 
-    return result.rows[0] || null;
+  return result.rows[0] || null;
 }
 
-export async function isUserInClub(userID: string, clubID: string): Promise<boolean> {
-    const result = await pool.query(
-        `SELECT 1 
+export async function isUserInClub(
+  userID: string,
+  clubID: string,
+): Promise<boolean> {
+  const result = await pool.query(
+    `SELECT 1 
          FROM "Club_Members"
          WHERE user_id = $1 AND club_id = $2
          LIMIT 1`,
-        [userID, clubID]
-    );
+    [userID, clubID],
+  );
 
-    return result.rows.length > 0;
+  return result.rows.length > 0;
 }
 
 export async function joinClub(userID: string, clubID: string) {
-    await pool.query(
-        `INSERT INTO "Club_Members" ("club_id", "user_id", "role")
+  await pool.query(
+    `INSERT INTO "Club_Members" ("club_id", "user_id", "role")
          VALUES ($1, $2, 'member')`,
-        [clubID, userID]
-    );
+    [clubID, userID],
+  );
 }
 
-export async function leaveClub(userID: string, clubID: string){
+export async function leaveClub(userID: string, clubID: string) {
   const result = await pool.query(
     `DELETE FROM "Club_Members" 
-    WHERE "user_id" = $1 AND "club_id" = $2`, [userID, clubID])   
+    WHERE "user_id" = $1 AND "club_id" = $2`,
+    [userID, clubID],
+  );
 }
 
 export async function getClubById(clubId: string) {
@@ -114,7 +128,7 @@ export async function getClubById(clubId: string) {
      LEFT JOIN "Events" e ON c.club_id = e.club_id
      WHERE c.club_id = $1
      GROUP BY c.club_id`,
-    [clubId]
+    [clubId],
   );
 
   return result.rows[0] ?? null;
@@ -143,13 +157,16 @@ export async function getClubMembers(clubId: string) {
          ELSE 2
        END,
        cm.joined_at ASC`,
-    [clubId]
+    [clubId],
   );
 
   return result.rows;
 }
 
-export async function getUserRoleInClub(userId: string, clubId: string): Promise<ClubRole | null> {
+export async function getUserRoleInClub(
+  userId: string,
+  clubId: string,
+): Promise<ClubRole | null> {
   const result = await pool.query(
     `SELECT
        CASE
@@ -160,7 +177,7 @@ export async function getUserRoleInClub(userId: string, clubId: string): Promise
      FROM "Club_Members"
      WHERE user_id = $1 AND club_id = $2
      LIMIT 1`,
-    [userId, clubId]
+    [userId, clubId],
   );
 
   return (result.rows[0]?.role as ClubRole) ?? null;
@@ -168,16 +185,16 @@ export async function getUserRoleInClub(userId: string, clubId: string): Promise
 
 export async function updateClub(clubId: string, data: UpdateClubDTO) {
   const allowedFields: Record<string, string> = {
-    name: 'name',
-    description: 'description',
-    shared_drive_link: 'shared_drive_link',
-    type: 'type',
-    club_color: 'club_color',
-    banner_url: 'banner_url',
-    logo_url: 'logo_url',
-    discord_link: 'discord_link',
-    instagram_link: 'instagram_link',
-    website_link: 'website_link',
+    name: "name",
+    description: "description",
+    shared_drive_link: "shared_drive_link",
+    type: "type",
+    club_color: "club_color",
+    banner_url: "banner_url",
+    logo_url: "logo_url",
+    discord_link: "discord_link",
+    instagram_link: "instagram_link",
+    website_link: "website_link",
   };
 
   const setClauses: string[] = [];
@@ -197,28 +214,50 @@ export async function updateClub(clubId: string, data: UpdateClubDTO) {
   values.push(clubId);
 
   const result = await pool.query(
-    `UPDATE "Clubs" SET ${setClauses.join(', ')} WHERE club_id = $${paramIndex} RETURNING *`,
-    values
+    `UPDATE "Clubs" SET ${setClauses.join(", ")} WHERE club_id = $${paramIndex} RETURNING *`,
+    values,
   );
 
   return result.rows[0] ?? null;
 }
 
-export async function deleteClub(client: PoolClient, clubId: string): Promise<void> {
-  await client.query(`DELETE FROM "Club_Members_Contributions" WHERE club_id = $1`, [clubId]);
-  await client.query(`DELETE FROM "Task_Assignees" WHERE task_id IN (SELECT task_id FROM "Tasks" WHERE event_id IN (SELECT event_id FROM "Events" WHERE club_id = $1))`, [clubId]);
-  await client.query(`DELETE FROM "Tasks" WHERE event_id IN (SELECT event_id FROM "Events" WHERE club_id = $1)`, [clubId]);
-  await client.query(`DELETE FROM "Event_Logistics" WHERE event_id IN (SELECT event_id FROM "Events" WHERE club_id = $1)`, [clubId]);
-  await client.query(`DELETE FROM "Event_Attendees" WHERE event_id IN (SELECT event_id FROM "Events" WHERE club_id = $1)`, [clubId]);
+export async function deleteClub(
+  client: PoolClient,
+  clubId: string,
+): Promise<void> {
+  await client.query(
+    `DELETE FROM "Club_Members_Contributions" WHERE club_id = $1`,
+    [clubId],
+  );
+  await client.query(
+    `DELETE FROM "Task_Assignees" WHERE task_id IN (SELECT task_id FROM "Tasks" WHERE event_id IN (SELECT event_id FROM "Events" WHERE club_id = $1))`,
+    [clubId],
+  );
+  await client.query(
+    `DELETE FROM "Tasks" WHERE event_id IN (SELECT event_id FROM "Events" WHERE club_id = $1)`,
+    [clubId],
+  );
+  await client.query(
+    `DELETE FROM "Event_Logistics" WHERE event_id IN (SELECT event_id FROM "Events" WHERE club_id = $1)`,
+    [clubId],
+  );
+  await client.query(
+    `DELETE FROM "Event_Attendees" WHERE event_id IN (SELECT event_id FROM "Events" WHERE club_id = $1)`,
+    [clubId],
+  );
   await client.query(`DELETE FROM "Events" WHERE club_id = $1`, [clubId]);
   await client.query(`DELETE FROM "Club_Members" WHERE club_id = $1`, [clubId]);
   await client.query(`DELETE FROM "Clubs" WHERE club_id = $1`, [clubId]);
 }
 
-export async function updateMemberRole(clubId: string, userId: string, role: string): Promise<boolean> {
+export async function updateMemberRole(
+  clubId: string,
+  userId: string,
+  role: string,
+): Promise<boolean> {
   const result = await pool.query(
     `UPDATE "Club_Members" SET role = $1 WHERE club_id = $2 AND user_id = $3`,
-    [role, clubId, userId]
+    [role, clubId, userId],
   );
   return (result.rowCount ?? 0) > 0;
 }
@@ -231,7 +270,7 @@ export async function updateMemberRoleTx(
 ): Promise<boolean> {
   const result = await client.query(
     `UPDATE "Club_Members" SET role = $1 WHERE club_id = $2 AND user_id = $3`,
-    [role, clubId, userId]
+    [role, clubId, userId],
   );
   return (result.rowCount ?? 0) > 0;
 }
@@ -247,14 +286,17 @@ export async function demoteOtherPresidents(
      WHERE club_id = $1
        AND role = 'president'
        AND user_id <> $2`,
-    [clubId, excludeUserId]
+    [clubId, excludeUserId],
   );
 }
 
-export async function removeMember(clubId: string, userId: string): Promise<boolean> {
+export async function removeMember(
+  clubId: string,
+  userId: string,
+): Promise<boolean> {
   const result = await pool.query(
     `DELETE FROM "Club_Members" WHERE club_id = $1 AND user_id = $2`,
-    [clubId, userId]
+    [clubId, userId],
   );
   return (result.rowCount ?? 0) > 0;
 }
