@@ -1,5 +1,5 @@
 export interface AuthUser {
-  user_id: number;
+  user_id: string;
   name: string;
   email: string;
   profile_pic_url: string | null;
@@ -22,8 +22,3 @@ export interface AuthResponse {
   token: string;
   user: AuthUser;
 }
-
-
-
-
-

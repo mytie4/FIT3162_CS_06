@@ -1,9 +1,17 @@
-import type { Club, ClubMember, ClubRole } from '../types/clubs.types';
+import type {
+  Club,
+  ClubMember,
+  ClubRole,
+  UpdateClub,
+} from '../types/clubs.types';
 
 const VALID_CLUB_ROLES: ClubRole[] = ['president', 'vice_president', 'member'];
 
 function toClubRole(value: unknown): ClubRole | null {
-  if (typeof value === 'string' && (VALID_CLUB_ROLES as string[]).includes(value)) {
+  if (
+    typeof value === 'string' &&
+    (VALID_CLUB_ROLES as string[]).includes(value)
+  ) {
     return value as ClubRole;
   }
   return null;
@@ -11,9 +19,12 @@ function toClubRole(value: unknown): ClubRole | null {
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:5000';
 
-export async function getAllClubs(): Promise<Club[]> {
+export async function getAllClubs(token: string): Promise<Club[]> {
   const res = await fetch(`${API_BASE}/api/clubs`, {
     method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
 
   const data: Club[] | { error?: string } = await res.json();
@@ -41,7 +52,7 @@ export async function createClub(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(data),
   });
@@ -79,10 +90,13 @@ export async function fetchClubMembers(clubId: string): Promise<ClubMember[]> {
   return data as ClubMember[];
 }
 
-export async function fetchMyRole(clubId: string, token: string): Promise<ClubRole | null> {
+export async function fetchMyRole(
+  clubId: string,
+  token: string,
+): Promise<ClubRole | null> {
   const res = await fetch(`${API_BASE}/api/clubs/${clubId}/my-role`, {
     headers: {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
   });
 
@@ -95,4 +109,56 @@ export async function fetchMyRole(clubId: string, token: string): Promise<ClubRo
   }
 
   return toClubRole(data.role);
+}
+
+async function parseJson<T>(res: Response): Promise<T> {
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data?.error ?? 'Request failed');
+  }
+  return data as T;
+}
+
+export async function getUserRoleInClub(
+  clubId: string,
+  token: string,
+): Promise<ClubRole | null> {
+  const res = await fetch(`${API_BASE}/api/clubs/${clubId}/my-role`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return parseJson<ClubRole | null>(res);
+}
+
+export async function updateClub(
+  clubId: string,
+  dto: UpdateClub,
+  token: string,
+): Promise<Club> {
+  const res = await fetch(`${API_BASE}/api/clubs/${clubId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(dto),
+  });
+
+  return parseJson<Club>(res);
+}
+
+export async function deleteClub(clubId: string, token: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/clubs/${clubId}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    const data = await res.json();
+    throw new Error(data?.error ?? 'Failed to delete club');
+  }
 }
