@@ -17,7 +17,7 @@ import EventCard from '../components/events/EventCard';
 import MembersTable from '../components/clubs/MembersTable';
 import InviteMembersModal from '../components/clubs/InviteMembersModal';
 import LeaveClubModal from '../components/clubs/LeaveClubModal';
-import { fetchClubById, fetchClubMembers, fetchMyRole } from '../api/clubs.api';
+import { fetchClubById, fetchClubMembers, fetchMyRole, leaveClub } from '../api/clubs.api';
 import { useAuth } from '../context/AuthContext';
 import { fetchClubEvents } from '../api/events.api';
 import type { Event } from '../types/events.types';
@@ -526,9 +526,17 @@ export default function ClubDetailsPage() {
       <LeaveClubModal
         isOpen={isLeaveOpen}
         onClose={() => setIsLeaveOpen(false)}
-        onLeave={() => {
-          setIsLeaveOpen(false);
-          navigate("/clubs");
+        onLeave={async () => {
+          if (!club || !token) return;
+
+          try {
+            await leaveClub(club.club_id, token);
+            setIsLeaveOpen(false);
+            navigate('/clubs');
+          } catch (err) {
+            console.error(err);
+            setError(err instanceof Error ? err.message : 'Failed to leave club');
+          }
         }}
         clubName={club.name}
       />
