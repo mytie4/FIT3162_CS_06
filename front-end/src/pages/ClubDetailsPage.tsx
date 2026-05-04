@@ -540,9 +540,17 @@ export default function ClubDetailsPage() {
       <LeaveClubModal
         isOpen={isLeaveOpen}
         onClose={() => setIsLeaveOpen(false)}
-        onLeave={() => {
-          setIsLeaveOpen(false);
-          navigate("/clubs");
+        onLeave={async () => {
+          if (!club || !token) return;
+
+          try {
+            await leaveClub(club.club_id, token);
+            setIsLeaveOpen(false);
+            navigate('/clubs');
+          } catch (err) {
+            console.error(err);
+            setError(err instanceof Error ? err.message : 'Failed to leave club');
+          }
         }}
         clubName={club.name}
       />

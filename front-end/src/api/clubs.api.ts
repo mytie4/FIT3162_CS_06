@@ -66,6 +66,25 @@ export async function createClub(
   return json.club!;
 }
 
+export async function leaveClub(clubID: string, token: string) {
+
+
+    const res = await fetch(`${API_BASE}/api/clubs/leave`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ clubID }),
+    })
+
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error ?? 'Failed to leave club');
+  }
+
+    return data;
+
+}
+
 export async function fetchClubById(clubId: string): Promise<Club> {
   const res = await fetch(`${API_BASE}/api/clubs/${clubId}`);
 
