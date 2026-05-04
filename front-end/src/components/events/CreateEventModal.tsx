@@ -9,8 +9,8 @@ import type { Club } from '../../types/clubs.types'
 
 const EVENT_TYPES = ['Social', 'Workshop', 'Seminar', 'Sports', 'Cultural', 'Networking', 'Fundraiser', 'Other']
 const VISIBILITY_OPTIONS = [
-  { value: 'public', label: 'Public' },
-  { value: 'private',     label: 'Members Only' },
+  { value: 'published', label: 'Public' },
+  { value: 'draft',     label: 'Members Only' },
 ]
 
 interface Props {
@@ -28,7 +28,7 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
   const [title, setTitle]           = useState('')
   const [clubId, setClubId]         = useState(predefinedClubId ?? '')
   const [type, setType]             = useState(EVENT_TYPES[0])
-  const [visibility, setVisibility] = useState<'public' | 'private'>('public')
+  const [visibility, setVisibility] = useState<'published' | 'draft'>('published')
   const [startDate, setStartDate]   = useState('')
   const [endDate, setEndDate]       = useState('')
   const [location, setLocation]     = useState('')
@@ -82,7 +82,7 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
     setTitle('')
     setClubId(predefinedClubId ?? '')
     setType(EVENT_TYPES[0])
-    setVisibility('public')
+    setVisibility('published')
     setStartDate('')
     setEndDate('')
     setLocation('')
@@ -93,5 +93,56 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
  
   if (!isOpen) return null
  
+  const selectedClub = manageableClubs.find((c) => c.club_id === clubId)
 
+
+  // ── Form submission ────────────────────────────────────────────────────────
+  const handleSubmit = async () => {
+    setError(null)
+ 
+    if (!title.trim()) {
+      setError('Event title is required.')
+      return
+    }
+ 
+    if (!clubId) {
+      setError('Please select a hosting club.')
+      return
+    }
+ 
+    if (!token) {
+      setError('You must be logged in to create an event.')
+      return
+    }
+ 
+    const dto: CreateEvent = {
+      club_id:     clubId,
+      title:       title.trim(),
+      type:        type || undefined,
+      date:        startDate || undefined,
+      end_date:    endDate   || undefined,
+      location:    location.trim()  || undefined,
+      banner_url:  bannerUrl.trim() || undefined,
+      description: description.trim() || undefined,
+      status:      visibility,
+    }
+ 
+    setIsSubmitting(true)
+ 
+    try {
+      const newEvent = await createEvent(dto, token)
+      onCreated?.(newEvent)
+      onClose()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create event. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+ 
+  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget && !isSubmitting) onClose()
+  }
+ 
+  const isBusy = isSubmitting || isGeneratingAi
 }
