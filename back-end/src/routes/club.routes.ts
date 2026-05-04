@@ -297,12 +297,7 @@ router.patch(
  *       404:
  *         description: Club not found
  */
-router.delete(
-  '/clubs/:clubId',
-  authMiddleware,
-  requireClubRole('president'),
-  clubController.deleteClub,
-);
+router.delete('/clubs/:clubId', authMiddleware, requireClubRole('president'), clubController.deleteClub);
 
 /**
  * @openapi

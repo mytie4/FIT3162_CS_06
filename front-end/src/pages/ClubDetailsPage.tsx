@@ -17,7 +17,8 @@ import EventCard from '../components/events/EventCard';
 import MembersTable from '../components/clubs/MembersTable';
 import InviteMembersModal from '../components/clubs/InviteMembersModal';
 import LeaveClubModal from '../components/clubs/LeaveClubModal';
-import { fetchClubById, fetchClubMembers, fetchMyRole, leaveClub } from '../api/clubs.api';
+import DeleteClubModal from '../components/clubs/DeleteClubModal';
+import { fetchClubById, fetchClubMembers, fetchMyRole, deleteClub, leaveClub } from '../api/clubs.api';
 import { useAuth } from '../context/AuthContext';
 import { fetchClubEvents } from '../api/events.api';
 import type { Event } from '../types/events.types';
@@ -65,6 +66,7 @@ export default function ClubDetailsPage() {
   const [activeTab, setActiveTab] = useState<Tab>('Overview');
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [isLeaveOpen, setIsLeaveOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   // API state
   const [club, setClub] = useState<Club | null>(null);
@@ -134,6 +136,15 @@ export default function ClubDetailsPage() {
   const handleRemoveMember = (userId: string) => {
     setMembers(members.filter((m) => m.user_id !== userId));
     // TODO: call DELETE /api/clubs/:id/members/:userId when built
+  };
+
+  const handleDeleteClub = async () => {
+    try {
+      await deleteClub(clubId!, token!);
+      navigate('/clubs');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete club');
+    }
   };
 
   // Loading / error states
@@ -507,7 +518,10 @@ export default function ClubDetailsPage() {
                   Deleting a club is irreversible. All associated events, tasks,
                   and member data will be permanently removed.
                 </p>
-                <button className="cd-danger-btn">
+                <button
+                  className="cd-danger-btn"
+                  onClick={() => setIsDeleteOpen(true)}
+                >
                   <Trash2 size={16} /> Delete Club
                 </button>
               </div>
@@ -538,6 +552,12 @@ export default function ClubDetailsPage() {
             setError(err instanceof Error ? err.message : 'Failed to leave club');
           }
         }}
+        clubName={club.name}
+      />
+      <DeleteClubModal
+        isOpen={isDeleteOpen}
+        onClose={() => setIsDeleteOpen(false)}
+        onDelete={handleDeleteClub}
         clubName={club.name}
       />
     </div>
