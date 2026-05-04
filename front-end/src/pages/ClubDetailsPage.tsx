@@ -18,7 +18,7 @@ import MembersTable from '../components/clubs/MembersTable';
 import InviteMembersModal from '../components/clubs/InviteMembersModal';
 import LeaveClubModal from '../components/clubs/LeaveClubModal';
 import DeleteClubModal from '../components/clubs/DeleteClubModal';
-import { fetchClubById, fetchClubMembers, fetchMyRole, deleteClub } from '../api/clubs.api';
+import { fetchClubById, fetchClubMembers, fetchMyRole, deleteClub, leaveClub } from '../api/clubs.api';
 import { useAuth } from '../context/AuthContext';
 import { fetchClubEvents } from '../api/events.api';
 import type { Event } from '../types/events.types';
