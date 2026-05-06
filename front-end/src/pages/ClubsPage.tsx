@@ -44,7 +44,9 @@ export default function ClubsPage() {
 
   const { token } = useAuth();
 
-  const loadClubs = useCallback(async () => {
+  const loadClubs = useCallback(async (isMounted: () => boolean = () => true) => {
+    if (!isMounted()) return;
+
     if (!token) {
       setClubs([]);
       setError('Please log in to view your clubs');
@@ -52,28 +54,30 @@ export default function ClubsPage() {
       return;
     }
 
+    setIsLoading(true);
+    setError(null);
+
     try {
-      setIsLoading(true);
-      setError(null);
       const fetchedClubs = await getAllClubs(token);
-      setClubs(fetchedClubs);
+      if (isMounted()) {
+        setClubs(fetchedClubs);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch clubs');
+      if (isMounted()) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch clubs');
+      }
     } finally {
-      setIsLoading(false);
+      if (isMounted()) {
+        setIsLoading(false);
+      }
     }
   }, [token]);
 
   useEffect(() => {
-    let isMounted = true;
-    (async () => {
-      await loadClubs();
-      if (!isMounted) {
-        // component unmounted before fetch resolved — state setters are no-ops
-      }
-    })();
+    let mounted = true;
+    loadClubs(() => mounted);
     return () => {
-      isMounted = false;
+      mounted = false;
     };
   }, [loadClubs]);
   const filtered = clubs.filter((club) =>
