@@ -1,5 +1,6 @@
 import * as taskRepo from "../repositories/task.repository";
 import * as eventRepo from "../repositories/event.repository";
+import * as userRepo from "../repositories/user.repository";
 import { getUserRoleInClub, isUserInClub } from "../repositories/club.repository";
 import {
     Task,
@@ -10,6 +11,7 @@ import {
     TaskStatus,
 } from "../entities/task.entity";
 import { ServiceError } from "./club.service";
+import * as notificationService from "./notification.service";
 
 const VALID_PRIORITIES: TaskPriority[] = ['low', 'medium', 'high'];
 const VALID_STATUSES: TaskStatus[] = ['todo', 'in_progress', 'done', 'blocked'];
@@ -163,7 +165,11 @@ export async function deleteTask(taskId: string): Promise<void> {
     await taskRepo.deleteTask(taskId);
 }
 
-export async function assignUser(taskId: string, assigneeUserId: string): Promise<void> {
+export async function assignUser(
+    taskId: string,
+    assigneeUserId: string,
+    senderUserId?: string,
+): Promise<void> {
     if (!taskId) {
         throw new ServiceError(400, "Task ID is required.");
     }
@@ -184,6 +190,32 @@ export async function assignUser(taskId: string, assigneeUserId: string): Promis
     const inserted = await taskRepo.assignUser(taskId, assigneeUserId);
     if (!inserted) {
         throw new ServiceError(409, "User is already assigned to this task.");
+    }
+
+    // Best-effort notification. Do not let any failure here break the assign.
+    if (senderUserId && senderUserId !== assigneeUserId) {
+        try {
+            const [notifCtx, sender] = await Promise.all([
+                taskRepo.getTaskNotificationContext(taskId),
+                userRepo.findById(senderUserId),
+            ]);
+
+            if (notifCtx) {
+                await notificationService.emitTaskAssigned({
+                    assigneeId: assigneeUserId,
+                    taskId: notifCtx.task_id,
+                    taskTitle: notifCtx.task_title,
+                    eventId: notifCtx.event_id,
+                    eventTitle: notifCtx.event_title,
+                    clubId: notifCtx.club_id,
+                    clubName: notifCtx.club_name,
+                    senderId: senderUserId,
+                    senderName: sender?.name ?? "A teammate",
+                });
+            }
+        } catch (err) {
+            console.error("[notifications] task_assigned wiring failed", err);
+        }
     }
 }
 

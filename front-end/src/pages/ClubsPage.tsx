@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ClubCard from '../components/clubs/ClubCard';
 import CreateClubModal from '../components/clubs/CreateClubModal';
@@ -44,47 +44,42 @@ export default function ClubsPage() {
 
   const { token } = useAuth();
 
-  useEffect(() => {
-    let isMounted = true;
+  const loadClubs = useCallback(async (isMounted: () => boolean = () => true) => {
+    if (!isMounted()) return;
 
-    async function loadClubs() {
-      if (!token) {
-        if (isMounted) {
-          setClubs([]);
-          setError('Please log in to view your clubs');
-          setIsLoading(false);
-        }
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        const fetchedClubs = await getAllClubs(token);
-
-        if (isMounted) {
-          setClubs(fetchedClubs);
-        }
-      } catch (err) {
-        if (isMounted) {
-          setError(
-            err instanceof Error ? err.message : 'Failed to fetch clubs',
-          );
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
+    if (!token) {
+      setClubs([]);
+      setError('Please log in to view your clubs');
+      setIsLoading(false);
+      return;
     }
 
-    loadClubs();
+    setIsLoading(true);
+    setError(null);
 
-    return () => {
-      isMounted = false;
-    };
+    try {
+      const fetchedClubs = await getAllClubs(token);
+      if (isMounted()) {
+        setClubs(fetchedClubs);
+      }
+    } catch (err) {
+      if (isMounted()) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch clubs');
+      }
+    } finally {
+      if (isMounted()) {
+        setIsLoading(false);
+      }
+    }
   }, [token]);
+
+  useEffect(() => {
+    let mounted = true;
+    loadClubs(() => mounted);
+    return () => {
+      mounted = false;
+    };
+  }, [loadClubs]);
   const filtered = clubs.filter((club) =>
     club.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
@@ -117,36 +112,6 @@ return (
         </div>
 
         <div className="clubs-toolbar-actions">
-          <button className="clubs-btn-outline">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-            </svg>
-            Filter
-          </button>
-
-          <button className="clubs-btn-outline">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="4" y1="6" x2="20" y2="6" />
-              <line x1="4" y1="12" x2="14" y2="12" />
-              <line x1="4" y1="18" x2="9" y2="18" />
-            </svg>
-            Sort by
-          </button>
-
           <button
             className="clubs-btn-outline"
             onClick={() => setIsJoinModalOpen(true)}
@@ -224,7 +189,10 @@ return (
       )}
 
       {isJoinModalOpen && (
-        <JoinClubModal onClose={() => setIsJoinModalOpen(false)} />
+        <JoinClubModal
+          onClose={() => setIsJoinModalOpen(false)}
+          onJoined={loadClubs}
+        />
       )}
     </div>
   );

@@ -13,28 +13,44 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [agreeTerms, setAgreeTerms] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+
     if (password !== confirmPassword) {
-      alert('Passwords do not match');
+      setError('Passwords do not match');
       return;
     }
+
+    setIsSubmitting(true);
     try {
       validateName(fullName);
       await registerRequest({
         name: fullName.trim(),
         email: email,
-        password: password
+        password: password,
       });
-      await login({ email, password });
-      navigate('/dashboard');
+
+      // Registration succeeded — try to auto-login. If that fails (network
+      // hiccup, transient backend error), fall back to the login page with a
+      // helpful inline message rather than leaving the user stranded.
+      try {
+        await login({ email, password });
+        navigate('/dashboard');
+      } catch {
+        setError('Account created — please log in.');
+        navigate('/login');
+      }
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'Unable to connect to server'
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -194,15 +210,17 @@ export default function RegisterPage() {
                 required
               />
               I agree to{" "}
-              <Link to="/" className="terms-link">
-                Terms &amp; Conditions
-              </Link>
+              <span className="terms-link">Terms &amp; Conditions</span>
             </label>
 
             {error && <p className="form-error">{error}</p>}
 
-            <button type="submit" className="btn-primary btn-dark">
-              Create Account
+            <button
+              type="submit"
+              className="btn-primary btn-dark"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Creating account…" : "Create Account"}
             </button>
 
             <p className="form-switch">

@@ -47,7 +47,19 @@ export default function EventCard({
   const statusKey = status.toLowerCase().replace(/\s+/g, '_')
 
   return (
-    <div className="event-card" onClick={onClick}>
+    <div
+      className="event-card"
+      role="button"
+      tabIndex={0}
+      aria-label={`Open event ${title}`}
+      onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick?.();
+        }
+      }}
+    >
       <div className="event-card-header" style={{ backgroundColor: color }}>
         <div className="event-card-header-actions">
           {showClubBadge && clubName && (
@@ -55,6 +67,7 @@ export default function EventCard({
           )}
           <button
             className="event-card-menu-btn"
+            aria-label="Event options"
             onClick={(e) => e.stopPropagation()}
           >
             <MoreHorizontal size={16} />

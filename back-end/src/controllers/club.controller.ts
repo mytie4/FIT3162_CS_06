@@ -280,3 +280,46 @@ export async function removeMember(req: AuthRequest, res: Response) {
     return res.status(500).json({ error: 'Internal server error' });
   }
 }
+
+export async function inviteMembers(req: AuthRequest, res: Response) {
+  try {
+    const inviterId = req.user?.user_id;
+    const { clubId } = req.params;
+
+    if (!inviterId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const body = (req.body ?? {}) as { user_ids?: unknown };
+    if (!Array.isArray(body.user_ids)) {
+      return res
+        .status(400)
+        .json({ error: 'Body must include a `user_ids` array.' });
+    }
+
+    const result = await clubService.inviteUsersToClub({
+      clubId,
+      inviterId,
+      targetUserIds: body.user_ids as string[],
+    });
+
+    return res.status(200).json({
+      message: result.invited.length
+        ? `Sent ${result.invited.length} invite${
+            result.invited.length === 1 ? '' : 's'
+          }.`
+        : 'No new invites were sent.',
+      invited: result.invited,
+      skipped: result.skipped,
+    });
+  } catch (error) {
+    if (error instanceof clubService.ServiceError) {
+      return res.status(error.statusCode).json({ error: error.message });
+    }
+
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown server error.';
+    console.error('inviteMembers failed:', errorMessage);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+}
