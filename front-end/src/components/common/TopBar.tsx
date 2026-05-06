@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { useNotifications } from '../../hooks/useNotifications'
+import { useNotificationsContext } from '../../context/NotificationsContext'
 import NotificationDropdown from './NotificationDropdown'
 import './TopBar.css'
 
@@ -28,7 +28,7 @@ export default function TopBar() {
     markRead,
     markAllRead,
     dismiss,
-  } = useNotifications()
+  } = useNotificationsContext()
 
   const title = Object.entries(PAGE_TITLES).find(([path]) =>
     pathname.startsWith(path),

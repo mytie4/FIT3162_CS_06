@@ -62,6 +62,25 @@ export async function findById(
   return result.rowCount === 0 ? null : result.rows[0];
 }
 
+/**
+ * Fetches all users whose `user_id` is in `userIds` in a single query.
+ * Returns only the IDs that actually exist in the database.
+ */
+export async function findByIds(
+  userIds: string[],
+): Promise<Set<string>> {
+  if (userIds.length === 0) return new Set();
+
+  const result = await pool.query(
+    `SELECT "user_id"
+     FROM "Users"
+     WHERE "user_id" = ANY($1::uuid[])`,
+    [userIds],
+  );
+
+  return new Set(result.rows.map((r) => r.user_id as string));
+}
+
 export interface UserSearchResult {
   user_id: string;
   name: string;

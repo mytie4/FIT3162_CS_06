@@ -462,13 +462,11 @@ export async function inviteUsersToClub(args: {
     }
   }
 
-  // Drop users that don't exist.
-  const existing = await Promise.all(
-    candidatePool.map((id) => userRepo.findById(id)),
-  );
+  // Drop users that don't exist — one round-trip using ANY($1::uuid[]).
+  const existingIds = await userRepo.findByIds(candidatePool);
   const existingSet = new Set<string>();
-  candidatePool.forEach((id, idx) => {
-    if (existing[idx]) {
+  candidatePool.forEach((id) => {
+    if (existingIds.has(id)) {
       existingSet.add(id);
     } else {
       skipped.push({ user_id: id, reason: 'not_found' });

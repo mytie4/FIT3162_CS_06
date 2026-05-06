@@ -33,7 +33,7 @@ export default function MembersTable({
   onRemove,
 }: MembersTableProps) {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
-  const canManage = currentUserRole === 'president' || currentUserRole === 'vice_president'
+  const canManage = currentUserRole === 'president'
   const canSeeEmails = currentUserRole === 'president' || currentUserRole === 'vice_president'
 
   return (
@@ -73,79 +73,66 @@ export default function MembersTable({
                 </span>
               </td>
               <td>
-                {canManage && (() => {
-                  const blockedByVp =
-                    currentUserRole === 'vice_president' && member.role === 'president'
-                  const blockedTitle = "Only the President can change this member's role"
-                  return (
-                    <>
-                      <button
-                        className="member-action-btn"
-                        aria-label={`Actions for ${member.name}`}
-                        onClick={() => setOpenMenuId(openMenuId === member.user_id ? null : member.user_id)}
-                      >
-                        <MoreHorizontal size={18} />
-                      </button>
+                {canManage && (
+                  <>
+                    <button
+                      className="member-action-btn"
+                      aria-label={`Actions for ${member.name}`}
+                      onClick={() => setOpenMenuId(openMenuId === member.user_id ? null : member.user_id)}
+                    >
+                      <MoreHorizontal size={18} />
+                    </button>
 
-                      {openMenuId === member.user_id && (
-                        <>
-                          <div
-                            className="member-action-overlay"
-                            onClick={() => setOpenMenuId(null)}
-                          />
-                          <div className="member-action-menu">
-                            <div className="member-action-menu-label">Change Role</div>
-                            <button
-                              className="member-action-menu-item"
-                              disabled={blockedByVp}
-                              title={blockedByVp ? blockedTitle : undefined}
-                              onClick={() => {
-                                onRoleChange?.(member.user_id, 'president')
-                                setOpenMenuId(null)
-                              }}
-                            >
-                              <Shield size={14} /> Make President
-                            </button>
-                            <button
-                              className="member-action-menu-item member-action-menu-item--vp"
-                              disabled={blockedByVp}
-                              title={blockedByVp ? blockedTitle : undefined}
-                              onClick={() => {
-                                onRoleChange?.(member.user_id, 'vice_president')
-                                setOpenMenuId(null)
-                              }}
-                            >
-                              <Calendar size={14} /> Make Vice President
-                            </button>
-                            <button
-                              className="member-action-menu-item member-action-menu-item--member"
-                              disabled={blockedByVp}
-                              title={blockedByVp ? blockedTitle : undefined}
-                              onClick={() => {
-                                onRoleChange?.(member.user_id, 'member')
-                                setOpenMenuId(null)
-                              }}
-                            >
-                              <Users size={14} /> Make Member
-                            </button>
-                            <div className="member-action-menu-divider" />
-                            <button
-                              className="member-action-menu-item member-action-menu-item--danger"
-                              disabled={blockedByVp}
-                              title={blockedByVp ? blockedTitle : undefined}
-                              onClick={() => {
-                                onRemove?.(member.user_id)
-                                setOpenMenuId(null)
-                              }}
-                            >
-                              <Trash2 size={14} /> Remove from Club
-                            </button>
-                          </div>
-                        </>
-                      )}
-                    </>
-                  )
-                })()}
+                    {openMenuId === member.user_id && (
+                      <>
+                        <div
+                          className="member-action-overlay"
+                          onClick={() => setOpenMenuId(null)}
+                        />
+                        <div className="member-action-menu">
+                          <div className="member-action-menu-label">Change Role</div>
+                          <button
+                            className="member-action-menu-item"
+                            onClick={() => {
+                              onRoleChange?.(member.user_id, 'president')
+                              setOpenMenuId(null)
+                            }}
+                          >
+                            <Shield size={14} /> Make President
+                          </button>
+                          <button
+                            className="member-action-menu-item member-action-menu-item--vp"
+                            onClick={() => {
+                              onRoleChange?.(member.user_id, 'vice_president')
+                              setOpenMenuId(null)
+                            }}
+                          >
+                            <Calendar size={14} /> Make Vice President
+                          </button>
+                          <button
+                            className="member-action-menu-item member-action-menu-item--member"
+                            onClick={() => {
+                              onRoleChange?.(member.user_id, 'member')
+                              setOpenMenuId(null)
+                            }}
+                          >
+                            <Users size={14} /> Make Member
+                          </button>
+                          <div className="member-action-menu-divider" />
+                          <button
+                            className="member-action-menu-item member-action-menu-item--danger"
+                            onClick={() => {
+                              onRemove?.(member.user_id)
+                              setOpenMenuId(null)
+                            }}
+                          >
+                            <Trash2 size={14} /> Remove from Club
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </>
+                )}
               </td>
             </tr>
           ))}

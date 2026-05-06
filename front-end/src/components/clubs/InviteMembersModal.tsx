@@ -128,7 +128,7 @@ export default function InviteMembersModal({
     }
   }
 
-  const displayCode = joinCode || clubName.substring(0, 4).toUpperCase() + '-2025'
+  const displayCode = joinCode || clubName.substring(0, 4).toUpperCase() + '-' + new Date().getFullYear()
   const trimmedQuery = searchQuery.trim()
   const showDropdown = trimmedQuery.length > 0
   const showTooShortHint = trimmedQuery.length > 0 && trimmedQuery.length < MIN_QUERY_LEN

@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { fetchClubById, joinClubByCode } from '../api/clubs.api';
-import { useNotifications } from '../hooks/useNotifications';
+import { useNotificationsContext } from '../context/NotificationsContext';
 import type { AppNotification } from '../types/notifications.types';
 import './NotificationsPage.css';
 
@@ -127,7 +127,7 @@ export default function NotificationsPage() {
     markRead,
     markAllRead,
     dismiss,
-  } = useNotifications();
+  } = useNotificationsContext();
   const { token } = useAuth();
   const [filter, setFilter] = useState<FilterId>('all');
   const [acceptingId, setAcceptingId] = useState<string | null>(null);

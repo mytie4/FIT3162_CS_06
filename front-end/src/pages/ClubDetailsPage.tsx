@@ -102,6 +102,18 @@ export default function ClubDetailsPage() {
   const [eventsError, setEventsError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Reset lazy-loaded data whenever the viewed club changes so navigating
+  // between clubs never shows stale members or events from the previous club,
+  // and a previously failed fetch can be retried.
+  useEffect(() => {
+    setMembers([]);
+    setMembersLoaded(false);
+    setMembersError(null);
+    setEvents([]);
+    setEventsLoaded(false);
+    setEventsError(null);
+  }, [clubId]);
+
   const loadMembers = useCallback(async () => {
     if (!clubId || membersLoading || membersLoaded) return;
 
@@ -110,11 +122,11 @@ export default function ClubDetailsPage() {
       setMembersError(null);
       const membersData = await fetchClubMembers(clubId);
       setMembers(membersData);
+      setMembersLoaded(true);
     } catch (err) {
       setMembersError(err instanceof Error ? err.message : 'Failed to load members');
     } finally {
       setMembersLoading(false);
-      setMembersLoaded(true);
     }
   }, [clubId, membersLoaded, membersLoading]);
 
@@ -126,11 +138,11 @@ export default function ClubDetailsPage() {
       setEventsError(null);
       const eventsData = await fetchClubEvents(clubId);
       setEvents(eventsData);
+      setEventsLoaded(true);
     } catch (err) {
       setEventsError(err instanceof Error ? err.message : 'Failed to load events');
     } finally {
       setEventsLoading(false);
-      setEventsLoaded(true);
     }
   }, [clubId, eventsLoaded, eventsLoading]);
 

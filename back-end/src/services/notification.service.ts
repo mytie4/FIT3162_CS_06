@@ -246,28 +246,30 @@ export async function emitEventUpdate(
     ? `${payload.eventTitle} was updated: ${payload.changeSummary}.`
     : `${payload.eventTitle} was updated.`;
 
-  for (const recipientId of payload.recipientUserIds) {
-    await safeCreate(
-      {
-        user_id: recipientId,
-        type: 'event_update',
-        title: `Event updated: ${payload.eventTitle}`,
-        message,
-        metadata: {
-          event_id: payload.eventId,
+  await Promise.all(
+    payload.recipientUserIds.map((recipientId) =>
+      safeCreate(
+        {
+          user_id: recipientId,
+          type: 'event_update',
+          title: `Event updated: ${payload.eventTitle}`,
+          message,
+          metadata: {
+            event_id: payload.eventId,
+            club_id: payload.clubId,
+            sender_id: payload.senderId,
+            change_summary: payload.changeSummary,
+          },
           club_id: payload.clubId,
-          sender_id: payload.senderId,
-          change_summary: payload.changeSummary,
+          event_id: payload.eventId,
+          sender_name: payload.senderName ?? null,
+          club_name: payload.clubName,
+          event_name: payload.eventTitle,
         },
-        club_id: payload.clubId,
-        event_id: payload.eventId,
-        sender_name: payload.senderName ?? null,
-        club_name: payload.clubName,
-        event_name: payload.eventTitle,
-      },
-      client,
-    );
-  }
+        client,
+      ),
+    ),
+  );
 }
 
 export interface EventReminderPayload {
