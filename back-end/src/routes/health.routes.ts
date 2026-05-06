@@ -8,6 +8,7 @@ const router = Router();
  * @openapi
  * /api/health:
  *   get:
+ *     security: []
  *     summary: API health check
  *     tags:
  *       - Health
@@ -32,6 +33,7 @@ router.get('/health', healthController.healthCheck);
  * @openapi
  * /api/health/db:
  *   get:
+ *     security: []
  *     summary: Database health check
  *     tags:
  *       - Health

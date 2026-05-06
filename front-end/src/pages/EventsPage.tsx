@@ -91,7 +91,7 @@ export default function EventsPage() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [token]);
 
   const filtered = events.filter((event) => {
     const matchesSearch = event.title
@@ -132,13 +132,14 @@ return (
             <input
               type="text"
               placeholder="Search events..."
+              aria-label="Search events"
               className="events-search-input"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
 
-          <button className="events-filter-btn">
+          <button className="events-filter-btn" aria-label="Filter events">
             <Filter size={18} />
           </button>
 

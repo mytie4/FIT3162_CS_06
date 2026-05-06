@@ -233,6 +233,18 @@
   font-size: 0.85rem;
   color: #6b7280;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.invite-search-spinner {
+  animation: invite-spin 0.9s linear infinite;
+}
+
+@keyframes invite-spin {
+  to { transform: rotate(360deg); }
 }
 
 /* Selected chips */

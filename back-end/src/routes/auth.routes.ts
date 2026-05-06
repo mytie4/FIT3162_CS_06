@@ -8,6 +8,7 @@ const router = Router();
  * @openapi
  * /api/register:
  *   post:
+ *     security: []
  *     summary: Register a new user account
  *     tags:
  *       - Auth
@@ -55,6 +56,7 @@ router.post('/register', authController.register);
  * @openapi
  * /api/login:
  *   post:
+ *     security: []
  *     summary: Log in with email and password
  *     tags:
  *       - Auth

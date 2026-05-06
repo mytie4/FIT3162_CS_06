@@ -358,6 +358,35 @@
   border-color: #1a6b6e;
 }
 
+.cd-action-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin-bottom: 12px;
+}
+
+.cd-action-error-dismiss {
+  background: transparent;
+  border: none;
+  color: #991b1b;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.cd-action-error-dismiss:hover {
+  background: #fee2e2;
+}
+
 /* Settings tab */
 .cd-settings {
   max-width: 640px;

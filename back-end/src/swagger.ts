@@ -14,6 +14,11 @@ const options: swaggerJSDoc.Options = {
         description: 'Local development server',
       },
     ],
+    security: [
+      {
+        BearerAuth: [],
+      },
+    ],
     components: {
       securitySchemes: {
         BearerAuth: {
@@ -513,6 +518,23 @@ const options: swaggerJSDoc.Options = {
               type: 'string',
               format: 'uuid',
               example: '550e8400-e29b-41d4-a716-446655440000',
+            },
+          },
+        },
+        UserSearchResult: {
+          type: 'object',
+          properties: {
+            user_id: {
+              type: 'string',
+              format: 'uuid',
+              example: '550e8400-e29b-41d4-a716-446655440000',
+            },
+            name: { type: 'string', example: 'Alice' },
+            email: { type: 'string', example: 'alice@example.com' },
+            profile_pic_url: {
+              type: 'string',
+              nullable: true,
+              example: null,
             },
           },
         },

@@ -178,3 +178,34 @@ export async function getTaskClubContext(taskId: string): Promise<TaskClubContex
 
     return result.rows[0] ?? null;
 }
+
+export interface TaskNotificationContext {
+    task_id: string;
+    task_title: string;
+    event_id: string;
+    event_title: string;
+    club_id: string;
+    club_name: string;
+}
+
+export async function getTaskNotificationContext(
+    taskId: string,
+): Promise<TaskNotificationContext | null> {
+    const result = await pool.query(
+        `SELECT
+            t.task_id,
+            COALESCE(t.title, 'Untitled task')   AS task_title,
+            t.event_id                            AS event_id,
+            COALESCE(e.title, 'Untitled event')   AS event_title,
+            c.club_id                             AS club_id,
+            c.name                                AS club_name
+         FROM "Tasks" t
+         JOIN "Events" e ON t.event_id = e.event_id
+         JOIN "Clubs" c ON e.club_id = c.club_id
+         WHERE t.task_id = $1
+         LIMIT 1`,
+        [taskId],
+    );
+
+    return result.rows[0] ?? null;
+}

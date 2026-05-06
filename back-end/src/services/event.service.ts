@@ -1,5 +1,8 @@
 import * as eventRepo from '../repositories/event.repository';
 import * as clubService from './club.service';
+import * as notificationService from './notification.service';
+import * as notificationRepo from '../repositories/notification.repository';
+import * as userRepo from '../repositories/user.repository';
 import {
   CreateEventDTO,
   Event,
@@ -7,6 +10,18 @@ import {
   UpdateEventDTO,
 } from '../entities/event.entity';
 import { ServiceError } from '../services/club.service';
+
+// Field-level changes that are interesting enough to notify members about.
+// Cosmetic-only updates (e.g. banner_url) deliberately do not trigger a
+// notification storm.
+const NOTIFIABLE_EVENT_FIELDS = new Set<keyof UpdateEventDTO>([
+  'title',
+  'date',
+  'end_date',
+  'location',
+  'description',
+  'status',
+]);
 
 export async function createEvent(
   dto: CreateEventDTO,
@@ -88,6 +103,7 @@ export async function getEventsByClubId(
 export async function updateEvent(
   eventId: string,
   dto: UpdateEventDTO,
+  senderUserId?: string,
 ): Promise<Event> {
   if (!eventId) {
     throw new ServiceError(400, 'Event ID is required.');
@@ -104,6 +120,40 @@ export async function updateEvent(
 
   if (!updatedEvent) {
     throw new ServiceError(500, 'Failed to update event.');
+  }
+
+  try {
+    const changedFields = (Object.keys(sanitizedDTO) as Array<keyof UpdateEventDTO>)
+      .filter((k) => sanitizedDTO[k] !== undefined)
+      .filter((k) => NOTIFIABLE_EVENT_FIELDS.has(k));
+
+    if (changedFields.length > 0) {
+      const recipientIds = await notificationRepo.getClubMemberIds(
+        existingEvent.club_id,
+      );
+      const recipients = senderUserId
+        ? recipientIds.filter((id) => id !== senderUserId)
+        : recipientIds;
+
+      if (recipients.length > 0) {
+        const sender = senderUserId
+          ? await userRepo.findById(senderUserId)
+          : null;
+
+        await notificationService.emitEventUpdate({
+          recipientUserIds: recipients,
+          eventId: updatedEvent.event_id,
+          eventTitle: updatedEvent.title ?? existingEvent.title ?? 'Event',
+          clubId: existingEvent.club_id,
+          clubName: existingEvent.club_name,
+          changeSummary: changedFields.join(', '),
+          senderId: senderUserId,
+          senderName: sender?.name ?? undefined,
+        });
+      }
+    }
+  } catch (err) {
+    console.error('[notifications] event_update wiring failed', err);
   }
 
   return updatedEvent;

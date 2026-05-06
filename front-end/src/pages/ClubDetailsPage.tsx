@@ -1,24 +1,33 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
   LogOut,
   Plus,
-  UserPlus,
   Search,
   Calendar,
   Globe,
   MessageSquare,
   Trash2,
+  UserPlus,
   Image as ImageIcon,
   Link as LinkIcon,
 } from 'lucide-react';
 import EventCard from '../components/events/EventCard';
 import MembersTable from '../components/clubs/MembersTable';
-import InviteMembersModal from '../components/clubs/InviteMembersModal';
 import LeaveClubModal from '../components/clubs/LeaveClubModal';
 import DeleteClubModal from '../components/clubs/DeleteClubModal';
-import { fetchClubById, fetchClubMembers, fetchMyRole, deleteClub, leaveClub } from '../api/clubs.api';
+import InviteMembersModal from '../components/clubs/InviteMembersModal';
+import {
+  fetchClubById,
+  fetchClubMembers,
+  fetchMyRole,
+  deleteClub,
+  leaveClub,
+  updateMemberRole as apiUpdateMemberRole,
+  removeMember as apiRemoveMember,
+  sendClubInvitations,
+} from '../api/clubs.api';
 import { useAuth } from '../context/AuthContext';
 import { fetchClubEvents } from '../api/events.api';
 import type { Event } from '../types/events.types';
@@ -51,6 +60,16 @@ function getEventColor(event: Event): string {
   return DEFAULT_COLORS[hashString(event.club_id) % DEFAULT_COLORS.length];
 }
 
+function isSafeHttpUrl(value: string | null | undefined): boolean {
+  if (!value) return false;
+  try {
+    const url = new URL(value);
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 // ── Tabs ──
 
 const TABS = ['Overview', 'Events', 'Members', 'Settings'] as const;
@@ -64,9 +83,9 @@ export default function ClubDetailsPage() {
   const { token } = useAuth();
 
   const [activeTab, setActiveTab] = useState<Tab>('Overview');
-  const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [isLeaveOpen, setIsLeaveOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isInviteOpen, setIsInviteOpen] = useState(false);
 
   // API state
   const [club, setClub] = useState<Club | null>(null);
@@ -74,7 +93,46 @@ export default function ClubDetailsPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [currentUserRole, setCurrentUserRole] = useState<ClubRole | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [membersLoading, setMembersLoading] = useState(false);
+  const [eventsLoading, setEventsLoading] = useState(false);
+  const [membersLoaded, setMembersLoaded] = useState(false);
+  const [eventsLoaded, setEventsLoaded] = useState(false);
+  const [membersError, setMembersError] = useState<string | null>(null);
+  const [memberActionError, setMemberActionError] = useState<string | null>(null);
+  const [eventsError, setEventsError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const loadMembers = useCallback(async () => {
+    if (!clubId || membersLoading || membersLoaded) return;
+
+    try {
+      setMembersLoading(true);
+      setMembersError(null);
+      const membersData = await fetchClubMembers(clubId);
+      setMembers(membersData);
+    } catch (err) {
+      setMembersError(err instanceof Error ? err.message : 'Failed to load members');
+    } finally {
+      setMembersLoading(false);
+      setMembersLoaded(true);
+    }
+  }, [clubId, membersLoaded, membersLoading]);
+
+  const loadEvents = useCallback(async () => {
+    if (!clubId || eventsLoading || eventsLoaded) return;
+
+    try {
+      setEventsLoading(true);
+      setEventsError(null);
+      const eventsData = await fetchClubEvents(clubId);
+      setEvents(eventsData);
+    } catch (err) {
+      setEventsError(err instanceof Error ? err.message : 'Failed to load events');
+    } finally {
+      setEventsLoading(false);
+      setEventsLoaded(true);
+    }
+  }, [clubId, eventsLoaded, eventsLoading]);
 
   useEffect(() => {
     if (!clubId) return;
@@ -86,23 +144,10 @@ export default function ClubDetailsPage() {
         setIsLoading(true);
         setError(null);
 
-        const [clubData, membersData, eventsData] = await Promise.all([
-          fetchClubById(clubId!),
-          fetchClubMembers(clubId!),
-          fetchClubEvents(clubId!),
-        ]);
-
-        // Fetch role only if user has a token
-        let role: ClubRole | null = null;
-        if (token) {
-          role = await fetchMyRole(clubId!, token);
-        }
+        const clubData = await fetchClubById(clubId!);
 
         if (isMounted) {
           setClub(clubData);
-          setMembers(membersData);
-          setEvents(eventsData);
-          setCurrentUserRole(role);
         }
       } catch (err) {
         if (isMounted) {
@@ -120,22 +165,141 @@ export default function ClubDetailsPage() {
     return () => {
       isMounted = false;
     };
+  }, [clubId]);
+
+  useEffect(() => {
+    if (!clubId || !token) {
+      setCurrentUserRole(null);
+      return;
+    }
+
+    const resolvedClubId: string = clubId;
+    const resolvedToken: string = token;
+
+    let isMounted = true;
+
+    async function loadRole() {
+      try {
+        const role = await fetchMyRole(resolvedClubId, resolvedToken);
+        if (isMounted) {
+          setCurrentUserRole(role);
+        }
+      } catch {
+        if (isMounted) {
+          setCurrentUserRole(null);
+        }
+      }
+    }
+
+    loadRole();
+
+    return () => {
+      isMounted = false;
+    };
   }, [clubId, token]);
+
+  useEffect(() => {
+    if (activeTab === 'Members') {
+      void loadMembers();
+    }
+  }, [activeTab, loadMembers]);
+
+  useEffect(() => {
+    if (activeTab === 'Events') {
+      void loadEvents();
+    }
+  }, [activeTab, loadEvents]);
 
   const canManageEvents =
     currentUserRole === 'president' || currentUserRole === 'vice_president';
   const isPresident = currentUserRole === 'president';
 
-  const handleRoleChange = (userId: string, newRole: ClubRole) => {
-    setMembers(
-      members.map((m) => (m.user_id === userId ? { ...m, role: newRole } : m)),
+  const handleRoleChange = async (userId: string, newRole: ClubRole) => {
+    if (!clubId || !token) return;
+
+    setMemberActionError(null);
+
+    // Snapshot for rollback if the API call fails.
+    const previous = members;
+
+    // Optimistic update — also handle the "transfer presidency" case where
+    // the previous president must be demoted client-side to keep the table
+    // consistent with the server's transactional behaviour.
+    setMembers((prev) =>
+      prev.map((m) => {
+        if (m.user_id === userId) return { ...m, role: newRole };
+        if (newRole === 'president' && m.role === 'president') {
+          return { ...m, role: 'vice_president' };
+        }
+        return m;
+      }),
     );
-    // TODO: call PUT /api/clubs/:id/members/:userId/role when built
+
+    try {
+      await apiUpdateMemberRole(clubId, userId, newRole, token);
+
+      // If the requester transferred presidency away from themselves,
+      // refresh their own role so the UI re-evaluates which controls
+      // are visible.
+      if (currentUserRole === 'president' && newRole === 'president') {
+        try {
+          const role = await fetchMyRole(clubId, token);
+          setCurrentUserRole(role);
+        } catch {
+          // best-effort
+        }
+      }
+    } catch (err) {
+      console.error('Failed to update member role:', err);
+      setMembers(previous);
+      setMemberActionError(
+        err instanceof Error ? err.message : 'Failed to update role',
+      );
+    }
   };
 
-  const handleRemoveMember = (userId: string) => {
-    setMembers(members.filter((m) => m.user_id !== userId));
-    // TODO: call DELETE /api/clubs/:id/members/:userId when built
+  const handleRemoveMember = async (userId: string) => {
+    if (!clubId || !token) return;
+
+    setMemberActionError(null);
+
+    const previous = members;
+    setMembers((prev) => prev.filter((m) => m.user_id !== userId));
+
+    try {
+      await apiRemoveMember(clubId, userId, token);
+    } catch (err) {
+      console.error('Failed to remove member:', err);
+      setMembers(previous);
+      setMemberActionError(
+        err instanceof Error ? err.message : 'Failed to remove member',
+      );
+    }
+  };
+
+  const handleSendInvitations = async (userIds: string[]) => {
+    if (!clubId || !token || userIds.length === 0) return;
+
+    const result = await sendClubInvitations(clubId, userIds, token);
+
+    // Surface a concise summary for the user. Promote the modal's own
+    // error path by throwing if literally nothing got sent — that way the
+    // modal's catch block keeps it open and shows the message.
+    if (result.invited.length === 0 && result.skipped.length > 0) {
+      const reasons = new Set(result.skipped.map((s) => s.reason));
+      const reasonText = [...reasons]
+        .map((r) =>
+          r === 'already_member'
+            ? 'already a member'
+            : r === 'already_pending'
+              ? 'already invited'
+              : r === 'self'
+                ? 'yourself'
+                : 'not found',
+        )
+        .join(', ');
+      throw new Error(`No invites sent — selected users were ${reasonText}.`);
+    }
   };
 
   const handleDeleteClub = async () => {
@@ -183,9 +347,9 @@ export default function ClubDetailsPage() {
       <div
         className="cd-hero"
         style={
-          club.banner_url
+          isSafeHttpUrl(club.banner_url)
             ? {
-                backgroundImage: `url(${club.banner_url})`,
+                backgroundImage: `url(${encodeURI(club.banner_url as string)})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }
@@ -264,9 +428,9 @@ export default function ClubDetailsPage() {
                 <div className="cd-card">
                   <h3>External Links</h3>
                   <div className="cd-links">
-                    {club.discord_link && (
+                    {isSafeHttpUrl(club.discord_link) && (
                       <a
-                        href={club.discord_link}
+                        href={club.discord_link as string}
                         target="_blank"
                         rel="noreferrer"
                         className="cd-link-item"
@@ -275,9 +439,9 @@ export default function ClubDetailsPage() {
                         Discord Server
                       </a>
                     )}
-                    {club.instagram_link && (
+                    {isSafeHttpUrl(club.instagram_link) && (
                       <a
-                        href={club.instagram_link}
+                        href={club.instagram_link as string}
                         target="_blank"
                         rel="noreferrer"
                         className="cd-link-item"
@@ -286,9 +450,9 @@ export default function ClubDetailsPage() {
                         Instagram
                       </a>
                     )}
-                    {club.website_link && (
+                    {isSafeHttpUrl(club.website_link) && (
                       <a
-                        href={club.website_link}
+                        href={club.website_link as string}
                         target="_blank"
                         rel="noreferrer"
                         className="cd-link-item"
@@ -297,9 +461,9 @@ export default function ClubDetailsPage() {
                         Website
                       </a>
                     )}
-                    {!club.discord_link &&
-                      !club.instagram_link &&
-                      !club.website_link && (
+                    {!isSafeHttpUrl(club.discord_link) &&
+                      !isSafeHttpUrl(club.instagram_link) &&
+                      !isSafeHttpUrl(club.website_link) && (
                         <p className="cd-no-links">
                           No external links provided yet.
                         </p>
@@ -321,8 +485,11 @@ export default function ClubDetailsPage() {
                   </button>
                 )}
               </div>
-              {/* TODO: replace with real events from GET /api/clubs/:id/events (EVE-52) */}
-              {events.length > 0 ? (
+              {eventsLoading ? (
+                <div className="cd-events-empty">Loading events...</div>
+              ) : eventsError ? (
+                <div className="cd-events-empty">{eventsError}</div>
+              ) : events.length > 0 ? (
                 <div className="cd-events-grid">
                   {events.map((event) => (
                     <EventCard
@@ -365,7 +532,11 @@ export default function ClubDetailsPage() {
               <div className="cd-members-header">
                 <div className="cd-members-search">
                   <Search className="cd-members-search-icon" size={16} />
-                  <input type="text" placeholder="Search members..." />
+                  <input
+                    type="text"
+                    placeholder="Search members..."
+                    aria-label="Search members"
+                  />
                 </div>
                 {canManageEvents && (
                   <button
@@ -376,12 +547,31 @@ export default function ClubDetailsPage() {
                   </button>
                 )}
               </div>
-              <MembersTable
-                members={members}
-                currentUserRole={currentUserRole}
-                onRoleChange={handleRoleChange}
-                onRemove={handleRemoveMember}
-              />
+              {memberActionError && (
+                <div className="cd-action-error" role="alert">
+                  <span>{memberActionError}</span>
+                  <button
+                    className="cd-action-error-dismiss"
+                    onClick={() => setMemberActionError(null)}
+                    aria-label="Dismiss error"
+                    type="button"
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
+              {membersLoading ? (
+                <div className="cd-members-empty">Loading members...</div>
+              ) : membersError ? (
+                <div className="cd-members-empty">{membersError}</div>
+              ) : (
+                <MembersTable
+                  members={members}
+                  currentUserRole={currentUserRole}
+                  onRoleChange={handleRoleChange}
+                  onRemove={handleRemoveMember}
+                />
+              )}
             </div>
           )}
 
@@ -505,10 +695,7 @@ export default function ClubDetailsPage() {
                     </div>
                   </div>
                 </div>
-                <div className="cd-settings-footer">
-                  <button className="cd-btn-cancel">Cancel</button>
-                  <button className="cd-btn-primary">Save Changes</button>
-                </div>
+                <p style={{ color: '#6b7280', fontSize: '0.85rem', textAlign: 'right' }}>Editing club settings is coming soon.</p>
               </div>
 
               {/* Danger Zone */}
@@ -531,12 +718,6 @@ export default function ClubDetailsPage() {
       </div>
 
       {/* Modals */}
-      <InviteMembersModal
-        isOpen={isInviteOpen}
-        onClose={() => setIsInviteOpen(false)}
-        clubName={club.name}
-        joinCode={club.join_code ?? undefined}
-      />
       <LeaveClubModal
         isOpen={isLeaveOpen}
         onClose={() => setIsLeaveOpen(false)}
@@ -560,6 +741,17 @@ export default function ClubDetailsPage() {
         onDelete={handleDeleteClub}
         clubName={club.name}
       />
+      {token && (
+        <InviteMembersModal
+          isOpen={isInviteOpen}
+          onClose={() => setIsInviteOpen(false)}
+          clubId={club.club_id}
+          clubName={club.name}
+          joinCode={club.join_code ?? undefined}
+          token={token}
+          onSendInvites={handleSendInvitations}
+        />
+      )}
     </div>
   );
 }

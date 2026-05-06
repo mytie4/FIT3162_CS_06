@@ -5,13 +5,15 @@ export default function Footer() {
   return (
     <footer className="site-footer">
       <nav className="footer-nav">
-        <Link to="/">Home</Link>
-        <Link to="/">Pages</Link>
-        <Link to="/">Members</Link>
-        <Link to="/">Links</Link>
+        <Link to="/dashboard">Home</Link>
+        <Link to="/clubs">Pages</Link>
+        <Link to="/clubs">Members</Link>
+        <Link to="/events">Links</Link>
         <Link to="/login">Log in</Link>
       </nav>
-      <p className="footer-copy">&copy; Copyright Eventure oem: all right.</p>
+      <p className="footer-copy">
+        &copy; {new Date().getFullYear()} Eventure. All rights reserved.
+      </p>
     </footer>
   )
 }
