@@ -20,13 +20,13 @@ export async function fetchAllEvents(token: string): Promise<Event[]> {
   return parseJson<Event[]>(res);
 }
 
-export async function fetchAssignedEvents(eventId: string): Promise<Event[]> {
-  const res = await fetch(`${API_BASE}/api/events/${eventId}`);
+export async function fetchAssignedEvents(clubId: string, eventId: string, taskId: string): Promise<Event[]> {
+  const res = await fetch(`${API_BASE}/api/clubs/${clubId}/events`);
   return parseJson<Event[]>(res);
 }
 
-export async function fetchEventById(eventId: string): Promise<Event> {
-  const res = await fetch(`${API_BASE}/api/events/${eventId}`);
+export async function fetchEventById(clubId: string, eventId: string): Promise<Event> {
+  const res = await fetch(`${API_BASE}/api/clubs/${clubId}/events/${eventId}`);
   return parseJson<Event>(res);
 }
 
