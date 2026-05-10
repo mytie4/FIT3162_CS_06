@@ -20,6 +20,11 @@ export async function fetchAllEvents(token: string): Promise<Event[]> {
   return parseJson<Event[]>(res);
 }
 
+export async function fetchAssignedEvents(eventId: string): Promise<Event[]> {
+  const res = await fetch(`${API_BASE}/api/events/${eventId}`);
+  return parseJson<Event[]>(res);
+}
+
 export async function fetchEventById(eventId: string): Promise<Event> {
   const res = await fetch(`${API_BASE}/api/events/${eventId}`);
   return parseJson<Event>(res);
@@ -31,10 +36,11 @@ export async function fetchClubEvents(clubId: string): Promise<Event[]> {
 }
 
 export async function createEvent(
+  clubId: string,
   dto: CreateEvent,
   token: string,
 ): Promise<Event> {
-  const res = await fetch(`${API_BASE}/api/events`, {
+  const res = await fetch(`${API_BASE}/api/clubs/${clubId}/events`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -48,10 +54,11 @@ export async function createEvent(
 
 export async function updateEvent(
   eventId: string,
+  clubId: string,
   dto: UpdateEvent,
   token: string,
 ): Promise<Event> {
-  const res = await fetch(`${API_BASE}/api/events/${eventId}`, {
+  const res = await fetch(`${API_BASE}/api/clubs/${clubId}/events/${eventId}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -65,9 +72,10 @@ export async function updateEvent(
 
 export async function deleteEvent(
   eventId: string,
+  clubId: string,
   token: string,
 ): Promise<void> {
-  const res = await fetch(`${API_BASE}/api/events/${eventId}`, {
+  const res = await fetch(`${API_BASE}/api/clubs/${clubId}/events/${eventId}`, {
     method: 'DELETE',
     headers: {
       Authorization: `Bearer ${token}`,

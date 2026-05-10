@@ -132,7 +132,7 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
     setIsSubmitting(true)
  
     try {
-      const newEvent = await createEvent(dto, token)
+      const newEvent = await createEvent(clubId, dto, token)
       onCreated?.(newEvent)
       onClose()
     } catch (err) {
