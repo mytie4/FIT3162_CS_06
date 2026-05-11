@@ -187,4 +187,35 @@ PORT=5000
 CLIENT_URL=http://localhost:5173
 NODE_ENV=development
 DATABASE_URL=postgres://postgres:postgres@localhost:5432/fit3162_db
+# Optional: enables POST /api/notifications/event-reminders/run
+NOTIFICATIONS_CRON_SECRET=
 ```
+
+## Notifications
+
+Notification rows live in the `Notifications` table and back the in-app
+notifications page. Five `type` values are supported:
+
+| Type             | Emitted when                                                |
+| ---------------- | ----------------------------------------------------------- |
+| `task_assigned`  | A user is assigned to a task (`POST /api/tasks/:taskId/assignees`) |
+| `club_invite`    | A user successfully redeems a club join code                |
+| `role_changed`   | A president changes another member's role                   |
+| `event_update`   | An event's title/date/location/description/status is changed |
+| `event_reminder` | The event reminder scan emits one per attendee for upcoming events |
+
+### Event reminder scan (external cron)
+
+There is no in-process scheduler. Have an external cron (server crontab,
+GitHub Action, k8s CronJob, Cloud Scheduler, etc.) hit:
+
+```bash
+curl -X POST \
+  -H "x-cron-secret: $NOTIFICATIONS_CRON_SECRET" \
+  "http://localhost:5000/api/notifications/event-reminders/run?lookaheadHours=24&windowMinutes=60"
+```
+
+Recommended cadence: every ~hour. The endpoint is idempotent — a reminder is
+only inserted if no `event_reminder` already exists for that
+`(user_id, event_id)` pair. If `NOTIFICATIONS_CRON_SECRET` is not set on the
+server, the endpoint returns `503` and is effectively disabled.

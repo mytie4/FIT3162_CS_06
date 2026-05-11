@@ -20,19 +20,24 @@ export default function CreateClubModal({ onClose, onCreated }: CreateClubModalP
   const [error, setError] = useState<string | null>(null)
 
   const [type, setType] = useState<string>(clubTypes[0])
-  const [members, setMembers] = useState<{ id: number; name: string; color: string }[]>([])
 
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget && !isSubmitting) onClose()
   }
 
-  const removeMember = (id: number) => {
-    setMembers((prev) => prev.filter((m) => m.id !== id))
-  }
-
   const handleCreate = async () => {
     if (!token) {
       setError('You must be logged in to create a club.')
+      return
+    }
+
+    const trimmed = name.trim()
+    if (trimmed.length < 2) {
+      setError('Club name must be at least 2 characters.')
+      return
+    }
+    if (trimmed.length > 80) {
+      setError('Club name must be 80 characters or fewer.')
       return
     }
 
@@ -47,7 +52,7 @@ export default function CreateClubModal({ onClose, onCreated }: CreateClubModalP
     try {
       const club = await createClub(
         {
-          name,
+          name: trimmed,
           description: description || undefined,
           type,
         },
@@ -101,42 +106,6 @@ export default function CreateClubModal({ onClose, onCreated }: CreateClubModalP
         </div>
 
         <div className="create-field">
-          <label className="create-label">Add members</label>
-          <div className="create-members-input">
-            {members.map((m) => (
-              <span key={m.id} className="create-member-chip">
-                <span
-                  className="create-member-avatar"
-                  style={{ backgroundColor: m.color }}
-                />
-                {m.name}
-                <button
-                  className="create-member-remove"
-                  onClick={() => removeMember(m.id)}
-                  aria-label={`Remove member ${m.name}`}
-                  disabled={isSubmitting}
-                >
-                  &times;
-                </button>
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <div className="create-field">
-          <label className="create-label">Set banner</label>
-          <div className="create-banner-upload">
-            <button className="create-banner-btn" type="button" disabled={isSubmitting}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="16" />
-                <line x1="8" y1="12" x2="16" y2="12" />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <div className="create-field">
           <label className="create-label" htmlFor="club-description">Description</label>
           <textarea
             id="club-description"
@@ -156,7 +125,7 @@ export default function CreateClubModal({ onClose, onCreated }: CreateClubModalP
         <button
           className="create-submit-btn"
           onClick={handleCreate}
-          disabled={isSubmitting}
+          disabled={isSubmitting || name.trim().length < 2}
         >
           {isSubmitting ? 'Creating...' : 'Create'}
         </button>

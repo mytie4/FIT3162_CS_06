@@ -10,7 +10,6 @@ export default function LoginPage() {
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -79,17 +78,14 @@ export default function LoginPage() {
             />
 
             <div className="form-options">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                />
-                Remember me
-              </label>
-              <Link to="/" className="forgot-link">
+              <button
+                type="button"
+                className="forgot-link"
+                disabled
+                title="Coming soon"
+              >
                 Forgot Password?
-              </Link>
+              </button>
             </div>
 
             {error && <p className="form-error">{error}</p>}

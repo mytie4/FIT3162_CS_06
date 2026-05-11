@@ -75,6 +75,7 @@ router.get('/events', authMiddleware, eventController.getAllEvents);
  * @openapi
  * /api/events/{id}:
  *   get:
+ *    security: []
  *    summary: Get event by ID
  *    tags:
  *     - Events
@@ -103,6 +104,7 @@ router.get('/events/:id', eventController.getEventById);
  * @openapi
  * /api/clubs/{clubId}/events:
  *   get:
+ *    security: []
  *    summary: Get all events for a club
  *    tags:
  *     - Events

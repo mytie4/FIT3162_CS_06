@@ -104,6 +104,7 @@ export async function deleteTask(req: AuthRequest, res: Response) {
 
 export async function assignUser(req: AuthRequest, res: Response) {
     try {
+        const senderUserId = req.user?.user_id;
         const { taskId } = req.params;
         const { user_id: assigneeUserId } = req.body ?? {};
 
@@ -111,7 +112,7 @@ export async function assignUser(req: AuthRequest, res: Response) {
             return res.status(400).json({ error: "user_id is required" });
         }
 
-        await taskService.assignUser(taskId, assigneeUserId);
+        await taskService.assignUser(taskId, assigneeUserId, senderUserId);
 
         return res.status(201).json({
             message: "User assigned to task successfully",

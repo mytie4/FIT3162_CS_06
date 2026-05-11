@@ -1,0 +1,322 @@
+/* ── Page container (matches `p-8 max-w-4xl mx-auto space-y-8`) ── */
+.notif-page {
+  padding: 32px;
+  max-width: 56rem; /* ~max-w-4xl */
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  animation: notif-page-fade-in 0.3s ease-out;
+}
+
+@keyframes notif-page-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ── Header ──────────────────────────────────────────────── */
+.notif-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 24px;
+}
+
+.notif-page-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 8px 0;
+  line-height: 1.2;
+}
+
+.notif-page-subtitle {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #4b5563;
+}
+
+.notif-page-mark-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: #1a6b6e;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color 0.15s ease, opacity 0.15s ease;
+}
+
+.notif-page-mark-all:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.notif-page-mark-all:disabled {
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* ── Filter tabs (pill buttons) ──────────────────────────── */
+.notif-page-tabs {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.notif-page-tab {
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #4b5563;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.notif-page-tab:hover:not(.notif-page-tab--active) {
+  background: #f9fafb;
+}
+
+.notif-page-tab--active {
+  background: #1a6b6e;
+  color: #ffffff;
+  border-color: #1a6b6e;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+/* ── Banner (errors) ─────────────────────────────────────── */
+.notif-page-banner {
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.notif-page-banner--error {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fee2e2;
+}
+
+/* ── List ────────────────────────────────────────────────── */
+.notif-page-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Notification card ──────────────────────────────────── */
+.notif-page-item {
+  position: relative;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #f3f4f6;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease,
+    box-shadow 0.18s ease, opacity 0.18s ease;
+}
+
+.notif-page-item--read {
+  opacity: 0.8;
+}
+
+.notif-page-item--unread {
+  background: rgba(240, 253, 250, 0.4); /* teal-50/20 */
+  border-color: #99f6e4; /* teal-200 */
+  box-shadow:
+    0 0 0 1px #f0fdfa, /* ring-1 ring-teal-50 */
+    0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+/* ── Per-type icon bubble (12x12, rounded-xl) ─────────── */
+.notif-page-item-icon-wrap {
+  flex-shrink: 0;
+}
+
+.notif-page-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notif-page-icon--invite {
+  background: #dbeafe; /* blue-100 */
+  color: #2563eb;      /* blue-600 */
+}
+
+.notif-page-icon--welcome {
+  background: #dcfce7; /* green-100 */
+  color: #15803d;      /* green-700 */
+}
+
+.notif-page-icon--task {
+  background: #ffedd5; /* orange-100 */
+  color: #ea580c;      /* orange-600 */
+}
+
+.notif-page-icon--reminder {
+  background: #f3f4f6; /* gray-100 */
+  color: #4b5563;      /* gray-600 */
+}
+
+.notif-page-icon--role {
+  background: #ede9fe; /* violet-100 */
+  color: #7c3aed;      /* violet-600 */
+}
+
+.notif-page-icon--default {
+  background: #ecfeff;
+  color: #0e7490;
+}
+
+/* ── Body ────────────────────────────────────────────────── */
+.notif-page-item-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.notif-page-item-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.notif-page-item-title {
+  margin: 0;
+  font-weight: 700;
+  color: #111827;
+  font-size: 1rem;
+}
+
+.notif-page-item-title--read {
+  color: #374151;
+}
+
+.notif-page-item-time {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.notif-page-item-text {
+  font-size: 0.875rem;
+  color: #4b5563;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.notif-page-strong {
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.notif-page-italic {
+  font-style: italic;
+}
+
+/* ── Action buttons (Accept / Decline) ─────────────────── */
+.notif-page-item-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 12px;
+}
+
+.notif-page-btn {
+  padding: 6px 16px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.notif-page-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.notif-page-btn--accept {
+  background: #1a6b6e;
+  color: #ffffff;
+  border-color: #1a6b6e;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+.notif-page-btn--accept:hover:not(:disabled) {
+  background: #155758;
+  border-color: #155758;
+}
+
+.notif-page-btn--decline {
+  background: #ffffff;
+  color: #4b5563;
+  border-color: #e5e7eb;
+}
+
+.notif-page-btn--decline:hover:not(:disabled) {
+  background: #f9fafb;
+}
+
+/* ── Unread dot (right side) ─────────────────────────── */
+.notif-page-item-dot {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #1a6b6e;
+  margin-top: 8px;
+  transition: transform 0.15s ease;
+}
+
+.notif-page-item:hover .notif-page-item-dot {
+  transform: scale(1.25);
+}
+
+/* ── Empty state ─────────────────────────────────────────── */
+.notif-page-empty {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px dashed #d1d5db;
+  padding: 80px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  opacity: 0.6;
+  gap: 16px;
+  color: #d1d5db;
+}
+
+.notif-page-empty p {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #6b7280;
+}

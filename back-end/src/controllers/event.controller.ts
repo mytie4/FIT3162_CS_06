@@ -83,7 +83,8 @@ export async function updateEvent(req: AuthRequest, res: Response) {
   try {
     const { id } = req.params;
     const dto: UpdateEventDTO = req.body;
-    const updatedEvent = await eventService.updateEvent(id, dto);
+    const senderUserId = req.user?.user_id;
+    const updatedEvent = await eventService.updateEvent(id, dto, senderUserId);
     return res.status(200).json({
       message: 'Event updated successfully',
       event: updatedEvent,

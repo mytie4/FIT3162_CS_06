@@ -1,5 +1,8 @@
 import pool from '../db';
 import * as clubRepo from '../repositories/club.repository';
+import * as userRepo from '../repositories/user.repository';
+import * as notificationRepo from '../repositories/notification.repository';
+import * as notificationService from './notification.service';
 import type {
   CreateClubDTO,
   UpdateClubDTO,
@@ -107,6 +110,18 @@ export async function joinClub(userID: string, joinCode: string) {
   }
 
   await clubRepo.joinClub(userID, clubID);
+
+  // Best-effort welcome notification. Distinct from emitClubInvite so the
+  // recipient doesn't see a "join" button on their own welcome row.
+  try {
+    await notificationService.emitClubJoined({
+      userId: userID,
+      clubId: clubID,
+      clubName: club.name,
+    });
+  } catch (err) {
+    console.error('[notifications] club_joined wiring failed', err);
+  }
 }
 
 export async function leaveClub(userID: string, clubID: string) {
@@ -286,6 +301,8 @@ export async function updateMemberRole(
     throw new ServiceError(404, 'User is not a member of this club.');
   }
 
+  const previousRole = await clubRepo.getUserRoleInClub(targetUserId, clubId);
+
   // Promoting to president is a transfer: demote every existing president in the
   // club first so the single-president partial unique index is never violated.
   if (newRole === 'president') {
@@ -315,6 +332,14 @@ export async function updateMemberRole(
     } finally {
       client.release();
     }
+
+    await emitRoleChangedNotification({
+      targetUserId,
+      clubId,
+      newRole,
+      previousRole,
+      requesterId,
+    });
     return;
   }
 
@@ -324,7 +349,180 @@ export async function updateMemberRole(
     newRole,
   );
   if (!updated) throw new ServiceError(500, 'Failed to update role.');
+
+  await emitRoleChangedNotification({
+    targetUserId,
+    clubId,
+    newRole,
+    previousRole,
+    requesterId,
+  });
 }
+
+async function emitRoleChangedNotification(args: {
+  targetUserId: string;
+  clubId: string;
+  newRole: string;
+  previousRole: string | null;
+  requesterId: string;
+}) {
+  if (args.targetUserId === args.requesterId) return;
+  try {
+    const [club, sender] = await Promise.all([
+      clubRepo.getClubById(args.clubId),
+      userRepo.findById(args.requesterId),
+    ]);
+    if (!club) return;
+    await notificationService.emitRoleChanged({
+      targetUserId: args.targetUserId,
+      clubId: args.clubId,
+      clubName: club.name,
+      oldRole: args.previousRole,
+      newRole: args.newRole,
+      senderId: args.requesterId,
+      senderName: sender?.name ?? 'A club admin',
+    });
+  } catch (err) {
+    console.error('[notifications] role_changed wiring failed', err);
+  }
+}
+
+// Invitations -----------------------------------------------------------
+
+const MAX_INVITES_PER_REQUEST = 50;
+
+export type InviteSkipReason =
+  | 'self'
+  | 'not_found'
+  | 'already_member'
+  | 'already_pending';
+
+export interface InviteUsersResult {
+  invited: string[];
+  skipped: { user_id: string; reason: InviteSkipReason }[];
+}
+
+/**
+ * Send a `club_invite` notification to each of the supplied users.
+ *
+ * Idempotent and silent-skipping by design: users who don't exist, are
+ * already in the club, are the inviter themselves, or already have an
+ * unread invite for this club are dropped from the work set with a
+ * `reason` so the caller can surface a friendly summary.
+ *
+ * Caller authorisation (president/VP) is expected to be enforced by
+ * `requireClubRole` middleware on the route — this service trusts the
+ * `inviterId` and only validates membership consistency.
+ */
+export async function inviteUsersToClub(args: {
+  clubId: string;
+  targetUserIds: string[];
+  inviterId: string;
+}): Promise<InviteUsersResult> {
+  const { clubId, inviterId } = args;
+
+  if (!clubId) throw new ServiceError(400, 'Club ID is required.');
+  if (!Array.isArray(args.targetUserIds) || args.targetUserIds.length === 0) {
+    throw new ServiceError(400, 'At least one user_id is required.');
+  }
+
+  const cleaned = Array.from(
+    new Set(
+      args.targetUserIds
+        .filter((id): id is string => typeof id === 'string')
+        .map((id) => id.trim())
+        .filter((id) => id.length > 0),
+    ),
+  );
+
+  if (cleaned.length === 0) {
+    throw new ServiceError(400, 'At least one user_id is required.');
+  }
+
+  if (cleaned.length > MAX_INVITES_PER_REQUEST) {
+    throw new ServiceError(
+      400,
+      `Cannot invite more than ${MAX_INVITES_PER_REQUEST} users at once.`,
+    );
+  }
+
+  const club = await clubRepo.getClubById(clubId);
+  if (!club) {
+    throw new ServiceError(404, 'Club not found.');
+  }
+
+  const skipped: { user_id: string; reason: InviteSkipReason }[] = [];
+  const candidatePool: string[] = [];
+
+  for (const userId of cleaned) {
+    if (userId === inviterId) {
+      skipped.push({ user_id: userId, reason: 'self' });
+    } else {
+      candidatePool.push(userId);
+    }
+  }
+
+  // Drop users that don't exist — one round-trip using ANY($1::uuid[]).
+  const existingIds = await userRepo.findByIds(candidatePool);
+  const existingSet = new Set<string>();
+  candidatePool.forEach((id) => {
+    if (existingIds.has(id)) {
+      existingSet.add(id);
+    } else {
+      skipped.push({ user_id: id, reason: 'not_found' });
+    }
+  });
+
+  // Drop users that are already in the club.
+  const memberIds = new Set(await notificationRepo.getClubMemberIds(clubId));
+  const afterMembershipFilter: string[] = [];
+  for (const id of existingSet) {
+    if (memberIds.has(id)) {
+      skipped.push({ user_id: id, reason: 'already_member' });
+    } else {
+      afterMembershipFilter.push(id);
+    }
+  }
+
+  // Drop users with an unread club_invite for this club already.
+  const pending = new Set(
+    await notificationRepo.findUsersWithPendingClubInvite(
+      clubId,
+      afterMembershipFilter,
+    ),
+  );
+  const toInvite: string[] = [];
+  for (const id of afterMembershipFilter) {
+    if (pending.has(id)) {
+      skipped.push({ user_id: id, reason: 'already_pending' });
+    } else {
+      toInvite.push(id);
+    }
+  }
+
+  if (toInvite.length === 0) {
+    return { invited: [], skipped };
+  }
+
+  const inviter = await userRepo.findById(inviterId);
+  const inviterName = inviter?.name ?? 'A club admin';
+  const joinCode = (club as Club & { join_code?: string | null }).join_code ?? null;
+
+  for (const userId of toInvite) {
+    await notificationService.emitClubInvite({
+      userId,
+      clubId,
+      clubName: club.name,
+      senderId: inviterId,
+      senderName: inviterName,
+      joinCode,
+    });
+  }
+
+  return { invited: toInvite, skipped };
+}
+
+// -----------------------------------------------------------------------
 
 export async function removeMember(
   clubId: string,

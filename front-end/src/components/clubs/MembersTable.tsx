@@ -34,6 +34,7 @@ export default function MembersTable({
 }: MembersTableProps) {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
   const canManage = currentUserRole === 'president'
+  const canSeeEmails = currentUserRole === 'president' || currentUserRole === 'vice_president'
 
   return (
     <div className="members-table-wrapper">
@@ -57,9 +58,11 @@ export default function MembersTable({
                   />
                   <div>
                     <p className="member-name">{member.name}</p>
-                    <p className="member-email">
-                      <Mail size={12} /> {member.email}
-                    </p>
+                    {canSeeEmails && (
+                      <p className="member-email">
+                        <Mail size={12} /> {member.email}
+                      </p>
+                    )}
                   </div>
                 </div>
               </td>
@@ -74,6 +77,7 @@ export default function MembersTable({
                   <>
                     <button
                       className="member-action-btn"
+                      aria-label={`Actions for ${member.name}`}
                       onClick={() => setOpenMenuId(openMenuId === member.user_id ? null : member.user_id)}
                     >
                       <MoreHorizontal size={18} />

@@ -185,6 +185,7 @@ router.post('/clubs/leave', authMiddleware, clubController.leaveClub);
  * @openapi
  * /api/clubs/{clubId}:
  *   get:
+ *     security: []
  *     summary: Get a single club by ID (with member count and event stats)
  *     tags:
  *       - Clubs
@@ -297,17 +298,13 @@ router.patch(
  *       404:
  *         description: Club not found
  */
-router.delete(
-  '/clubs/:clubId',
-  authMiddleware,
-  requireClubRole('president'),
-  clubController.deleteClub,
-);
+router.delete('/clubs/:clubId', authMiddleware, requireClubRole('president'), clubController.deleteClub);
 
 /**
  * @openapi
  * /api/clubs/{clubId}/members:
  *   get:
+ *     security: []
  *     summary: Get all members of a club with their roles
  *     tags:
  *       - Clubs
@@ -489,6 +486,98 @@ router.delete(
   authMiddleware,
   requireClubRole('president'),
   clubController.removeMember,
+);
+
+/**
+ * @openapi
+ * /api/clubs/{clubId}/invitations:
+ *   post:
+ *     security:
+ *       - BearerAuth: []
+ *     summary: Send club invitations to one or more users (president & vice-president only)
+ *     description: |
+ *       Emits a `club_invite` notification to each supplied user_id. The
+ *       endpoint is idempotent and silently skips:
+ *         - the inviter themselves (`self`)
+ *         - non-existent users (`not_found`)
+ *         - existing club members (`already_member`)
+ *         - users with an unread `club_invite` for this club already (`already_pending`)
+ *
+ *       Each recipient sees a notification in their bell with a one-click
+ *       Join button (the club's join_code is stamped into metadata).
+ *     tags:
+ *       - Clubs
+ *     parameters:
+ *       - in: path
+ *         name: clubId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [user_ids]
+ *             properties:
+ *               user_ids:
+ *                 type: array
+ *                 minItems: 1
+ *                 maxItems: 50
+ *                 items:
+ *                   type: string
+ *                   format: uuid
+ *     responses:
+ *       200:
+ *         description: Summary of who was invited and who was skipped.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Sent 2 invites.
+ *                 invited:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                     format: uuid
+ *                 skipped:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       user_id:
+ *                         type: string
+ *                         format: uuid
+ *                       reason:
+ *                         type: string
+ *                         enum: [self, not_found, already_member, already_pending]
+ *       400:
+ *         description: Invalid body or empty user_ids
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       403:
+ *         description: Forbidden — only president & vice-president can invite
+ *       404:
+ *         description: Club not found
+ */
+router.post(
+  '/clubs/:clubId/invitations',
+  authMiddleware,
+  requireClubRole('president', 'vice_president'),
+  clubController.inviteMembers,
 );
 
 export default router;
