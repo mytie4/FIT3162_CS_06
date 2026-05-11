@@ -16,7 +16,7 @@ export interface TaskFormData {
   dueDate: string
 }
 
-const CATEGORIES = ['Design', 'Development', 'Testing', 'Documentation', 'Other']
+const CATEGORIES = ['Design', 'Tech', 'Logistics', 'Marketing', 'Finance', 'Operations']
 const STATUS_OPTIONS = [
   { value: 'todo', label: 'To do' },
   { value: 'in_progress', label: 'In Progress' },
