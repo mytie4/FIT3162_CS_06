@@ -14,10 +14,11 @@ import {
   Link as LinkIcon,
 } from 'lucide-react';
 import EventCard from '../components/events/EventCard';
+import CreateEventModal from '../components/events/CreateEventModal';
 import MembersTable from '../components/clubs/MembersTable';
 import InviteMembersModal from '../components/clubs/InviteMembersModal';
 import LeaveClubModal from '../components/clubs/LeaveClubModal';
-import { fetchClubById, fetchClubMembers, fetchMyRole, leaveClub } from '../api/clubs.api';
+import { fetchClubById, fetchClubMembers, fetchMyRole } from '../api/clubs.api';
 import { useAuth } from '../context/AuthContext';
 import { fetchClubEvents } from '../api/events.api';
 import type { Event } from '../types/events.types';
@@ -65,6 +66,7 @@ export default function ClubDetailsPage() {
   const [activeTab, setActiveTab] = useState<Tab>('Overview');
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [isLeaveOpen, setIsLeaveOpen] = useState(false);
+  const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
 
   // API state
   const [club, setClub] = useState<Club | null>(null);
@@ -305,7 +307,7 @@ export default function ClubDetailsPage() {
               <div className="cd-events-header">
                 <h2>Club Events</h2>
                 {canManageEvents && (
-                  <button className="cd-btn-outline">
+                  <button className="cd-btn-outline" onClick={() => setIsCreateEventOpen(true)}>
                     <Plus size={16} /> New Event
                   </button>
                 )}
@@ -339,7 +341,7 @@ export default function ClubDetailsPage() {
                     to kick things off!
                   </p>
                   {canManageEvents && (
-                    <button className="cd-btn-primary">
+                    <button className="cd-btn-primary" onClick={() => setIsCreateEventOpen(true)}>
                       Create First Event
                     </button>
                   )}
@@ -517,6 +519,12 @@ export default function ClubDetailsPage() {
       </div>
 
       {/* Modals */}
+      <CreateEventModal
+        isOpen={isCreateEventOpen}
+        onClose={() => setIsCreateEventOpen(false)}
+        onCreated={(newEvent) => setEvents((prev) => [...prev, newEvent])}
+        predefinedClubId={clubId}
+      />
       <InviteMembersModal
         isOpen={isInviteOpen}
         onClose={() => setIsInviteOpen(false)}
@@ -526,17 +534,9 @@ export default function ClubDetailsPage() {
       <LeaveClubModal
         isOpen={isLeaveOpen}
         onClose={() => setIsLeaveOpen(false)}
-        onLeave={async () => {
-          if (!club || !token) return;
-
-          try {
-            await leaveClub(club.club_id, token);
-            setIsLeaveOpen(false);
-            navigate('/clubs');
-          } catch (err) {
-            console.error(err);
-            setError(err instanceof Error ? err.message : 'Failed to leave club');
-          }
+        onLeave={() => {
+          setIsLeaveOpen(false);
+          navigate("/clubs");
         }}
         clubName={club.name}
       />
