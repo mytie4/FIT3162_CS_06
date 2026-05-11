@@ -39,7 +39,6 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
   const [manageableClubs, setManageableClubs] = useState<Club[]>([])
   const [isLoadingClubs, setIsLoadingClubs]   = useState(false)
   const [isSubmitting, setIsSubmitting]       = useState(false)
-  const [isGeneratingAi, setIsGeneratingAi]   = useState(false)
   const [error, setError]                     = useState<string | null>(null)
 
   // Sync predefinedClubId changes
@@ -95,9 +94,6 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
  
   const selectedClub = manageableClubs.find((c) => c.club_id === clubId)
 
-  
-
-
   // ── Form submission ────────────────────────────────────────────────────────
   const handleSubmit = async () => {
     setError(null)
@@ -146,7 +142,7 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
     if (e.target === e.currentTarget && !isSubmitting) onClose()
   }
  
-  const isBusy = isSubmitting || isGeneratingAi
+  const isBusy = isSubmitting
     // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="cem-overlay" onClick={handleOverlayClick}>
@@ -339,24 +335,9 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
  
           {/* Description */}
           <div className="cem-field">
-            <div className="cem-desc-header">
-              <label className="cem-label" htmlFor="cem-description">
-                Description <span className="cem-label-hint">(optional)</span>
-              </label>
-              <button
-                // className="cem-ai-btn"
-                // type="button"
-                // onClick={handleGenerateDescription}
-                // disabled={isBusy}
-                // title="Generate a description with AI"
-              >
-                {isGeneratingAi ? (
-                  <><span className="cem-ai-spinner" /> Generating...</>
-                ) : (
-                  <><Sparkles size={12} /> Generate with AI</>
-                )}
-              </button>
-            </div>
+            <label className="cem-label" htmlFor="cem-description">
+              Description <span className="cem-label-hint">(optional)</span>
+            </label>
             <textarea
               id="cem-description"
               className="cem-textarea"
