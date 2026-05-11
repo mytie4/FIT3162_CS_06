@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { X, Sparkles } from 'lucide-react'
+import { X } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { createEvent } from '../../api/events.api'
 import { getAllClubs } from '../../api/clubs.api'
@@ -16,8 +16,8 @@ const VISIBILITY_OPTIONS = [
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onCreated?: (event: Event) => void;  // callback to refresh list
-  predefinedClubId?: string;             // locks club selector when opened from ClubDetailsPage
+  onCreated?: (event: Event) => void;
+  predefinedClubId?: string
 }
 
 
@@ -56,9 +56,6 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
     getAllClubs(token)
       .then((clubs) => {
         if (isMounted) {
-          // getAllClubs already returns only the user's clubs (via getAllClubsForUser on backend)
-          // We show all of them — the backend's requireClubRole middleware will enforce
-          // president/vice_president at submission time
           setManageableClubs(clubs)
           if (clubs.length > 0 && !clubId) {
             setClubId(clubs[0].club_id)
@@ -142,7 +139,6 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
     if (e.target === e.currentTarget && !isSubmitting) onClose()
   }
  
-  const isBusy = isSubmitting
     // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="cem-overlay" onClick={handleOverlayClick}>
@@ -176,7 +172,7 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
               placeholder="e.g. Annual Trivia Night"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              disabled={isBusy}
+              disabled={isSubmitting}
               autoFocus
             />
           </div>
@@ -206,7 +202,7 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
                 className="cem-select"
                 value={clubId}
                 onChange={(e) => setClubId(e.target.value)}
-                disabled={isBusy || isLoadingClubs}
+                disabled={isSubmitting || isLoadingClubs}
               >
                 {isLoadingClubs ? (
                   <option>Loading clubs...</option>
@@ -235,7 +231,7 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
                 className="cem-select"
                 value={type}
                 onChange={(e) => setType(e.target.value)}
-                disabled={isBusy}
+                disabled={isSubmitting}
               >
                 {EVENT_TYPES.map((t) => (
                   <option key={t} value={t}>{t}</option>
@@ -250,7 +246,7 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
                 className="cem-select"
                 value={visibility}
                 onChange={(e) => setVisibility(e.target.value as 'published' | 'draft')}
-                disabled={isBusy}
+                disabled={isSubmitting}
               >
                 {VISIBILITY_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>{o.label}</option>
@@ -271,7 +267,7 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
                 type="datetime-local"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                disabled={isBusy}
+                disabled={isSubmitting}
               />
             </div>
  
@@ -286,7 +282,7 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
                 value={endDate}
                 min={startDate || undefined}
                 onChange={(e) => setEndDate(e.target.value)}
-                disabled={isBusy}
+                disabled={isSubmitting}
               />
             </div>
           </div>
@@ -303,7 +299,7 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
               placeholder="e.g. Campus Hall B, Room 204"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              disabled={isBusy}
+              disabled={isSubmitting}
             />
           </div>
  
@@ -319,7 +315,7 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
               placeholder="https://..."
               value={bannerUrl}
               onChange={(e) => setBannerUrl(e.target.value)}
-              disabled={isBusy}
+              disabled={isSubmitting}
             />
             {bannerUrl && (
               <div className="cem-banner-preview">
@@ -344,7 +340,7 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
               placeholder="Describe the event for your club members..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              disabled={isBusy}
+              disabled={isSubmitting}
               rows={4}
             />
           </div>
@@ -366,7 +362,7 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
           <button
             className="cem-submit-btn"
             onClick={handleSubmit}
-            disabled={isBusy}
+            disabled={isSubmitting}
           >
             {isSubmitting ? (
               <><span className="cem-ai-spinner" /> Creating...</>
