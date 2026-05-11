@@ -11,12 +11,10 @@ interface AddTaskModalProps {
 export interface TaskFormData {
   title: string
   description: string
-  category: string
   status: string
   dueDate: string
 }
 
-const CATEGORIES = ['Design', 'Tech', 'Logistics', 'Marketing', 'Finance', 'Operations']
 const STATUS_OPTIONS = [
   { value: 'todo', label: 'To do' },
   { value: 'in_progress', label: 'In Progress' },
@@ -28,7 +26,6 @@ export default function AddTaskModal({ isOpen, onClose, onSubmit }: AddTaskModal
   const [formData, setFormData] = useState<TaskFormData>({
     title: '',
     description: '',
-    category: CATEGORIES[0],
     status: STATUS_OPTIONS[0].value,
     dueDate: '',
   })
@@ -57,7 +54,6 @@ export default function AddTaskModal({ isOpen, onClose, onSubmit }: AddTaskModal
       setFormData({
         title: '',
         description: '',
-        category: CATEGORIES[0],
         status: STATUS_OPTIONS[0].value,
         dueDate: '',
       })
@@ -126,41 +122,21 @@ export default function AddTaskModal({ isOpen, onClose, onSubmit }: AddTaskModal
             />
           </div>
 
-          {/* Category & Status row */}
-          <div className="atm-row">
-            <div className="atm-field">
-              <label className="atm-label" htmlFor="atm-category-select">
-                Category Tag
-              </label>
-              <select
-                id="atm-category-select"
-                className="atm-select"
-                value={formData.category}
-                onChange={(e) => handleChange('category', e.target.value)}
-                disabled={isSubmitting}
-              >
-                {CATEGORIES.map((cat) => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="atm-field">
-              <label className="atm-label" htmlFor="atm-status-select">
-                Column / Status
-              </label>
-              <select
-                id="atm-status-select"
-                className="atm-select"
-                value={formData.status}
-                onChange={(e) => handleChange('status', e.target.value)}
-                disabled={isSubmitting}
-              >
-                {STATUS_OPTIONS.map((status) => (
-                  <option key={status.value} value={status.value}>{status.label}</option>
-                ))}
-              </select>
-            </div>
+          <div className="atm-field">
+            <label className="atm-label" htmlFor="atm-status-select">
+              Column / Status
+            </label>
+            <select
+              id="atm-status-select"
+              className="atm-select"
+              value={formData.status}
+              onChange={(e) => handleChange('status', e.target.value)}
+              disabled={isSubmitting}
+            >
+              {STATUS_OPTIONS.map((status) => (
+                <option key={status.value} value={status.value}>{status.label}</option>
+              ))}
+            </select>
           </div>
 
           {/* Due Date */}
