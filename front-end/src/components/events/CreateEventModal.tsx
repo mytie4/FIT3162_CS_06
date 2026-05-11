@@ -1,25 +1,24 @@
 import { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
+import './CreateEventModal.css'
 import { useAuth } from '../../context/AuthContext'
 import { createEvent } from '../../api/events.api'
 import { getAllClubs } from '../../api/clubs.api'
 import type { Event, CreateEvent } from '../../types/events.types'
 import type { Club } from '../../types/clubs.types'
 
-
 const EVENT_TYPES = ['Social', 'Workshop', 'Seminar', 'Sports', 'Cultural', 'Networking', 'Fundraiser', 'Other']
 const VISIBILITY_OPTIONS = [
   { value: 'published', label: 'Public' },
-  { value: 'draft',     label: 'Members Only' },
+  { value: 'draft',     label: 'Members Only (Draft)' },
 ]
 
 interface Props {
-  isOpen: boolean;
-  onClose: () => void;
-  onCreated?: (event: Event) => void;
+  isOpen: boolean
+  onClose: () => void
+  onCreated?: (event: Event) => void
   predefinedClubId?: string
 }
-
 
 export default function CreateEventModal({ isOpen, onClose, onCreated, predefinedClubId }: Props) {
   const { token } = useAuth()
@@ -45,14 +44,14 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
   useEffect(() => {
     setClubId(predefinedClubId ?? '')
   }, [predefinedClubId])
- 
+
   // Load user's manageable clubs when opened without a predefined club
   useEffect(() => {
     if (!isOpen || predefinedClubId || !token) return
- 
+
     let isMounted = true
     setIsLoadingClubs(true)
- 
+
     getAllClubs(token)
       .then((clubs) => {
         if (isMounted) {
@@ -68,10 +67,10 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
       .finally(() => {
         if (isMounted) setIsLoadingClubs(false)
       })
- 
+
     return () => { isMounted = false }
   }, [isOpen, predefinedClubId, token])
- 
+
   // Reset form when modal opens
   useEffect(() => {
     if (!isOpen) return
@@ -86,30 +85,30 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
     setDescription('')
     setError(null)
   }, [isOpen, predefinedClubId])
- 
+
   if (!isOpen) return null
- 
+
   const selectedClub = manageableClubs.find((c) => c.club_id === clubId)
 
-  // ── Form submission ────────────────────────────────────────────────────────
+  // ── Form submission ──────────────────────────────────────────────────────
   const handleSubmit = async () => {
     setError(null)
- 
+
     if (!title.trim()) {
       setError('Event title is required.')
       return
     }
- 
+
     if (!clubId) {
       setError('Please select a hosting club.')
       return
     }
- 
+
     if (!token) {
       setError('You must be logged in to create an event.')
       return
     }
- 
+
     const dto: CreateEvent = {
       club_id:     clubId,
       title:       title.trim(),
@@ -121,9 +120,9 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
       description: description.trim() || undefined,
       status:      visibility,
     }
- 
+
     setIsSubmitting(true)
- 
+
     try {
       const newEvent = await createEvent(dto, token)
       onCreated?.(newEvent)
@@ -134,16 +133,16 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
       setIsSubmitting(false)
     }
   }
- 
+
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget && !isSubmitting) onClose()
   }
- 
-    // ── Render ─────────────────────────────────────────────────────────────────
+
+  // ── Render ───────────────────────────────────────────────────────────────
   return (
     <div className="cem-overlay" onClick={handleOverlayClick}>
       <div className="cem-card" role="dialog" aria-modal="true" aria-labelledby="cem-title">
- 
+
         {/* Header */}
         <div className="cem-header">
           <h2 className="cem-title" id="cem-title">Create New Event</h2>
@@ -156,10 +155,10 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
             <X size={20} />
           </button>
         </div>
- 
+
         {/* Body */}
         <div className="cem-body">
- 
+
           {/* Event Title */}
           <div className="cem-field">
             <label className="cem-label" htmlFor="cem-title-input">
@@ -176,13 +175,13 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
               autoFocus
             />
           </div>
- 
+
           {/* Hosting Club */}
           <div className="cem-field">
             <label className="cem-label" htmlFor="cem-club-select">
               Hosting Club <span className="cem-required">*</span>
             </label>
- 
+
             {predefinedClubId ? (
               /* Locked — opened from ClubDetailsPage */
               <div className="cem-club-locked">
@@ -221,7 +220,7 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
               </select>
             )}
           </div>
- 
+
           {/* Event Type + Visibility row */}
           <div className="cem-date-row">
             <div className="cem-field">
@@ -238,7 +237,7 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
                 ))}
               </select>
             </div>
- 
+
             <div className="cem-field">
               <label className="cem-label" htmlFor="cem-visibility-select">Visibility</label>
               <select
@@ -254,7 +253,7 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
               </select>
             </div>
           </div>
- 
+
           {/* Date & Time row */}
           <div className="cem-date-row">
             <div className="cem-field">
@@ -270,7 +269,7 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
                 disabled={isSubmitting}
               />
             </div>
- 
+
             <div className="cem-field">
               <label className="cem-label" htmlFor="cem-end-date">
                 End Date & Time <span className="cem-label-hint">(optional)</span>
@@ -286,7 +285,7 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
               />
             </div>
           </div>
- 
+
           {/* Location */}
           <div className="cem-field">
             <label className="cem-label" htmlFor="cem-location">
@@ -302,7 +301,7 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
               disabled={isSubmitting}
             />
           </div>
- 
+
           {/* Event Banner URL */}
           <div className="cem-field">
             <label className="cem-label" htmlFor="cem-banner">
@@ -328,7 +327,7 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
               </div>
             )}
           </div>
- 
+
           {/* Description */}
           <div className="cem-field">
             <label className="cem-label" htmlFor="cem-description">
@@ -344,12 +343,12 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
               rows={4}
             />
           </div>
- 
+
           {/* Error */}
           {error && <div className="cem-error">{error}</div>}
- 
+
         </div>
- 
+
         {/* Footer */}
         <div className="cem-footer">
           <button
@@ -364,14 +363,10 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
             onClick={handleSubmit}
             disabled={isSubmitting}
           >
-            {isSubmitting ? (
-              <><span className="cem-ai-spinner" /> Creating...</>
-            ) : (
-              'Create Event'
-            )}
+            {isSubmitting ? 'Creating...' : 'Create Event'}
           </button>
         </div>
- 
+
       </div>
     </div>
   )

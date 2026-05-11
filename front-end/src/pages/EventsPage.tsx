@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Filter, Plus } from 'lucide-react';
 import EventCard from '../components/events/EventCard';
+import CreateEventModal from '../components/events/CreateEventModal';
 import { fetchAllEvents } from '../api/events.api';
 import type { Event } from '../types/events.types';
 import { useAuth } from '../context/AuthContext';
@@ -52,6 +53,7 @@ export default function EventsPage() {
   const [activeTab, setActiveTab] = useState<Tab>('All Events');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -117,6 +119,7 @@ export default function EventsPage() {
   });
 
 return (
+  <>
     <div className="events-page">
       <div className="events-page-header">
         <div>
@@ -142,7 +145,7 @@ return (
             <Filter size={18} />
           </button>
 
-          <button className="events-create-btn">
+          <button className="events-create-btn" onClick={() => setIsCreateEventOpen(true)}>
             <Plus size={18} /> Create Event
           </button>
         </div>
@@ -189,5 +192,12 @@ return (
         </>
       )}
     </div>
+
+    <CreateEventModal
+      isOpen={isCreateEventOpen}
+      onClose={() => setIsCreateEventOpen(false)}
+      onCreated={(newEvent) => setEvents((prev) => [newEvent, ...prev])}
+    />
+    </>
   );
 }
