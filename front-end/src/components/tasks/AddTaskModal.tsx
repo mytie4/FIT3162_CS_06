@@ -17,14 +17,19 @@ export interface TaskFormData {
 }
 
 const CATEGORIES = ['Design', 'Development', 'Testing', 'Documentation', 'Other']
-const STATUSES = ['Backlog', 'To Do', 'In Progress', 'Done']
+const STATUS_OPTIONS = [
+  { value: 'todo', label: 'To do' },
+  { value: 'in_progress', label: 'In Progress' },
+  { value: 'done', label: 'Done' },
+  { value: 'blocked', label: 'Blocked' },
+]
 
 export default function AddTaskModal({ isOpen, onClose, onSubmit }: AddTaskModalProps) {
   const [formData, setFormData] = useState<TaskFormData>({
     title: '',
     description: '',
     category: CATEGORIES[0],
-    status: STATUSES[0],
+    status: STATUS_OPTIONS[0].value,
     dueDate: '',
   })
 
@@ -53,7 +58,7 @@ export default function AddTaskModal({ isOpen, onClose, onSubmit }: AddTaskModal
         title: '',
         description: '',
         category: CATEGORIES[0],
-        status: STATUSES[0],
+        status: STATUS_OPTIONS[0].value,
         dueDate: '',
       })
       onClose()
@@ -151,8 +156,8 @@ export default function AddTaskModal({ isOpen, onClose, onSubmit }: AddTaskModal
                 onChange={(e) => handleChange('status', e.target.value)}
                 disabled={isSubmitting}
               >
-                {STATUSES.map((status) => (
-                  <option key={status} value={status}>{status}</option>
+                {STATUS_OPTIONS.map((status) => (
+                  <option key={status.value} value={status.value}>{status.label}</option>
                 ))}
               </select>
             </div>
