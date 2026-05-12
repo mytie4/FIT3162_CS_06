@@ -5,6 +5,7 @@ import { createEvent } from '../../api/events.api'
 import { getAllClubs } from '../../api/clubs.api'
 import type { Event, CreateEvent } from '../../types/events.types'
 import type { Club } from '../../types/clubs.types'
+import './CreateEventModal.css'
 
 
 const EVENT_TYPES = ['Social', 'Workshop', 'Seminar', 'Sports', 'Cultural', 'Networking', 'Fundraiser', 'Other']
@@ -18,10 +19,19 @@ interface Props {
   onClose: () => void;
   onCreated?: (event: Event) => void;  // callback to refresh list
   predefinedClubId?: string;             // locks club selector when opened from ClubDetailsPage
+  predefinedClubName?: string;           // shown in the locked chip when predefinedClubId is set
+  predefinedClubColor?: string;          // dot color for the locked chip
 }
 
 
-export default function CreateEventModal({ isOpen, onClose, onCreated, predefinedClubId }: Props) {
+export default function CreateEventModal({
+  isOpen,
+  onClose,
+  onCreated,
+  predefinedClubId,
+  predefinedClubName,
+  predefinedClubColor,
+}: Props) {
   const { token } = useAuth()
 
   // Form state
@@ -192,14 +202,16 @@ export default function CreateEventModal({ isOpen, onClose, onCreated, predefine
             </label>
  
             {predefinedClubId ? (
-              /* Locked — opened from ClubDetailsPage */
+              /* Locked — opened from ClubDetailsPage. Name/colour come in as
+                 props so we don't need to refetch the club list just to show
+                 a label. */
               <div className="cem-club-locked">
                 <span
                   className="cem-club-dot"
-                  style={{ backgroundColor: selectedClub?.club_color ?? manageableClubs.find(c => c.club_id === predefinedClubId)?.club_color ?? '#1a6b6e' }}
+                  style={{ backgroundColor: predefinedClubColor ?? selectedClub?.club_color ?? '#1a6b6e' }}
                 />
                 <span className="cem-club-locked-name">
-                  {manageableClubs.find(c => c.club_id === predefinedClubId)?.name ?? 'This Club'}
+                  {predefinedClubName ?? manageableClubs.find(c => c.club_id === predefinedClubId)?.name ?? 'This Club'}
                 </span>
                 <span className="cem-club-locked-hint">Pre-selected</span>
               </div>

@@ -1,0 +1,312 @@
+/* CreateEventModal — styles paired with the cem-* class hierarchy in the .tsx.
+   Brand teal #1a6b6e matches the existing events-create-btn. */
+
+.cem-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.55);
+  backdrop-filter: blur(2px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: cemFadeIn 0.18s ease-out;
+}
+
+@keyframes cemFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.cem-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow:
+    0 20px 50px -12px rgba(17, 24, 39, 0.25),
+    0 4px 12px -4px rgba(17, 24, 39, 0.1);
+  width: 100%;
+  max-width: 560px;
+  max-height: calc(100vh - 48px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: cemSlideUp 0.22s ease-out;
+}
+
+@keyframes cemSlideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Header */
+.cem-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.cem-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.cem-close-btn {
+  background: transparent;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.cem-close-btn:hover:not(:disabled) {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.cem-close-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Body */
+.cem-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cem-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cem-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.cem-required {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.cem-label-hint {
+  font-weight: 400;
+  color: #9ca3af;
+  font-size: 0.78rem;
+}
+
+.cem-input,
+.cem-select,
+.cem-textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  color: #111827;
+  background: #fff;
+  font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
+}
+
+.cem-input:focus,
+.cem-select:focus,
+.cem-textarea:focus {
+  outline: none;
+  border-color: #1a6b6e;
+  box-shadow: 0 0 0 3px rgba(26, 107, 110, 0.15);
+}
+
+.cem-input:disabled,
+.cem-select:disabled,
+.cem-textarea:disabled {
+  background: #f9fafb;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.cem-textarea {
+  resize: vertical;
+  min-height: 96px;
+  line-height: 1.5;
+}
+
+/* Two-column row (event type / visibility / dates) */
+.cem-date-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 520px) {
+  .cem-date-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Locked club chip */
+.cem-club-locked {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #f9fafb;
+}
+
+.cem-club-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.cem-club-locked-name {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #111827;
+  flex: 1;
+}
+
+.cem-club-locked-hint {
+  font-size: 0.72rem;
+  color: #6b7280;
+  background: #fff;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+}
+
+/* Banner preview */
+.cem-banner-preview {
+  margin-top: 8px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f3f4f6;
+  max-height: 140px;
+}
+
+.cem-banner-img {
+  width: 100%;
+  height: 100%;
+  max-height: 140px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Description header + AI button (currently disabled in JSX) */
+.cem-desc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cem-ai-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 1px solid #e5e7eb;
+  color: #6b7280;
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.cem-ai-btn:hover:not(:disabled) {
+  background: #f3f4f6;
+  color: #1a6b6e;
+  border-color: #1a6b6e;
+}
+
+.cem-ai-spinner {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  animation: cemSpin 0.7s linear infinite;
+}
+
+@keyframes cemSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Error banner */
+.cem-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+}
+
+/* Footer */
+.cem-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 24px;
+  border-top: 1px solid #e5e7eb;
+  background: #fafafa;
+}
+
+.cem-cancel-btn,
+.cem-submit-btn {
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cem-cancel-btn {
+  background: #fff;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.cem-cancel-btn:hover:not(:disabled) {
+  background: #f3f4f6;
+}
+
+.cem-submit-btn {
+  background: #1a6b6e;
+  color: #fff;
+  border: 1px solid #1a6b6e;
+}
+
+.cem-submit-btn:hover:not(:disabled) {
+  background: #155758;
+  border-color: #155758;
+}
+
+.cem-cancel-btn:disabled,
+.cem-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

@@ -3,6 +3,7 @@ import * as clubService from './club.service';
 import * as notificationService from './notification.service';
 import * as notificationRepo from '../repositories/notification.repository';
 import * as userRepo from '../repositories/user.repository';
+import * as safetyRepo from '../repositories/safety.repository';
 import {
   CreateEventDTO,
   Event,
@@ -46,6 +47,16 @@ export async function createEvent(
   await clubService.getClubById(sanitizedDTO.club_id);
 
   const event = await eventRepo.createEvent(sanitizedDTO, userId);
+
+  // Seed the default safety checklist for every new event. Best-effort: if
+  // seeding fails we still return the created event rather than rolling back,
+  // because the organiser can re-add checks manually from the Safety tab.
+  try {
+    await safetyRepo.seedDefaultSafetyChecks(event.event_id);
+  } catch (err) {
+    console.error('[safety] failed to seed default checks for event', event.event_id, err);
+  }
+
   return event;
 }
 
@@ -115,6 +126,23 @@ export async function updateEvent(
   }
 
   const sanitizedDTO = sanitizeAndValidateEventDTO(dto) as UpdateEventDTO;
+
+  // Publish gate: a draft event cannot transition to `published` while any
+  // required safety check is still open. Update from anything-other-than-draft
+  // is unaffected (e.g. published -> ongoing, completed) so we only check the
+  // specific draft -> published transition.
+  if (
+    sanitizedDTO.status === 'published' &&
+    existingEvent.status === 'draft'
+  ) {
+    const incomplete = await safetyRepo.countIncompleteRequiredChecks(eventId);
+    if (incomplete > 0) {
+      throw new ServiceError(
+        400,
+        `Cannot publish: ${incomplete} required safety check${incomplete === 1 ? '' : 's'} still incomplete.`,
+      );
+    }
+  }
 
   const updatedEvent = await eventRepo.updateEvent(eventId, sanitizedDTO);
 
