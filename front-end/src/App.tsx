@@ -40,7 +40,6 @@ function App() {
               element={<EventDetailsPage />}
             />
             <Route path="/events" element={<EventsPage />} />
-            <Route path="/events/:eventId" element={<EventDetailsPage />} />
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
           </Route>

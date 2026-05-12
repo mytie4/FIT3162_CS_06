@@ -1,5 +1,3 @@
-export type HazardSeverity = 'low' | 'medium' | 'high';
-
 export interface SafetyCheck {
   check_id: string;
   event_id: string;
@@ -26,28 +24,6 @@ export interface UpdateSafetyCheckDTO {
   required?: boolean;
   completed?: boolean;
   sort_order?: number;
-}
-
-export interface Hazard {
-  hazard_id: string;
-  event_id: string;
-  label: string;
-  severity: HazardSeverity;
-  notes: string | null;
-  created_by: string | null;
-  created_at: string;
-}
-
-export interface CreateHazardDTO {
-  label: string;
-  severity?: HazardSeverity;
-  notes?: string;
-}
-
-export interface UpdateHazardDTO {
-  label?: string;
-  severity?: HazardSeverity;
-  notes?: string | null;
 }
 
 export interface EmergencyContact {
@@ -77,20 +53,50 @@ export interface UpdateEmergencyContactDTO {
   sort_order?: number;
 }
 
-// Default checklist seeded into every new outdoor event. Kept in code (not
-// the DB) so future tweaks don't require a migration. Order matters — the UI
-// renders by sort_order.
+// Default checklist seeded into every new event. Labels track the Monash HSW
+// event planning framework so club organisers see the same language they'll
+// encounter when filing the ERMP in SARAH. Kept in code (not the DB) so
+// future tweaks don't require a migration. Order matters — the UI renders by
+// sort_order.
 export const DEFAULT_SAFETY_CHECK_TEMPLATE: ReadonlyArray<{
   label: string;
   description?: string;
   required: boolean;
 }> = [
-  { label: 'Risk assessment completed and filed', required: true },
-  { label: 'Trip leader and first-aider assigned', required: true },
-  { label: 'Emergency contacts confirmed', required: true },
-  { label: 'Weather forecast reviewed', required: true },
-  { label: 'Hazard list reviewed with attendees', required: true },
-  { label: 'Equipment checked and signed off', required: true },
-  { label: 'Liability waivers collected from all attendees', required: true },
-  { label: 'Medical declarations collected from all attendees', required: true },
+  {
+    label: 'Event Risk Management Plan (ERMP) submitted',
+    description: 'Lodge via the Monash SARAH system before promoting the event.',
+    required: true,
+  },
+  {
+    label: 'Event Safety Marshal appointed',
+    description: 'Named Monash worker trained to act on risks during the event.',
+    required: true,
+  },
+  {
+    label: 'First aider identified',
+    description: 'At least one attendee with current first aid qualifications.',
+    required: true,
+  },
+  {
+    label: 'Hazards identified with control measures',
+    description: 'Each hazard recorded with a mitigation in the ERMP.',
+    required: true,
+  },
+  {
+    label: 'Emergency contacts confirmed',
+    required: true,
+  },
+  {
+    label: 'Weather and site conditions reviewed',
+    required: true,
+  },
+  {
+    label: 'Equipment inspected and signed off',
+    required: true,
+  },
+  {
+    label: 'Attendee consent and medical declarations collected',
+    required: true,
+  },
 ];

@@ -211,33 +211,6 @@
   display: block;
 }
 
-/* Description header + AI button (currently disabled in JSX) */
-.cem-desc-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.cem-ai-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: transparent;
-  border: 1px solid #e5e7eb;
-  color: #6b7280;
-  font-size: 0.72rem;
-  font-weight: 500;
-  padding: 4px 8px;
-  border-radius: 999px;
-  cursor: pointer;
-}
-
-.cem-ai-btn:hover:not(:disabled) {
-  background: #f3f4f6;
-  color: #1a6b6e;
-  border-color: #1a6b6e;
-}
-
 .cem-ai-spinner {
   width: 12px;
   height: 12px;

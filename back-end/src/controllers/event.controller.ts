@@ -11,7 +11,9 @@ export async function createEvent(req: AuthRequest, res: Response) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const dto: CreateEventDTO = req.body;
+    const { clubId } = req.params;
+    // clubId comes from the URL — body's club_id is ignored to avoid mismatch
+    const dto: CreateEventDTO = { ...req.body, club_id: clubId };
     const event = await eventService.createEvent(dto, userId);
 
     return res.status(201).json({
@@ -37,8 +39,11 @@ export async function createEvent(req: AuthRequest, res: Response) {
 
 export async function getEventById(req: AuthRequest, res: Response) {
   try {
-    const { id } = req.params;
-    const event = await eventService.getEventById(id);
+    const { clubId, eventId } = req.params;
+    const event = await eventService.getEventById(eventId);
+    if (event.club_id !== clubId) {
+      return res.status(404).json({ error: 'Event not found in this club' });
+    }
     return res.status(200).json(event);
   } catch (error) {
     if (error instanceof ServiceError) {
@@ -81,10 +86,16 @@ export async function getEventsByClubId(req: AuthRequest, res: Response) {
 
 export async function updateEvent(req: AuthRequest, res: Response) {
   try {
-    const { id } = req.params;
+    const { clubId, eventId } = req.params;
+    // Verify event actually belongs to the club in the URL — otherwise a user
+    // with role in club A could mutate an event in club B via a mismatched URL
+    const existing = await eventService.getEventById(eventId);
+    if (existing.club_id !== clubId) {
+      return res.status(404).json({ error: 'Event not found in this club' });
+    }
     const dto: UpdateEventDTO = req.body;
     const senderUserId = req.user?.user_id;
-    const updatedEvent = await eventService.updateEvent(id, dto, senderUserId);
+    const updatedEvent = await eventService.updateEvent(eventId, dto, senderUserId);
     return res.status(200).json({
       message: 'Event updated successfully',
       event: updatedEvent,
@@ -108,8 +119,12 @@ export async function updateEvent(req: AuthRequest, res: Response) {
 
 export async function deleteEvent(req: AuthRequest, res: Response) {
   try {
-    const { id } = req.params;
-    await eventService.deleteEvent(id);
+    const { clubId, eventId } = req.params;
+    const existing = await eventService.getEventById(eventId);
+    if (existing.club_id !== clubId) {
+      return res.status(404).json({ error: 'Event not found in this club' });
+    }
+    await eventService.deleteEvent(eventId);
     return res.status(204).send();
   } catch (error) {
     if (error instanceof ServiceError) {

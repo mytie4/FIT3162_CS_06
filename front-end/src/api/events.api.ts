@@ -16,8 +16,14 @@ export async function fetchAssignedEvents(clubId: string, eventId: string, taskI
   return parseJsonSafe<Event[]>(res, 'Failed to fetch event');
 }
 
-export async function fetchEventById(clubId: string, eventId: string): Promise<Event> {
-  const res = await fetchWithTimeout(`${API_BASE}/api/clubs/${clubId}/events/${eventId}`);
+export async function fetchEventById(
+  clubId: string,
+  eventId: string,
+  token?: string,
+): Promise<Event> {
+  const res = await fetchWithTimeout(`${API_BASE}/api/clubs/${clubId}/events/${eventId}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
   return parseJsonSafe<Event>(res, 'Failed to fetch event');
 }
 
@@ -27,15 +33,11 @@ export async function fetchClubEvents(clubId: string): Promise<Event[]> {
 }
 
 export async function createEvent(
-  _clubId: string,
+  clubId: string,
   dto: CreateEvent,
   token: string,
 ): Promise<Event> {
-  // Backend exposes POST /api/events; the clubId is read from the body
-  // (`dto.club_id`) by the RBAC middleware. We keep the first positional arg
-  // for backward compatibility with existing callers — it's intentionally
-  // unused. Once all callers are updated we can drop it.
-  const res = await fetchWithTimeout(`${API_BASE}/api/events`, {
+  const res = await fetchWithTimeout(`${API_BASE}/api/clubs/${clubId}/events`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -54,8 +56,8 @@ export async function createEvent(
 }
 
 export async function updateEvent(
-  eventId: string,
   clubId: string,
+  eventId: string,
   dto: UpdateEvent,
   token: string,
 ): Promise<Event> {
@@ -68,12 +70,18 @@ export async function updateEvent(
     body: JSON.stringify(dto),
   });
 
-  return parseJsonSafe<Event>(res, 'Failed to update event');
+  // Controller wraps the response as { message, event }. Unwrap so callers
+  // get the event itself.
+  const envelope = await parseJsonSafe<{ message?: string; event: Event }>(
+    res,
+    'Failed to update event',
+  );
+  return envelope.event;
 }
 
 export async function deleteEvent(
-  eventId: string,
   clubId: string,
+  eventId: string,
   token: string,
 ): Promise<void> {
   const res = await fetchWithTimeout(`${API_BASE}/api/clubs/${clubId}/events/${eventId}`, {
@@ -83,5 +91,8 @@ export async function deleteEvent(
     },
   });
 
-  await parseJsonSafe<null>(res, 'Failed to delete event');
+  // 204 No Content — don't try to parse JSON
+  if (!res.ok) {
+    throw new Error('Failed to delete event');
+  }
 }

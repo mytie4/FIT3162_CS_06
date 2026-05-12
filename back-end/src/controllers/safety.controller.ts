@@ -3,10 +3,8 @@ import * as safetyService from '../services/safety.service';
 import { AuthRequest } from '../middlewares/auth.middleware';
 import {
   CreateEmergencyContactDTO,
-  CreateHazardDTO,
   CreateSafetyCheckDTO,
   UpdateEmergencyContactDTO,
-  UpdateHazardDTO,
   UpdateSafetyCheckDTO,
 } from '../entities/safety.entity';
 import { ServiceError } from '../services/club.service';
@@ -67,56 +65,6 @@ export async function deleteSafetyCheck(req: AuthRequest, res: Response) {
     return res.status(204).send();
   } catch (error) {
     return handleError(res, error, 'Delete safety check');
-  }
-}
-
-// ---- Hazards ---------------------------------------------------------------
-
-export async function getHazards(req: AuthRequest, res: Response) {
-  try {
-    const userId = req.user?.user_id;
-    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
-
-    const { eventId } = req.params;
-    const hazards = await safetyService.getHazards(eventId, userId);
-    return res.status(200).json(hazards);
-  } catch (error) {
-    return handleError(res, error, 'Get hazards');
-  }
-}
-
-export async function createHazard(req: AuthRequest, res: Response) {
-  try {
-    const userId = req.user?.user_id;
-    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
-
-    const { eventId } = req.params;
-    const dto: CreateHazardDTO = req.body ?? {};
-    const hazard = await safetyService.createHazard(eventId, dto, userId);
-    return res.status(201).json({ message: 'Hazard created', hazard });
-  } catch (error) {
-    return handleError(res, error, 'Create hazard');
-  }
-}
-
-export async function updateHazard(req: AuthRequest, res: Response) {
-  try {
-    const { eventId, hazardId } = req.params;
-    const dto: UpdateHazardDTO = req.body ?? {};
-    const hazard = await safetyService.updateHazard(eventId, hazardId, dto);
-    return res.status(200).json({ message: 'Hazard updated', hazard });
-  } catch (error) {
-    return handleError(res, error, 'Update hazard');
-  }
-}
-
-export async function deleteHazard(req: AuthRequest, res: Response) {
-  try {
-    const { eventId, hazardId } = req.params;
-    await safetyService.deleteHazard(eventId, hazardId);
-    return res.status(204).send();
-  } catch (error) {
-    return handleError(res, error, 'Delete hazard');
   }
 }
 

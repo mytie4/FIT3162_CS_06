@@ -42,9 +42,7 @@
 
 /* Header card */
 .cd-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 32px;
+  padding: 0 40px;
   position: relative;
   z-index: 10;
 }
@@ -390,6 +388,7 @@
 /* Settings tab */
 .cd-settings {
   max-width: 640px;
+  margin: 0 auto;
 }
 
 .cd-settings-card {

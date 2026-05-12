@@ -3,19 +3,13 @@ import * as eventRepo from '../repositories/event.repository';
 import { isUserInClub } from '../repositories/club.repository';
 import {
   CreateEmergencyContactDTO,
-  CreateHazardDTO,
   CreateSafetyCheckDTO,
   EmergencyContact,
-  Hazard,
-  HazardSeverity,
   SafetyCheck,
   UpdateEmergencyContactDTO,
-  UpdateHazardDTO,
   UpdateSafetyCheckDTO,
 } from '../entities/safety.entity';
 import { ServiceError } from './club.service';
-
-const VALID_SEVERITIES: HazardSeverity[] = ['low', 'medium', 'high'];
 
 // ---- Safety Checks ---------------------------------------------------------
 
@@ -66,57 +60,6 @@ export async function deleteSafetyCheck(
     throw new ServiceError(404, 'Safety check not found.');
   }
   await safetyRepo.deleteSafetyCheck(checkId);
-}
-
-// ---- Hazards ---------------------------------------------------------------
-
-export async function getHazards(
-  eventId: string,
-  userId: string,
-): Promise<Hazard[]> {
-  await assertEventMember(eventId, userId);
-  return safetyRepo.getHazardsByEventId(eventId);
-}
-
-export async function createHazard(
-  eventId: string,
-  dto: CreateHazardDTO,
-  userId: string,
-): Promise<Hazard> {
-  await assertEventExists(eventId);
-  const sanitized = sanitizeHazardDTO(dto) as CreateHazardDTO;
-  if (!sanitized.label) {
-    throw new ServiceError(400, 'Hazard label is required.');
-  }
-  return safetyRepo.createHazard(eventId, sanitized, userId);
-}
-
-export async function updateHazard(
-  eventId: string,
-  hazardId: string,
-  dto: UpdateHazardDTO,
-): Promise<Hazard> {
-  const existing = await safetyRepo.getHazardById(hazardId);
-  if (!existing || existing.event_id !== eventId) {
-    throw new ServiceError(404, 'Hazard not found.');
-  }
-  const sanitized = sanitizeHazardDTO(dto) as UpdateHazardDTO;
-  const updated = await safetyRepo.updateHazard(hazardId, sanitized);
-  if (!updated) {
-    throw new ServiceError(400, 'No valid fields provided to update.');
-  }
-  return updated;
-}
-
-export async function deleteHazard(
-  eventId: string,
-  hazardId: string,
-): Promise<void> {
-  const existing = await safetyRepo.getHazardById(hazardId);
-  if (!existing || existing.event_id !== eventId) {
-    throw new ServiceError(404, 'Hazard not found.');
-  }
-  await safetyRepo.deleteHazard(hazardId);
 }
 
 // ---- Emergency Contacts ----------------------------------------------------
@@ -236,46 +179,6 @@ function sanitizeSafetyCheckDTO(
   if (cleaned.sort_order !== undefined) {
     if (typeof cleaned.sort_order !== 'number' || !Number.isInteger(cleaned.sort_order)) {
       throw new ServiceError(400, 'sort_order must be an integer.');
-    }
-  }
-
-  return cleaned;
-}
-
-function sanitizeHazardDTO(
-  dto: CreateHazardDTO | UpdateHazardDTO,
-): CreateHazardDTO | UpdateHazardDTO {
-  const cleaned: CreateHazardDTO | UpdateHazardDTO = { ...dto };
-
-  if (cleaned.label !== undefined) {
-    if (typeof cleaned.label !== 'string') {
-      throw new ServiceError(400, 'Hazard label must be a string.');
-    }
-    cleaned.label = cleaned.label.trim();
-    if (cleaned.label.length === 0) {
-      throw new ServiceError(400, 'Hazard label cannot be empty.');
-    }
-    if (cleaned.label.length > 120) {
-      throw new ServiceError(400, 'Hazard label cannot exceed 120 characters.');
-    }
-  }
-
-  if (cleaned.severity !== undefined) {
-    if (!VALID_SEVERITIES.includes(cleaned.severity)) {
-      throw new ServiceError(
-        400,
-        `Invalid severity. Must be one of: ${VALID_SEVERITIES.join(', ')}.`,
-      );
-    }
-  }
-
-  if (cleaned.notes !== undefined && cleaned.notes !== null) {
-    if (typeof cleaned.notes !== 'string') {
-      throw new ServiceError(400, 'Hazard notes must be a string.');
-    }
-    cleaned.notes = cleaned.notes.trim();
-    if (cleaned.notes.length > 2000) {
-      throw new ServiceError(400, 'Hazard notes cannot exceed 2000 characters.');
     }
   }
 

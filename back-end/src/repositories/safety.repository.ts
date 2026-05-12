@@ -1,14 +1,11 @@
 import pool from '../db';
 import {
   CreateEmergencyContactDTO,
-  CreateHazardDTO,
   CreateSafetyCheckDTO,
   DEFAULT_SAFETY_CHECK_TEMPLATE,
   EmergencyContact,
-  Hazard,
   SafetyCheck,
   UpdateEmergencyContactDTO,
-  UpdateHazardDTO,
   UpdateSafetyCheckDTO,
 } from '../entities/safety.entity';
 
@@ -165,101 +162,6 @@ export async function countIncompleteRequiredChecks(
   );
 
   return result.rows[0]?.count ?? 0;
-}
-
-// ---- Hazards ---------------------------------------------------------------
-
-export async function createHazard(
-  eventId: string,
-  dto: CreateHazardDTO,
-  createdBy: string,
-): Promise<Hazard> {
-  const result = await pool.query(
-    `INSERT INTO "Event_Hazards"
-        (event_id, label, severity, notes, created_by)
-     VALUES ($1, $2, $3, $4, $5)
-     RETURNING *`,
-    [
-      eventId,
-      dto.label,
-      dto.severity ?? 'medium',
-      dto.notes ?? null,
-      createdBy,
-    ],
-  );
-
-  return result.rows[0];
-}
-
-export async function getHazardsByEventId(eventId: string): Promise<Hazard[]> {
-  const result = await pool.query(
-    `SELECT *
-     FROM "Event_Hazards"
-     WHERE event_id = $1
-     ORDER BY
-       CASE severity
-         WHEN 'high' THEN 0
-         WHEN 'medium' THEN 1
-         WHEN 'low' THEN 2
-       END,
-       created_at DESC`,
-    [eventId],
-  );
-
-  return result.rows;
-}
-
-export async function getHazardById(hazardId: string): Promise<Hazard | null> {
-  const result = await pool.query(
-    `SELECT * FROM "Event_Hazards" WHERE hazard_id = $1`,
-    [hazardId],
-  );
-
-  return result.rows[0] ?? null;
-}
-
-export async function updateHazard(
-  hazardId: string,
-  dto: UpdateHazardDTO,
-): Promise<Hazard | null> {
-  const allowedFields: Record<string, string> = {
-    label: 'label',
-    severity: 'severity',
-    notes: 'notes',
-  };
-
-  const setClauses: string[] = [];
-  const values: unknown[] = [];
-  let paramIndex = 1;
-
-  for (const [key, column] of Object.entries(allowedFields)) {
-    if (key in dto) {
-      setClauses.push(`"${column}" = $${paramIndex}`);
-      values.push((dto as Record<string, unknown>)[key] ?? null);
-      paramIndex++;
-    }
-  }
-
-  if (setClauses.length === 0) return null;
-
-  values.push(hazardId);
-
-  const result = await pool.query(
-    `UPDATE "Event_Hazards"
-     SET ${setClauses.join(', ')}
-     WHERE hazard_id = $${paramIndex}
-     RETURNING *`,
-    values,
-  );
-
-  return result.rows[0] ?? null;
-}
-
-export async function deleteHazard(hazardId: string): Promise<void> {
-  await pool.query(
-    `DELETE FROM "Event_Hazards" WHERE hazard_id = $1`,
-    [hazardId],
-  );
 }
 
 // ---- Emergency Contacts ---------------------------------------------------

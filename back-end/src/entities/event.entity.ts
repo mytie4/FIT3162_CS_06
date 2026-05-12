@@ -24,13 +24,15 @@ export interface EventWithClubName extends Event {
 export interface CreateEventDTO {
   club_id: string;
   title: string;
-  type?: string;
-  date?: string;
-  end_date?: string;
-  location?: string;
-  description?: string;
-  banner_url?: string;
-  budget?: number;
+  // Nullable columns accept `null` to explicitly clear the value, or
+  // `undefined` (omitted) to leave it untouched on update.
+  type?: string | null;
+  date?: string | null;
+  end_date?: string | null;
+  location?: string | null;
+  description?: string | null;
+  banner_url?: string | null;
+  budget?: number | null;
   status?: 'draft' | 'published' | 'ongoing' | 'completed' | 'cancelled';
 }
 
