@@ -176,7 +176,7 @@ return (
                   attendees={event.attendee_count ?? 0}
                   color={getEventColor(event)}
                   showClubBadge
-                  onClick={() => navigate(`/events/${event.event_id}`)}
+                  onClick={() => navigate(`/clubs/${event.club_id}/events/${event.event_id}`)}
                 />
               ))}
             </div>

@@ -7,13 +7,20 @@ const router = Router();
 
 /**
  * @openapi
- * /api/events:
+ * /api/clubs/{clubId}/events:
  *   post:
  *    security:
  *     - BearerAuth: []
  *    summary: Create a new event (president or vice president only)
  *    tags:
  *     - Events
+ *    parameters:
+ *     - in: path
+ *       name: clubId
+ *       required: true
+ *       schema:
+ *        type: string
+ *        format: uuid
  *    requestBody:
  *     required: true
  *     content:
@@ -44,7 +51,7 @@ const router = Router();
  *
  */
 router.post(
-  '/events',
+  '/clubs/:clubId/events',
   authMiddleware,
   requireClubRole('president', 'vice_president'),
   eventController.createEvent,
@@ -73,7 +80,7 @@ router.get('/events', authMiddleware, eventController.getAllEvents);
 
 /**
  * @openapi
- * /api/events/{id}:
+ * /api/clubs/{clubId}/events/{eventId}:
  *   get:
  *    security: []
  *    summary: Get event by ID
@@ -81,7 +88,13 @@ router.get('/events', authMiddleware, eventController.getAllEvents);
  *     - Events
  *    parameters:
  *     - in: path
- *       name: id
+ *       name: clubId
+ *       required: true
+ *       schema:
+ *        type: string
+ *        format: uuid
+ *     - in: path
+ *       name: eventId
  *       required: true
  *       schema:
  *        type: string
@@ -98,7 +111,7 @@ router.get('/events', authMiddleware, eventController.getAllEvents);
  *     500:
  *      description: Internal server error
  */
-router.get('/events/:id', eventController.getEventById);
+router.get('/clubs/:clubId/events/:eventId', eventController.getEventById);
 
 /**
  * @openapi
@@ -135,7 +148,7 @@ router.get('/clubs/:clubId/events', eventController.getEventsByClubId);
 
 /**
  * @openapi
- * /api/events/{id}:
+ * /api/clubs/{clubId}/events/{eventId}:
  *   put:
  *    security:
  *      - BearerAuth: []
@@ -144,7 +157,13 @@ router.get('/clubs/:clubId/events', eventController.getEventsByClubId);
  *     - Events
  *    parameters:
  *     - in: path
- *       name: id
+ *       name: clubId
+ *       required: true
+ *       schema:
+ *        type: string
+ *        format: uuid
+ *     - in: path
+ *       name: eventId
  *       required: true
  *       schema:
  *        type: string
@@ -180,7 +199,7 @@ router.get('/clubs/:clubId/events', eventController.getEventsByClubId);
  *      description: Internal server error
  */
 router.put(
-  '/events/:id',
+  '/clubs/:clubId/events/:eventId',
   authMiddleware,
   requireClubRole('president', 'vice_president'),
   eventController.updateEvent,
@@ -188,7 +207,7 @@ router.put(
 
 /**
  * @openapi
- * /api/events/{id}:
+ * /api/clubs/{clubId}/events/{eventId}:
  *   delete:
  *    security:
  *     - BearerAuth: []
@@ -197,7 +216,13 @@ router.put(
  *     - Events
  *    parameters:
  *     - in: path
- *       name: id
+ *       name: clubId
+ *       required: true
+ *       schema:
+ *        type: string
+ *        format: uuid
+ *     - in: path
+ *       name: eventId
  *       required: true
  *       schema:
  *        type: string
@@ -217,7 +242,7 @@ router.put(
  *      description: Internal server error
  */
 router.delete(
-  '/events/:id',
+  '/clubs/:clubId/events/:eventId',
   authMiddleware,
   requireClubRole('president'),
   eventController.deleteEvent,

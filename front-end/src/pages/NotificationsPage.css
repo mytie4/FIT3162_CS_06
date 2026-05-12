@@ -1,8 +1,6 @@
 /* ── Page container (matches `p-8 max-w-4xl mx-auto space-y-8`) ── */
 .notif-page {
-  padding: 32px;
-  max-width: 56rem; /* ~max-w-4xl */
-  margin: 0 auto;
+  padding: 32px 40px;
   display: flex;
   flex-direction: column;
   gap: 32px;

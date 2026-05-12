@@ -205,7 +205,11 @@ function sanitizeAndValidateEventDTO(
 ): CreateEventDTO | UpdateEventDTO {
   const cleaned: CreateEventDTO | UpdateEventDTO = { ...dto };
 
+  // title: required column, cannot be null. Only validate when provided.
   if (cleaned.title !== undefined) {
+    if (typeof cleaned.title !== 'string') {
+      throw new ServiceError(400, 'Event title cannot be empty.');
+    }
     cleaned.title = cleaned.title.trim();
 
     if (!cleaned.title) {
@@ -217,41 +221,41 @@ function sanitizeAndValidateEventDTO(
     }
   }
 
-  if (cleaned.date && isNaN(Date.parse(cleaned.date))) {
+  // Nullable date columns: null clears, string must parse.
+  if (typeof cleaned.date === 'string' && isNaN(Date.parse(cleaned.date))) {
     throw new ServiceError(400, 'Valid event date is required.');
   }
 
-  if (cleaned.end_date && isNaN(Date.parse(cleaned.end_date))) {
+  if (typeof cleaned.end_date === 'string' && isNaN(Date.parse(cleaned.end_date))) {
     throw new ServiceError(400, 'Valid event end date is required.');
   }
 
   if (
-    cleaned.date &&
-    cleaned.end_date &&
+    typeof cleaned.date === 'string' &&
+    typeof cleaned.end_date === 'string' &&
     new Date(cleaned.date) > new Date(cleaned.end_date)
   ) {
     throw new ServiceError(400, 'Event start date cannot be after end date.');
   }
 
-  if (cleaned.type !== undefined) {
+  // Nullable string columns: null passes through (clears the column); strings
+  // get trimmed and validated. Empty-after-trim is rejected — callers should
+  // send null to clear, not empty string.
+  if (typeof cleaned.type === 'string') {
     cleaned.type = cleaned.type.trim();
-
     if (!cleaned.type) {
       throw new ServiceError(400, 'Event type cannot be empty.');
     }
-
     if (cleaned.type.length > 50) {
       throw new ServiceError(400, 'Event type cannot exceed 50 characters.');
     }
   }
 
-  if (cleaned.description !== undefined) {
+  if (typeof cleaned.description === 'string') {
     cleaned.description = cleaned.description.trim();
-
     if (!cleaned.description) {
       throw new ServiceError(400, 'Event description cannot be empty.');
     }
-
     if (cleaned.description.length > 500) {
       throw new ServiceError(
         400,
@@ -260,9 +264,8 @@ function sanitizeAndValidateEventDTO(
     }
   }
 
-  if (cleaned.location !== undefined) {
+  if (typeof cleaned.location === 'string') {
     cleaned.location = cleaned.location.trim();
-
     if (!cleaned.location) {
       throw new ServiceError(400, 'Event location cannot be empty.');
     }
@@ -274,7 +277,7 @@ function sanitizeAndValidateEventDTO(
     }
   }
 
-  if (cleaned.budget !== undefined) {
+  if (cleaned.budget !== undefined && cleaned.budget !== null) {
     if (typeof cleaned.budget !== 'number' || cleaned.budget < 0) {
       throw new ServiceError(
         400,
@@ -283,13 +286,11 @@ function sanitizeAndValidateEventDTO(
     }
   }
 
-  if (cleaned.banner_url !== undefined) {
+  if (typeof cleaned.banner_url === 'string') {
     cleaned.banner_url = cleaned.banner_url.trim();
-
     if (!cleaned.banner_url) {
       throw new ServiceError(400, 'Event banner URL cannot be empty.');
     }
-
     try {
       new URL(cleaned.banner_url);
     } catch {
