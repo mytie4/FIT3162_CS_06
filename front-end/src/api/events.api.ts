@@ -27,11 +27,15 @@ export async function fetchClubEvents(clubId: string): Promise<Event[]> {
 }
 
 export async function createEvent(
-  clubId: string,
+  _clubId: string,
   dto: CreateEvent,
   token: string,
 ): Promise<Event> {
-  const res = await fetchWithTimeout(`${API_BASE}/api/clubs/${clubId}/events`, {
+  // Backend exposes POST /api/events; the clubId is read from the body
+  // (`dto.club_id`) by the RBAC middleware. We keep the first positional arg
+  // for backward compatibility with existing callers — it's intentionally
+  // unused. Once all callers are updated we can drop it.
+  const res = await fetchWithTimeout(`${API_BASE}/api/events`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -40,7 +44,13 @@ export async function createEvent(
     body: JSON.stringify(dto),
   });
 
-  return parseJsonSafe<Event>(res, 'Failed to create event');
+  // Controller wraps the response as { message, event }. Unwrap so callers
+  // get the event itself.
+  const envelope = await parseJsonSafe<{ message?: string; event: Event }>(
+    res,
+    'Failed to create event',
+  );
+  return envelope.event;
 }
 
 export async function updateEvent(

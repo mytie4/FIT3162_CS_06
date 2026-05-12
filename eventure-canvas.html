@@ -1,0 +1,1969 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Eventure · Canvas Preview</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/lucide@0.292.0/dist/umd/lucide.min.js"></script>
+<style>
+  html, body, #root { height: 100%; }
+  body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: #f5f0eb; }
+  .anim-fade { animation: fade .3s ease-out; }
+  @keyframes fade { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: none; } }
+  [data-lucide] { display: inline-flex; vertical-align: middle; flex-shrink: 0; }
+  [data-lucide] svg { width: 100%; height: 100%; }
+</style>
+</head>
+<body>
+<div id="root">
+  <div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#1a6b6e;font-family:system-ui;">
+    <div style="text-align:center;">
+      <div style="width:48px;height:48px;border:4px solid #ccfbf1;border-top-color:#1a6b6e;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px;"></div>
+      <div style="font-weight:600;">Loading Eventure preview…</div>
+    </div>
+  </div>
+  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+</div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect } = React;
+const { createRoot } = ReactDOM;
+
+// ---- Lucide wrapper -------------------------------------------------------
+// Renders <i data-lucide="..."> and relies on lucide.createIcons() to swap it
+// for an <svg>. We refresh icons in a top-level useEffect after every render.
+function makeLucide(kebab) {
+  return function LucideIcon({ size = 16, className = '', strokeWidth = 2, color, style, ...rest }) {
+    return (
+      <i
+        data-lucide={kebab}
+        data-stroke-width={strokeWidth}
+        className={className}
+        style={{ width: size, height: size, color, ...(style || {}) }}
+        {...rest}
+      />
+    );
+  };
+}
+const LayoutDashboard = makeLucide('layout-dashboard');
+const Users           = makeLucide('users');
+const Calendar        = makeLucide('calendar');
+const CheckSquare     = makeLucide('check-square');
+const Clock           = makeLucide('clock');
+const Search          = makeLucide('search');
+const Filter          = makeLucide('filter');
+const Plus            = makeLucide('plus');
+const MapPin          = makeLucide('map-pin');
+const MoreHorizontal  = makeLucide('more-horizontal');
+const Bell            = makeLucide('bell');
+const ChevronRight    = makeLucide('chevron-right');
+const TrendingUp      = makeLucide('trending-up');
+const ArrowUpDown     = makeLucide('arrow-up-down');
+const UserPlus        = makeLucide('user-plus');
+const Edit            = makeLucide('edit');
+const Sparkles        = makeLucide('sparkles');
+const X               = makeLucide('x');
+const ImageIcon       = makeLucide('image');
+const CalendarCheck2  = makeLucide('calendar-check-2');
+const ArrowLeft       = makeLucide('arrow-left');
+const Mail            = makeLucide('mail');
+const Shield          = makeLucide('shield');
+const Trash2          = makeLucide('trash-2');
+const Globe           = makeLucide('globe');
+const Instagram       = makeLucide('instagram');
+const MessageSquare   = makeLucide('message-square');
+const CheckCircle2    = makeLucide('check-circle-2');
+const Paperclip       = makeLucide('paperclip');
+const MoreVertical    = makeLucide('more-vertical');
+const ListFilter      = makeLucide('list-filter');
+const FileText        = makeLucide('file-text');
+const Download        = makeLucide('download');
+const DollarSign      = makeLucide('dollar-sign');
+const PieChart        = makeLucide('pie-chart');
+const AlignLeft       = makeLucide('align-left');
+const ExternalLink    = makeLucide('external-link');
+const Folder          = makeLucide('folder');
+const Check           = makeLucide('check');
+const LogOut          = makeLucide('log-out');
+const Send            = makeLucide('send');
+const ShieldCheck     = makeLucide('shield-check');
+const AlertTriangle   = makeLucide('alert-triangle');
+const Stethoscope     = makeLucide('stethoscope');
+const FileCheck2      = makeLucide('file-check-2');
+const Truck           = makeLucide('truck');
+const Wind            = makeLucide('wind');
+const CloudRain       = makeLucide('cloud-rain');
+const Sun             = makeLucide('sun');
+const Phone           = makeLucide('phone');
+const UserCheck       = makeLucide('user-check');
+const Waves           = makeLucide('waves');
+const Compass         = makeLucide('compass');
+const Thermometer     = makeLucide('thermometer');
+const Briefcase       = makeLucide('briefcase');
+const Video           = makeLucide('video');
+const Vote            = makeLucide('vote');
+const FileSignature   = makeLucide('file-signature');
+const CircleAlert     = makeLucide('circle-alert');
+const XCircle         = makeLucide('x-circle');
+
+// ---- Mock data ------------------------------------------------------------
+const MOCK_USER = { name: "Quan", avatar: "https://i.pravatar.cc/150?img=11" };
+
+const MOCK_EVENTS = [
+  { id: 1, title: "Annual Tech Summit 2025", club: "Monash Tech Club", date: "Nov 12-14, 2025", location: "Caulfield Campus, Building H", status: "In Progress", attendees: 124, color: "bg-blue-500", badge: "bg-blue-100 text-blue-700" },
+  { id: 2, title: "End of Year Gala", club: "Business Society", date: "Dec 5, 2025", location: "Crown Palladium", status: "Planning", attendees: 350, color: "bg-purple-500", badge: "bg-purple-100 text-purple-700" },
+  { id: 3, title: "Code to Create Hackathon", club: "Monash Tech Club", date: "Oct 20, 2025", location: "Clayton Woodside Building", status: "Published", attendees: 85, color: "bg-teal-500", badge: "bg-teal-100 text-teal-700" },
+  { id: 4, title: "Weekly Chess Meetup", club: "Monash Chess Club", date: "Every Thursday", location: "Campus Center, Level 2", status: "Ongoing", attendees: 24, color: "bg-orange-500", badge: "bg-orange-100 text-orange-700" }
+];
+
+const MOCK_TASKS = [
+  { id: 101, title: "Finalize stage, booth, and seating arrangement", event: "Annual Tech Summit", due: "Oct 15", priority: "High", color: "border-red-400" },
+  { id: 102, title: "Send reminder to registered attendees", event: "End of Year Gala", due: "Nov 1", priority: "Medium", color: "border-yellow-400" },
+  { id: 103, title: "Catering order confirmation", event: "Annual Tech Summit", due: "Oct 25", priority: "High", color: "border-red-400" },
+  { id: 104, title: "Design badges for speakers", event: "Code to Create Hackathon", due: "Oct 10", priority: "Low", color: "border-green-400" },
+];
+
+const MOCK_CLUBS = [
+  { id: 1, name: "Monash Tech Club", type: "Technology", banner: "bg-[#0f172a]", event: "Annual Tech Summit 2025", members: "124", badgeColors: "bg-blue-100 text-blue-600", isLogo: true, socials: { discord: "https://discord.gg/example", instagram: "https://instagram.com/example", website: "https://monashtech.club" } },
+  { id: 2, name: "Business Society", type: "Academic", banner: "bg-blue-600", event: "End of Year Gala", members: "350", badgeColors: "bg-indigo-100 text-indigo-600", socials: { instagram: "https://instagram.com/example" } },
+  { id: 3, name: "MEGA", type: "Hobby", banner: "bg-[#2d1b4e]", event: "Ongoing event name", members: "45", badgeColors: "bg-orange-100 text-orange-600", isLogo: true, socials: { discord: "https://discord.gg/example" } },
+  { id: 4, name: "Monash Chess Club", type: "Social", banner: "bg-amber-700", event: "Weekly Chess Meetup", members: "24", badgeColors: "bg-orange-100 text-orange-800" },
+  { id: 5, name: "Monash Thai Club", type: "Cultural", banner: "bg-blue-50", event: "Welcome Dinner", members: "80", badgeColors: "bg-red-100 text-red-600", isLogoPattern: true },
+  { id: 6, name: "Data Science Society", type: "Academic", banner: "bg-purple-600", event: "Python Workshop", members: "112", badgeColors: "bg-purple-100 text-purple-600" },
+  { id: 7, name: "Debating Society", type: "Social", banner: "bg-emerald-600", event: "Inter-uni Tournament", members: "55", badgeColors: "bg-emerald-100 text-emerald-600" },
+  { id: 8, name: "Robotics Club", type: "Technology", banner: "bg-slate-700", event: "Robot Wars 2025", members: "40", badgeColors: "bg-blue-100 text-blue-600" },
+];
+
+const MOCK_MEMBERS = [
+  { id: 1, name: "Quan", role: "Admin", email: "quan@student.monash.edu", avatar: "https://i.pravatar.cc/150?img=11", joined: "Mar 2024" },
+  { id: 2, name: "Sarah Connor", role: "Event Manager", email: "sconnor@student.monash.edu", avatar: "https://i.pravatar.cc/150?img=5", joined: "Apr 2024" },
+  { id: 3, name: "David Chen", role: "Member", email: "dchen@student.monash.edu", avatar: "https://i.pravatar.cc/150?img=12", joined: "Jul 2024" },
+  { id: 4, name: "Emily Rogers", role: "Member", email: "erogers@student.monash.edu", avatar: "https://i.pravatar.cc/150?img=9", joined: "Aug 2024" },
+  { id: 5, name: "Michael Chang", role: "Member", email: "mchang@student.monash.edu", avatar: "https://i.pravatar.cc/150?img=14", joined: "Sep 2024" },
+];
+
+const MOCK_PLATFORM_USERS = [
+  { id: 101, name: "Alice Smith", email: "asmith@student.monash.edu", avatar: "https://i.pravatar.cc/150?img=47" },
+  { id: 102, name: "Bob Jones", email: "bjones@student.monash.edu", avatar: "https://i.pravatar.cc/150?img=13" },
+  { id: 103, name: "Charlie Brown", email: "cbrown@student.monash.edu", avatar: "https://i.pravatar.cc/150?img=33" },
+  { id: 104, name: "Diana Prince", email: "dprince@student.monash.edu", avatar: "https://i.pravatar.cc/150?img=41" },
+];
+
+const MOCK_KANBAN = {
+  backlog: [
+    { id: 1, tag: "Design", tagColor: "bg-purple-100 text-purple-700", title: "Event banner & social assets", desc: "Create banner for all social media platforms", avatars: ["11", "5"], due: "Oct 20", colorMark: "bg-purple-500" },
+    { id: 2, tag: "Finance", tagColor: "bg-orange-100 text-orange-700", title: "Sponsorship proposal deck", desc: "Prepare slide deck for potential sponsors", avatars: ["12"], due: "Oct 15", colorMark: "bg-orange-500" },
+    { id: 3, tag: "Operations", tagColor: "bg-pink-100 text-pink-700", title: "Volunteer onboarding guide", desc: "Document roles & responsibilities for day-of volunteers", avatars: ["14", "9"], due: "Oct 25", colorMark: "bg-pink-500", progress: "0 / 3" },
+    { id: 4, tag: "Tech", tagColor: "bg-blue-100 text-blue-700", title: "Registration form QR codes", desc: "Generate QR for check-in stations", avatars: ["11"], colorMark: "bg-blue-500" }
+  ],
+  inProgress: [
+    { id: 5, tag: "Logistics", tagColor: "bg-green-100 text-green-700", title: "Venue floor plan & layout", desc: "Finalize stage, booth, and seating arrangement", avatars: ["5"], due: "2 / 3", colorMark: "bg-green-500" },
+    { id: 6, tag: "Marketing", tagColor: "bg-red-100 text-red-700", title: "Email campaign - Week 2", desc: "Send reminder to registered attendees", avatars: ["9"], due: "Nov 1", colorMark: "bg-red-500", progress: "15 Nov" },
+    { id: 7, tag: "Tech", tagColor: "bg-blue-100 text-blue-700", title: "Livestream setup & testing", desc: "Configure OBS, cameras, and streaming to YouTube", avatars: ["11", "12"], due: "1 / 5", colorMark: "bg-blue-500" },
+    { id: 8, tag: "Logistics", tagColor: "bg-green-100 text-green-700", title: "Catering order confirmation", desc: "Confirm dietary requirements & quantities", avatars: ["14"], colorMark: "bg-orange-500" },
+    { id: 9, tag: "Design", tagColor: "bg-purple-100 text-purple-700", title: "Name badge & lanyard design", desc: "Design badges for speakers, attendees, staff", avatars: ["5", "11"], colorMark: "bg-green-500" }
+  ],
+  review: [
+    { id: 10, tag: "Marketing", tagColor: "bg-red-100 text-red-700", title: "Speaker announcement posts", desc: "4 posts ready for approval before publishing", avatars: ["9"], due: "0 / 2", colorMark: "bg-green-500" },
+    { id: 11, tag: "Finance", tagColor: "bg-orange-100 text-orange-700", title: "Budget reconciliation - Q3", desc: "Awaiting treasurer sign-off", avatars: ["12"], colorMark: "bg-red-500" },
+    { id: 12, tag: "Tech", tagColor: "bg-blue-100 text-blue-700", title: "Eventure event page publish", desc: "Final check of event page copy and links", avatars: ["11"], due: "0 / 1", colorMark: "bg-orange-500" }
+  ],
+  done: [
+    { id: 13, tag: "Logistics", tagColor: "bg-green-100 text-green-700", title: "Venue booking confirmed", avatars: ["5"], done: true },
+    { id: 14, tag: "Marketing", tagColor: "bg-red-100 text-red-700", title: "Event page copy written", avatars: ["9"], done: true },
+    { id: 15, tag: "Tech", tagColor: "bg-blue-100 text-blue-700", title: "Registration system setup", avatars: ["11", "12"], done: true },
+    { id: 16, tag: "Design", tagColor: "bg-purple-100 text-purple-700", title: "Logo & branding kit", avatars: ["5"], done: true },
+    { id: 17, tag: "Finance", tagColor: "bg-orange-100 text-orange-700", title: "Initial budget approved", avatars: ["12"], done: true },
+    { id: 18, tag: "Operations", tagColor: "bg-pink-100 text-pink-700", title: "Speaker invites sent", avatars: ["14"], done: true }
+  ]
+};
+
+const MOCK_BUDGET = [
+  { id: 1, item: "Venue Booking", category: "Logistics", amount: 1500, status: "Paid", date: "Oct 1" },
+  { id: 2, item: "Catering Deposit", category: "Logistics", amount: 800, status: "Paid", date: "Oct 5" },
+  { id: 3, item: "Social Media Ads", category: "Marketing", amount: 300, status: "Pending", date: "Oct 15" },
+  { id: 4, item: "Lanyards & Badges", category: "Design", amount: 250, status: "Pending", date: "Oct 18" }
+];
+
+const MOCK_NOTIFICATIONS = [
+  { id: 1, type: 'invite', sender: 'Sarah Connor', club: 'Data Science Society', time: '10 mins ago', read: false },
+  { id: 2, type: 'task', title: 'Upload venue floorplan', event: 'Annual Tech Summit 2025', time: '2 hours ago', read: false },
+  { id: 3, type: 'reminder', title: 'Event reminder: Weekly Chess Meetup starts in 1 hour', time: '1 day ago', read: true },
+  { id: 4, type: 'task', title: 'Finalize catering budget', event: 'End of Year Gala', time: '2 days ago', read: true },
+  { id: 5, type: 'invite', sender: 'Quan', club: 'Monash Tech Club', time: '3 days ago', read: true },
+];
+
+// --- Outdoor-trip mock data -------------------------------------------------
+const MOCK_SAFETY_CHECKS = [
+  { id: 'risk',      label: 'Risk assessment completed & signed off',         done: true,  detail: 'Aarav K. (Trip Leader)' },
+  { id: 'briefing',  label: 'Pre-trip safety briefing scheduled',             done: true,  detail: '21 May, 18:00 — Campus Centre R3' },
+  { id: 'medical',   label: 'All "going" attendees submitted medical declaration', done: false, detail: '6 / 8 submitted' },
+  { id: 'waiver',    label: 'All "going" attendees signed liability waiver',  done: false, detail: '6 / 8 signed' },
+  { id: 'firstaid',  label: 'First aid kit + qualified first-aider assigned', done: true,  detail: 'Priya S. (Level 2 First Aid)' },
+  { id: 'weather',   label: 'Weather check within 48h of departure',          done: false, detail: 'Auto-checks Fri 22 May' },
+  { id: 'certs',     label: 'Activity competency verified for participants',  done: true,  detail: '6 / 6 paddlers cleared' },
+  { id: 'comms',     label: 'Comms plan filed (PLB, sat phone, check-ins)',   done: true,  detail: 'PLB #MUC-04, Sat phone #2' },
+];
+
+const MOCK_HAZARDS = [
+  { label: 'Cold water (<14°C)',       severity: 'high' },
+  { label: 'Rapid weather change',     severity: 'high' },
+  { label: 'Slippery granite',         severity: 'medium' },
+  { label: 'Snake activity (spring)',  severity: 'medium' },
+  { label: 'Limited mobile coverage',  severity: 'medium' },
+  { label: 'Sun exposure',             severity: 'low' },
+];
+
+const MOCK_WEATHER = [
+  { day: 'Sat', icon: Sun,       temp: '18° / 9°', wind: 'SW 15 km/h', rain: '10%' },
+  { day: 'Sun', icon: CloudRain, temp: '15° / 8°', wind: 'SW 25 km/h', rain: '70%' },
+];
+
+const MOCK_EMERGENCY_CONTACTS = [
+  { name: 'Aarav Khanna',                  role: 'Trip Leader',      phone: '+61 4XX 123 456' },
+  { name: 'Priya Shah',                    role: 'First Aider',      phone: '+61 4XX 987 654' },
+  { name: 'Parks Victoria — Tidal River',  role: 'Local rangers',    phone: '13 19 63' },
+  { name: 'Monash Security (24h)',         role: 'Campus emergency', phone: '+61 3 9905 3333' },
+];
+
+const MOCK_TRIP_ATTENDEES = [
+  { id: 't1', name: 'Aarav Khanna',  rsvp: 'going',      medical: true,  waiver: true,  cert: 'Sea kayak L2', avatar: '11', checkedIn: true },
+  { id: 't2', name: 'Priya Shah',    rsvp: 'going',      medical: true,  waiver: true,  cert: 'First Aid L2', avatar: '5',  checkedIn: true },
+  { id: 't3', name: 'Liam Chen',     rsvp: 'going',      medical: true,  waiver: true,  cert: 'Sea kayak L1', avatar: '12', checkedIn: true },
+  { id: 't4', name: 'Maya Robinson', rsvp: 'going',      medical: true,  waiver: true,  cert: '',             avatar: '9',  checkedIn: false },
+  { id: 't5', name: 'Noah Williams', rsvp: 'going',      medical: true,  waiver: false, cert: '',             avatar: '14', checkedIn: false },
+  { id: 't6', name: 'Ines Vidal',    rsvp: 'going',      medical: false, waiver: false, cert: '',             avatar: '47', checkedIn: false },
+  { id: 't7', name: 'Sofia Nguyen',  rsvp: 'going',      medical: true,  waiver: true,  cert: 'Sea kayak L1', avatar: '41', checkedIn: true },
+  { id: 't8', name: 'Daniel Park',   rsvp: 'going',      medical: true,  waiver: true,  cert: '',             avatar: '33', checkedIn: true },
+  { id: 't9', name: 'Ruby O’Brien',  rsvp: 'interested', medical: false, waiver: false, cert: '',             avatar: '13' },
+  { id: 't10',name: 'Hassan Ali',    rsvp: 'interested', medical: false, waiver: false, cert: '',             avatar: '34' },
+];
+
+const MOCK_VEHICLES = [
+  { id: 'v1', label: 'Minibus (12-seat)', driver: 'Aarav K.',  capacity: 12, claimed: ['Priya S.','Liam C.','Maya R.','Noah W.','Ines V.','Sofia N.','Daniel P.','+ 4'], depart: '06:30', pickup: 'Clayton — Bus Loop', note: 'Tows kayak trailer' },
+  { id: 'v2', label: 'Mazda CX-5',        driver: 'Hassan A.', capacity: 5,  claimed: ['Aarav K.','Ruby O.'],                                                            depart: '07:00', pickup: 'Caulfield — Sir John Monash Dr' },
+  { id: 'v3', label: 'Subaru Forester',   driver: 'Maya R.',   capacity: 5,  claimed: ['+ 1'],                                                                            depart: '06:45', pickup: 'Clayton — Bus Loop', note: 'Roof rack — gear only' },
+];
+
+const MOCK_CONTRACTS = [
+  { id: 'c1', vendor: 'Coach Hire Australia',    type: 'Transport',  value: 1200, status: 'Signed',       deadline: '15 May',  contact: 'sales@coachhire.com.au',  notes: 'Driver included, 2-day rate' },
+  { id: 'c2', vendor: 'Tidal River Camp Ground', type: 'Venue',      value: 480,  status: 'Signed',       deadline: '10 May',  contact: 'bookings@parks.vic.gov.au', notes: '12 unpowered sites, Sat–Sun' },
+  { id: 'c3', vendor: 'Adventure Kayaks Co.',    type: 'Equipment',  value: 270,  status: 'In review',    deadline: '20 May',  contact: 'hire@advkayaks.com.au',     notes: '6 sea kayaks + safety gear' },
+  { id: 'c4', vendor: 'Wilderness First Aid',    type: 'Service',    value: 350,  status: 'Negotiating',  deadline: '18 May',  contact: 'lisa@wildfirstaid.com',     notes: 'Standby first-aider, 2 days' },
+  { id: 'c5', vendor: 'Phillip Catering',        type: 'Catering',   value: 168.7,status: 'Draft',        deadline: '21 May',  contact: 'orders@phillipcat.com.au',  notes: 'Sat dinner only, dietary covered' },
+];
+
+const MOCK_MEETINGS = [
+  { id: 'm1', title: 'Weekly committee sync',         when: 'Mon 12 May, 18:00', where: 'Campus Centre R3', attendees: 6,  status: 'upcoming' },
+  { id: 'm2', title: 'Trip leaders briefing',         when: 'Wed 21 May, 18:00', where: 'Campus Centre R3', attendees: 8,  status: 'upcoming' },
+  { id: 'm3', title: 'Sponsorship review',            when: 'Thu 15 May, 17:30', where: 'Zoom',             attendees: 4,  status: 'upcoming' },
+  { id: 'm4', title: 'Semester 1 retrospective',      when: 'Fri 2 May, 18:00',  where: 'Campus Centre R3', attendees: 9,  status: 'past' },
+  { id: 'm5', title: 'New committee onboarding',      when: 'Tue 22 Apr, 18:00', where: 'Sir Louis Matheson', attendees: 11,status: 'past' },
+];
+
+const MOCK_POLL = {
+  question: 'When can we do the post-trip debrief?',
+  options: [
+    { label: 'Mon 26 May · 18:00', votes: 4, voters: ['11','5','12','9'] },
+    { label: 'Tue 27 May · 18:00', votes: 2, voters: ['14','47'] },
+    { label: 'Wed 28 May · 19:00', votes: 6, voters: ['11','5','12','9','14','41'] },
+  ],
+};
+
+// ---- Components -----------------------------------------------------------
+const BrandLogo = () => (
+  <div className="flex items-center gap-2 px-6 py-8">
+    <div className="w-8 h-8 rounded-lg bg-teal-500 flex items-center justify-center text-white font-bold text-xl">E</div>
+    <span className="text-white font-bold text-xl tracking-wide">Eventure</span>
+  </div>
+);
+
+const Sidebar = ({ activePage, setActivePage }) => {
+  const NAV_ITEMS = [
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'clubs', label: 'Clubs', icon: Users },
+    { id: 'events', label: 'Events', icon: Calendar },
+    { id: 'tasks', label: 'Tasks', icon: CheckSquare },
+  ];
+  return (
+    <aside className="w-[260px] bg-[#0a3d3d] flex flex-col h-screen fixed left-0 top-0 text-white z-20">
+      <BrandLogo />
+      <nav className="flex-1 px-4 space-y-1">
+        {NAV_ITEMS.map((item) => {
+          const Icon = item.icon;
+          const isActive = activePage === item.id;
+          return (
+            <button key={item.id} onClick={() => setActivePage(item.id)}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium ${isActive ? 'bg-[#155758] text-white shadow-sm' : 'text-teal-100 hover:bg-[#114a4a] hover:text-white'}`}>
+              <Icon size={20} className={isActive ? 'text-teal-400' : 'opacity-70'} />
+              {item.label}
+            </button>
+          );
+        })}
+      </nav>
+      <div className="p-6 border-t border-[#155758]">
+        <div className="flex items-center gap-3 cursor-pointer hover:opacity-80">
+          <img src={MOCK_USER.avatar} alt="User" className="w-10 h-10 rounded-full border-2 border-teal-500" />
+          <div className="text-left">
+            <p className="text-sm font-semibold">{MOCK_USER.name}</p>
+            <p className="text-xs text-teal-200">Monash University</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+  );
+};
+
+// ---- Modals ---------------------------------------------------------------
+const CreateClubModal = ({ isOpen, onClose, onCreate }) => {
+  const [formData, setFormData] = useState({ name: '', type: 'Social', description: '' });
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 anim-fade">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col">
+        <div className="p-5 border-b border-gray-100 flex justify-between items-center">
+          <h2 className="text-lg font-bold text-gray-800">Create a Club</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={20}/></button>
+        </div>
+        <div className="p-5 space-y-4 overflow-y-auto">
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1">Name</label>
+            <input type="text" placeholder="Enter name" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-teal-600"
+              value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})}/>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1">Type</label>
+            <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-teal-600"
+              value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})}>
+              <option>Social</option><option>Academic</option><option>Cultural</option><option>Fitness</option><option>Hobby</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1">Add members</label>
+            <div className="border border-gray-200 rounded-lg px-3 py-2 flex gap-2">
+              <span className="bg-gray-100 text-xs px-2 py-1 rounded flex items-center gap-1">New Member 1 <X size={12}/></span>
+              <span className="bg-gray-100 text-xs px-2 py-1 rounded flex items-center gap-1">Jane Doe <X size={12}/></span>
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1">Set banner</label>
+            <div className="w-full h-24 bg-gray-200 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300 cursor-pointer hover:bg-gray-50">
+              <Plus className="text-gray-500" />
+            </div>
+          </div>
+          <div>
+            <div className="flex justify-between items-center mb-1">
+              <label className="block text-xs font-semibold text-gray-600">Description</label>
+              <button className="text-xs text-teal-600 flex items-center gap-1 hover:text-teal-700"><Sparkles size={12} /> Generate with AI</button>
+            </div>
+            <textarea rows={3} placeholder="Enter description" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-teal-600"
+              value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})}/>
+          </div>
+        </div>
+        <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end">
+          <button onClick={() => onCreate(formData)} className="bg-[#1a6b6e] text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-[#155758]">Create</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const JoinClubModal = ({ isOpen, onClose }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 anim-fade">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden text-center p-6 relative">
+        <button onClick={onClose} className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"><X size={20}/></button>
+        <h2 className="text-lg font-bold text-gray-800 mb-4">Join a club with a code</h2>
+        <input type="text" placeholder="Enter join code" className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-teal-600 mb-4 text-center tracking-widest uppercase"/>
+        <button className="w-full bg-[#1a6b6e] text-white px-4 py-3 rounded-lg text-sm font-semibold hover:bg-[#155758]">Join Club</button>
+      </div>
+    </div>
+  );
+};
+
+const InviteMembersModal = ({ isOpen, onClose, clubName }) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  if (!isOpen) return null;
+  const searchResults = MOCK_PLATFORM_USERS.filter(u =>
+    (u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+     u.email.toLowerCase().includes(searchQuery.toLowerCase())) &&
+    !selectedUsers.find(s => s.id === u.id));
+  return (
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 anim-fade">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col">
+        <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+          <div>
+            <h2 className="text-lg font-bold text-gray-800">Invite to {clubName}</h2>
+            <p className="text-xs text-gray-500">Search for students or share a link.</p>
+          </div>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 bg-white p-1.5 rounded-md border border-gray-200 shadow-sm"><X size={18}/></button>
+        </div>
+        <div className="p-6 space-y-6">
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Share Join Code</label>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-mono text-gray-700 tracking-widest text-center font-bold">
+                {clubName.substring(0, 4).toUpperCase()}-2025
+              </div>
+              <button className="bg-teal-50 text-teal-700 hover:bg-teal-100 border border-teal-200 px-4 py-2.5 rounded-lg text-sm font-semibold">Copy</button>
+            </div>
+            <p className="text-[11px] text-gray-500 mt-1.5">Anyone with this code can request to join the club.</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="h-px bg-gray-200 flex-1"></div>
+            <span className="text-xs font-semibold text-gray-400 uppercase">OR</span>
+            <div className="h-px bg-gray-200 flex-1"></div>
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Search Directory</label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><Search size={16}/></span>
+              <input type="text" placeholder="Search by name or @student.monash.edu..."
+                className="w-full border border-gray-200 rounded-lg pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-teal-600 shadow-sm"
+                value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}/>
+              {searchQuery.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-10 max-h-48 overflow-y-auto">
+                  {searchResults.length > 0 ? searchResults.map(user => (
+                    <div key={user.id} onClick={() => { setSelectedUsers([...selectedUsers, user]); setSearchQuery(''); }}
+                      className="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center gap-3 border-b border-gray-50 last:border-0">
+                      <img src={user.avatar} className="w-8 h-8 rounded-full" alt="avatar" />
+                      <div>
+                        <p className="text-sm font-semibold text-gray-800">{user.name}</p>
+                        <p className="text-xs text-gray-500">{user.email}</p>
+                      </div>
+                      <Plus size={16} className="ml-auto text-teal-600" />
+                    </div>
+                  )) : <div className="px-4 py-3 text-sm text-gray-500 text-center">No users found matching "{searchQuery}"</div>}
+                </div>
+              )}
+            </div>
+          </div>
+          {selectedUsers.length > 0 && (
+            <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Selected to Invite ({selectedUsers.length})</label>
+              <div className="flex flex-wrap gap-2">
+                {selectedUsers.map(user => (
+                  <div key={user.id} className="bg-white border border-gray-200 rounded-full pl-1 pr-3 py-1 flex items-center gap-2 shadow-sm">
+                    <img src={user.avatar} className="w-6 h-6 rounded-full" alt="avatar" />
+                    <span className="text-xs font-semibold text-gray-700">{user.name}</span>
+                    <button onClick={() => setSelectedUsers(selectedUsers.filter(u => u.id !== user.id))} className="text-gray-400 hover:text-red-500 ml-1">
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+          <button onClick={onClose} className="px-5 py-2 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-200">Cancel</button>
+          <button disabled={selectedUsers.length === 0}
+            className="bg-[#1a6b6e] text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-[#155758] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+            <Mail size={16} /> Send Invites
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const CreateEventModal = ({ isOpen, onClose, onCreate, predefinedClub }) => {
+  const [formData, setFormData] = useState({ title: '', club: predefinedClub || '', date: '', location: '', type: 'Public', description: '' });
+  if (!isOpen) return null;
+  const handleSubmit = () => { if (onCreate) onCreate(formData); onClose(); };
+  return (
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 anim-fade">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="p-5 border-b border-gray-100 flex justify-between items-center">
+          <h2 className="text-lg font-bold text-gray-800">Create a New Event</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={20}/></button>
+        </div>
+        <div className="p-5 space-y-4 overflow-y-auto">
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1">Event Title</label>
+            <input type="text" placeholder="E.g., Welcome Pizza Night" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-teal-600"
+              value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})}/>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1">Hosting Club</label>
+              <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-teal-600 bg-white"
+                value={formData.club} onChange={e => setFormData({...formData, club: e.target.value, type: 'Public'})} disabled={!!predefinedClub}>
+                <option value="">None (Personal Event)</option>
+                {MOCK_CLUBS.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1">Visibility</label>
+              <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-teal-600 bg-white"
+                value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})}>
+                <option>Public</option>
+                {formData.club ? <option>Members Only</option> : <option>Invite Only / Private</option>}
+              </select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1">Date & Time</label>
+              <input type="datetime-local" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-teal-600"
+                value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})}/>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1">Location</label>
+              <input type="text" placeholder="E.g., Campus Center" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-teal-600"
+                value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})}/>
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1">Event Banner (Optional)</label>
+            <div className="w-full h-24 bg-gray-200 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300 cursor-pointer hover:bg-gray-50">
+              <span className="flex items-center gap-2 text-gray-500 font-medium text-sm"><ImageIcon size={18} /> Upload Image</span>
+            </div>
+          </div>
+          <div>
+            <div className="flex justify-between items-center mb-1">
+              <label className="block text-xs font-semibold text-gray-600">Event Description</label>
+              <button className="text-xs text-teal-600 flex items-center gap-1 hover:text-teal-700"><Sparkles size={12} /> Generate with AI</button>
+            </div>
+            <textarea rows={3} placeholder="Tell attendees what to expect..." className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-teal-600"
+              value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})}/>
+          </div>
+        </div>
+        <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+          <button onClick={onClose} className="px-5 py-2 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-200">Cancel</button>
+          <button onClick={handleSubmit} className="bg-[#1a6b6e] text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-[#155758] shadow-sm">Create Event</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const LeaveClubModal = ({ isOpen, onClose, onLeave, clubName }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 anim-fade">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden text-center p-6 relative">
+        <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4"><LogOut size={24} /></div>
+        <h2 className="text-lg font-bold text-gray-800 mb-2">Leave Club?</h2>
+        <p className="text-sm text-gray-500 mb-6">Are you sure you want to leave <b>{clubName}</b>? You will lose access to all internal events and tasks.</p>
+        <div className="flex gap-3">
+          <button onClick={onClose} className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200">Cancel</button>
+          <button onClick={onLeave} className="flex-1 bg-red-600 text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-red-700 shadow-sm">Leave Club</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const CreateTaskModal = ({ isOpen, onClose, onCreate }) => {
+  const [formData, setFormData] = useState({ title: '', desc: '', tag: 'Design', due: '', column: 'backlog' });
+  if (!isOpen) return null;
+  const handleSubmit = () => {
+    if (!formData.title) return;
+    onCreate(formData);
+    setFormData({ title: '', desc: '', tag: 'Design', due: '', column: 'backlog' });
+    onClose();
+  };
+  return (
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 anim-fade">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="p-5 border-b border-gray-100 flex justify-between items-center">
+          <h2 className="text-lg font-bold text-gray-800">Add New Task</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={20}/></button>
+        </div>
+        <div className="p-5 space-y-4 overflow-y-auto">
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1">Task Title</label>
+            <input type="text" placeholder="What needs to be done?" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-teal-600"
+              value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})}/>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1">Description</label>
+            <textarea rows={3} placeholder="Add details, instructions, etc." className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-teal-600"
+              value={formData.desc} onChange={e => setFormData({...formData, desc: e.target.value})}/>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1">Category Tag</label>
+              <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white" value={formData.tag} onChange={e => setFormData({...formData, tag: e.target.value})}>
+                <option>Design</option><option>Tech</option><option>Logistics</option><option>Marketing</option><option>Finance</option><option>Operations</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1">Column / Status</label>
+              <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white" value={formData.column} onChange={e => setFormData({...formData, column: e.target.value})}>
+                <option value="backlog">Backlog</option><option value="inProgress">In Progress</option><option value="review">Review</option><option value="done">Done</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1">Due Date</label>
+            <input type="date" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" value={formData.due} onChange={e => setFormData({...formData, due: e.target.value})}/>
+          </div>
+        </div>
+        <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+          <button onClick={onClose} className="px-5 py-2 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-200">Cancel</button>
+          <button onClick={handleSubmit} className="bg-[#1a6b6e] text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-[#155758] shadow-sm">Add Task</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const TaskDetailsModal = ({ isOpen, onClose, task }) => {
+  if (!isOpen || !task) return null;
+  return (
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 sm:p-6 anim-fade">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="p-6 border-b border-gray-100 flex justify-between items-start bg-gray-50/50">
+          <div className="flex-1 pr-4">
+            <div className="flex items-center gap-2 mb-3">
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wide ${task.tagColor || 'bg-gray-100 text-gray-700'}`}>{task.tag}</span>
+              <span className="text-xs font-bold text-gray-500 bg-white border border-gray-200 px-2 py-0.5 rounded">{task.status}</span>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 leading-tight">{task.title}</h2>
+          </div>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 p-2 rounded-lg"><X size={20}/></button>
+        </div>
+        <div className="flex-1 overflow-y-auto flex flex-col md:flex-row">
+          <div className="flex-1 p-6 border-r border-gray-100 space-y-8">
+            <div>
+              <h3 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2"><AlignLeft size={16} className="text-gray-400"/> Description</h3>
+              <div className="bg-gray-50/50 rounded-xl p-4 text-sm text-gray-700 leading-relaxed border border-gray-100 min-h-[80px]">
+                {task.desc || <span className="text-gray-400 italic">No description provided for this task. Click to add one.</span>}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2"><CheckSquare size={16} className="text-gray-400"/> Subtasks</h3>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3"><input type="checkbox" defaultChecked className="w-4 h-4"/><span className="text-sm text-gray-500 line-through">Create initial draft</span></div>
+                <div className="flex items-center gap-3"><input type="checkbox" className="w-4 h-4"/><span className="text-sm text-gray-700 font-medium">Review with committee</span></div>
+                <div className="flex items-center gap-3"><input type="checkbox" className="w-4 h-4"/><span className="text-sm text-gray-700 font-medium">Publish final version</span></div>
+                <button className="text-sm text-[#1a6b6e] font-semibold hover:underline mt-2 flex items-center gap-1"><Plus size={14}/> Add subtask</button>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2"><MessageSquare size={16} className="text-gray-400"/> Activity</h3>
+              <div className="space-y-4 mb-6">
+                <div className="flex gap-3">
+                  <img src="https://i.pravatar.cc/150?img=5" className="w-8 h-8 rounded-full border border-gray-200" alt="user"/>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-gray-900">Sarah Connor</span>
+                      <span className="text-xs text-gray-500">2 hours ago</span>
+                    </div>
+                    <p className="text-sm text-gray-700 mt-1 bg-gray-50 p-3 rounded-lg rounded-tl-none border border-gray-100">
+                      I've attached the preliminary design files. Let me know what you think!
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-3 items-start">
+                <img src={MOCK_USER.avatar} className="w-8 h-8 rounded-full border border-gray-200" alt="me"/>
+                <div className="flex-1 relative">
+                  <textarea rows={2} placeholder="Write a comment or update..." className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-teal-600 resize-none shadow-sm"></textarea>
+                  <button className="absolute bottom-3 right-3 text-white bg-[#1a6b6e] hover:bg-[#155758] p-1.5 rounded-lg shadow-sm"><Send size={14}/></button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="w-full md:w-72 bg-gray-50/50 p-6 space-y-6">
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Assignees</label>
+              <div className="flex flex-wrap gap-2 items-center">
+                {task.avatars && task.avatars.map((av, i) => (
+                  <img key={i} src={`https://i.pravatar.cc/150?img=${av}`} className="w-8 h-8 rounded-full border-2 border-white shadow-sm" alt="avatar"/>
+                ))}
+                <button className="w-8 h-8 rounded-full border border-dashed border-gray-400 flex items-center justify-center text-gray-400 hover:text-gray-600 bg-white"><Plus size={16}/></button>
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Due Date</label>
+              <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 py-2 cursor-pointer hover:border-teal-600 shadow-sm">
+                <Calendar size={16} className="text-gray-400"/>
+                <span className="text-sm font-semibold text-gray-700">{task.due || 'No date set'}</span>
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Priority</label>
+              <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white font-semibold text-gray-700 outline-none shadow-sm focus:border-teal-600">
+                <option>Low Priority</option><option>Medium Priority</option><option>High Priority</option><option>Urgent</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Attachments</label>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-2 bg-white border border-gray-200 rounded-lg group cursor-pointer hover:border-teal-600 shadow-sm">
+                  <div className="flex items-center gap-2 overflow-hidden">
+                    <FileText size={16} className="text-blue-500" />
+                    <span className="text-xs font-medium text-gray-700 truncate">project_brief_v2.pdf</span>
+                  </div>
+                  <Download size={14} className="text-gray-400 opacity-0 group-hover:opacity-100"/>
+                </div>
+                <button className="w-full py-2.5 text-xs font-semibold text-[#1a6b6e] hover:text-[#155758] border border-dashed border-[#1a6b6e]/30 rounded-lg hover:bg-teal-50 flex items-center justify-center gap-1"><Paperclip size={14}/> Add file</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ---- Pages ----------------------------------------------------------------
+const DashboardPage = () => {
+  const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
+  return (
+    <div className="p-8 max-w-7xl mx-auto space-y-8 anim-fade">
+      <div className="flex justify-between items-end">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, {MOCK_USER.name}!</h1>
+          <p className="text-gray-600">Here's what's happening across your clubs today.</p>
+        </div>
+        <button onClick={() => setIsCreateEventOpen(true)} className="bg-[#1a6b6e] hover:bg-[#155758] text-white px-5 py-2.5 rounded-lg font-semibold flex items-center gap-2 shadow-sm">
+          <Plus size={18} /> New Event
+        </button>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {[
+          { label: "Active Events", value: "4", icon: Calendar, trend: "+2 this month", color: "text-blue-600", bg: "bg-blue-100" },
+          { label: "Pending Tasks", value: "12", icon: CheckSquare, trend: "3 due today", color: "text-orange-600", bg: "bg-orange-100" },
+          { label: "Club Memberships", value: "3", icon: Users, trend: "Admin in 2 clubs", color: "text-teal-600", bg: "bg-teal-100" }
+        ].map((stat, idx) => {
+          const Icon = stat.icon;
+          return (
+            <div key={idx} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-start justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500 mb-1">{stat.label}</p>
+                <h3 className="text-3xl font-bold text-gray-900 mb-2">{stat.value}</h3>
+                <p className="text-xs font-medium text-gray-500 flex items-center gap-1"><TrendingUp size={12} className={stat.color} /> {stat.trend}</p>
+              </div>
+              <div className={`w-12 h-12 rounded-full ${stat.bg} flex items-center justify-center`}><Icon size={24} className={stat.color} /></div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-gray-900">Upcoming Events</h2>
+            <button className="text-[#1a6b6e] text-sm font-semibold hover:underline">View All</button>
+          </div>
+          <div className="space-y-4">
+            {MOCK_EVENTS.slice(0, 3).map((event) => (
+              <div key={event.id} className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-5 hover:shadow-md cursor-pointer group">
+                <div className={`w-16 h-16 rounded-lg ${event.color} flex flex-col items-center justify-center text-white shadow-sm`}>
+                  <span className="text-xs font-bold uppercase opacity-90">{event.date.split(' ')[0]}</span>
+                  <span className="text-xl font-bold">{event.date.split(' ')[1].replace(',', '')}</span>
+                </div>
+                <div className="flex-1">
+                  <div className="flex justify-between items-start mb-1">
+                    <h3 className="font-bold text-gray-900 group-hover:text-[#1a6b6e]">{event.title}</h3>
+                    <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${event.badge}`}>{event.status}</span>
+                  </div>
+                  <p className="text-sm text-gray-500 mb-2">{event.club}</p>
+                  <div className="flex items-center gap-4 text-xs text-gray-500 font-medium">
+                    <span className="flex items-center gap-1"><MapPin size={14} /> {event.location}</span>
+                    <span className="flex items-center gap-1"><Users size={14} /> {event.attendees} Attending</span>
+                  </div>
+                </div>
+                <ChevronRight size={18} className="text-gray-300 group-hover:text-[#1a6b6e]" />
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="space-y-6">
+          <div className="flex items-center justify-between"><h2 className="text-xl font-bold text-gray-900">My Tasks</h2></div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
+              <span className="text-sm font-semibold text-gray-600">Tasks Due Soon</span>
+              <span className="text-xs font-medium text-[#1a6b6e] bg-teal-50 px-2 py-1 rounded">4 Pending</span>
+            </div>
+            <div className="divide-y divide-gray-50">
+              {MOCK_TASKS.map((task) => (
+                <div key={task.id} className={`p-4 hover:bg-gray-50 border-l-4 ${task.color} cursor-pointer`}>
+                  <h4 className="text-sm font-semibold text-gray-800 mb-1 leading-snug">{task.title}</h4>
+                  <p className="text-xs text-gray-500 mb-3">{task.event}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-gray-500 flex items-center gap-1"><Clock size={12} /> Due {task.due}</span>
+                    <div className="w-6 h-6 rounded-full border border-gray-200 overflow-hidden"><img src={MOCK_USER.avatar} alt="assignee" /></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button className="w-full py-3 text-sm font-semibold text-[#1a6b6e] hover:bg-gray-50">Go to Task Board</button>
+          </div>
+        </div>
+      </div>
+      <CreateEventModal isOpen={isCreateEventOpen} onClose={() => setIsCreateEventOpen(false)} />
+    </div>
+  );
+};
+
+const MyTasksPage = () => {
+  const [filter, setFilter] = useState('To Do');
+  const [tasks, setTasks] = useState([
+    { id: 101, title: "Finalize stage, booth, and seating arrangement", event: "Annual Tech Summit 2025", club: "Monash Tech Club", due: "Today", priority: "High", completed: false },
+    { id: 102, title: "Send reminder to registered attendees", event: "End of Year Gala", club: "Business Society", due: "Tomorrow", priority: "Medium", completed: false },
+    { id: 103, title: "Catering order confirmation", event: "Annual Tech Summit 2025", club: "Monash Tech Club", due: "Oct 25", priority: "High", completed: false },
+    { id: 104, title: "Design badges for speakers", event: "Code to Create Hackathon", club: "Monash Tech Club", due: "Oct 10", priority: "Low", completed: true },
+    { id: 105, title: "Draft budget proposal for Q1", event: "Committee Meeting", club: "Data Science Society", due: "Nov 2", priority: "Medium", completed: false },
+  ]);
+  const toggleTask = (id) => setTasks(tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
+  const filteredTasks = tasks.filter(t => filter === 'All' ? true : filter === 'Completed' ? t.completed : !t.completed);
+  return (
+    <div className="p-8 max-w-5xl mx-auto space-y-6 anim-fade">
+      <div className="flex justify-between items-end">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-1">My Tasks</h1>
+          <p className="text-gray-600 text-sm">Manage your assignments across all your clubs and events.</p>
+        </div>
+        <div className="flex gap-2">
+          <button className="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-gray-50 shadow-sm"><Filter size={16} /> Filter</button>
+          <button className="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-gray-50 shadow-sm"><ArrowUpDown size={16} /> Sort</button>
+        </div>
+      </div>
+      <div className="flex gap-6 border-b border-gray-200">
+        {['To Do', 'Completed', 'All'].map(tab => (
+          <button key={tab} onClick={() => setFilter(tab)}
+            className={`pb-3 text-sm font-semibold border-b-2 flex items-center gap-2 ${filter === tab ? 'border-[#1a6b6e] text-[#1a6b6e]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
+            {tab}
+            <span className={`py-0.5 px-2 rounded-full text-xs ${filter === tab ? 'bg-teal-50 text-teal-700' : 'bg-gray-100 text-gray-600'}`}>
+              {tasks.filter(t => tab === 'All' ? true : tab === 'Completed' ? t.completed : !t.completed).length}
+            </span>
+          </button>
+        ))}
+      </div>
+      <div className="space-y-3 pt-2">
+        {filteredTasks.length > 0 ? filteredTasks.map(task => (
+          <div key={task.id} className={`bg-white p-4 rounded-xl border shadow-sm flex items-center gap-4 hover:shadow-md group ${task.completed ? 'border-gray-100 opacity-60 bg-gray-50/50' : 'border-gray-200'}`}>
+            <button onClick={() => toggleTask(task.id)}
+              className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${task.completed ? 'bg-teal-500 border-teal-500 text-white' : 'border-gray-300 text-transparent hover:border-teal-500'}`}>
+              <Check size={14} strokeWidth={3} />
+            </button>
+            <div className="flex-1 min-w-0">
+              <h3 className={`font-bold text-sm truncate ${task.completed ? 'text-gray-500 line-through' : 'text-gray-900 group-hover:text-[#1a6b6e]'}`}>{task.title}</h3>
+              <div className="flex items-center gap-3 mt-1.5 text-xs font-medium text-gray-500">
+                <span className="flex items-center gap-1.5"><Calendar size={13} className="text-gray-400"/> {task.event}</span>
+                <span className="text-gray-300">•</span>
+                <span className="flex items-center gap-1.5"><Users size={13} className="text-gray-400"/> {task.club}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-6">
+              <span className={`text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide ${task.priority === 'High' ? 'bg-red-100 text-red-700' : task.priority === 'Medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'}`}>{task.priority}</span>
+              <div className={`flex items-center gap-1.5 text-xs font-bold w-24 justify-end ${task.completed ? 'text-gray-400' : (task.due === 'Today' || task.due === 'Tomorrow') ? 'text-orange-600' : 'text-gray-600'}`}>
+                <Clock size={14} /> {task.due}
+              </div>
+              <button className="text-gray-300 hover:text-gray-600 opacity-0 group-hover:opacity-100"><MoreVertical size={18} /></button>
+            </div>
+          </div>
+        )) : (
+          <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-gray-300">
+            <div className="w-16 h-16 bg-teal-50 rounded-full flex items-center justify-center mx-auto mb-4"><CheckSquare size={28} className="text-teal-600" /></div>
+            <h3 className="text-lg font-bold text-gray-900 mb-1">No tasks found</h3>
+            <p className="text-sm text-gray-500">You're all caught up for now!</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const NotificationsPage = () => {
+  const [filter, setFilter] = useState('All');
+  const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
+  const filteredNotifs = filter === 'All' ? notifications : notifications.filter(n => n.type === filter.toLowerCase());
+  const markRead = (id) => setNotifications(notifications.map(n => n.id === id ? {...n, read: true} : n));
+  return (
+    <div className="p-8 max-w-4xl mx-auto space-y-8 anim-fade">
+      <div className="flex justify-between items-end border-b border-gray-200 pb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Notifications</h1>
+          <p className="text-gray-600">Stay updated on your club activities and task assignments.</p>
+        </div>
+        <button onClick={() => setNotifications(notifications.map(n => ({...n, read: true})))} className="text-sm font-semibold text-[#1a6b6e] hover:underline flex items-center gap-1.5">
+          <Check size={16} /> Mark all as read
+        </button>
+      </div>
+      <div className="flex gap-4">
+        {['All', 'Invite', 'Task', 'Reminder'].map(t => (
+          <button key={t} onClick={() => setFilter(t)}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold ${filter === t ? 'bg-[#1a6b6e] text-white shadow-sm' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'}`}>
+            {t}s
+          </button>
+        ))}
+      </div>
+      <div className="space-y-4">
+        {filteredNotifs.length > 0 ? filteredNotifs.map(notif => (
+          <div key={notif.id} onClick={() => markRead(notif.id)}
+            className={`bg-white rounded-xl p-5 border flex gap-5 items-start cursor-pointer group ${notif.read ? 'border-gray-100 opacity-80' : 'border-teal-200 bg-teal-50/20 shadow-sm'}`}>
+            <div className="flex-shrink-0">
+              {notif.type === 'invite' && <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center"><UserPlus size={24}/></div>}
+              {notif.type === 'task' && <div className="w-12 h-12 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center"><CheckSquare size={24}/></div>}
+              {notif.type === 'reminder' && <div className="w-12 h-12 rounded-xl bg-gray-100 text-gray-600 flex items-center justify-center"><Calendar size={24}/></div>}
+            </div>
+            <div className="flex-1">
+              <div className="flex justify-between items-start mb-1">
+                <h3 className={`font-bold ${notif.read ? 'text-gray-700' : 'text-gray-900'}`}>
+                  {notif.type === 'invite' ? 'Club Invitation' : notif.type === 'task' ? 'Task Assignment' : 'Event Reminder'}
+                </h3>
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{notif.time}</span>
+              </div>
+              <div className="text-sm text-gray-600 leading-relaxed">
+                {notif.type === 'invite' && <span><span className="font-bold text-gray-800">{notif.sender}</span> has invited you to join the <span className="font-bold text-gray-800">{notif.club}</span> committee.</span>}
+                {notif.type === 'task' && <span>You have been assigned to: <span className="font-bold text-gray-800">"{notif.title}"</span> in <span className="italic">{notif.event}</span>.</span>}
+                {notif.type === 'reminder' && <span>{notif.title}</span>}
+              </div>
+              {notif.type === 'invite' && !notif.read && (
+                <div className="mt-4 flex gap-3">
+                  <button className="bg-[#1a6b6e] text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-[#155758] shadow-sm">Accept Invitation</button>
+                  <button className="bg-white text-gray-600 border border-gray-200 px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-gray-50">Decline</button>
+                </div>
+              )}
+            </div>
+            {!notif.read && <div className="w-2.5 h-2.5 rounded-full bg-[#1a6b6e] mt-2"></div>}
+          </div>
+        )) : (
+          <div className="bg-white rounded-2xl border border-dashed border-gray-300 p-20 flex flex-col items-center justify-center text-center opacity-60">
+            <Bell size={48} className="text-gray-300 mb-4" />
+            <p className="text-gray-500 font-medium">No {filter.toLowerCase()}s to show right now.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const ClubsPage = ({ onClubSelect }) => {
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isJoinOpen, setIsJoinOpen] = useState(false);
+  const [clubs, setClubs] = useState(MOCK_CLUBS);
+  const handleCreateClub = (data) => {
+    const newClub = { id: clubs.length + 1, name: data.name, type: data.type, banner: "bg-teal-500", event: "No events yet", members: "1/50", badgeColors: "bg-gray-100 text-gray-700" };
+    setClubs([newClub, ...clubs]);
+    setIsCreateOpen(false);
+  };
+  return (
+    <div className="p-8 max-w-7xl mx-auto space-y-8 anim-fade">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <h1 className="text-3xl font-bold text-[#1f2937]">Club Management</h1>
+      </div>
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white/50 p-2 rounded-xl">
+        <div className="relative w-full md:w-80">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><Search size={18}/></span>
+          <input type="text" placeholder="search a club" className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#1a6b6e] text-sm shadow-sm"/>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 shadow-sm"><Filter size={16} /> Filter</button>
+          <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 shadow-sm"><ArrowUpDown size={16} /> Sort by</button>
+          <button onClick={() => setIsJoinOpen(true)} className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 shadow-sm"><UserPlus size={16} /> Join club</button>
+          <button onClick={() => setIsCreateOpen(true)} className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 shadow-sm"><Edit size={16} /> Create club</button>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {clubs.map(club => (
+          <div key={club.id} onClick={() => onClubSelect(club.id)}
+            className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md hover:-translate-y-1 transition-all flex flex-col h-[180px] cursor-pointer">
+            <div className={`h-[80px] w-full ${club.banner} flex items-center justify-center relative overflow-hidden`}>
+              {club.isLogo && (
+                <div className="text-white text-3xl font-black italic tracking-tighter drop-shadow-md">
+                  {club.name === "MEGA" ? "MEGA" : club.name.split(' ')[0]}
+                  {club.name === "MEGA" && <span className="text-2xl ml-1">🎮</span>}
+                </div>
+              )}
+              {club.isLogoPattern && (
+                <div className="absolute inset-0 opacity-20 flex flex-wrap text-4xl leading-none">🐘🐘🐘🐘🐘🐘🐘🐘🐘🐘🐘🐘🐘🐘🐘🐘</div>
+              )}
+            </div>
+            <div className="p-4 flex-1 flex flex-col justify-between">
+              <div className="flex justify-between items-start">
+                <h3 className="font-bold text-gray-900 truncate pr-2">{club.name}</h3>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide ${club.badgeColors}`}>{club.type}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs text-gray-500 font-medium mt-auto pt-2">
+                <div className="flex items-center gap-1.5 truncate max-w-[65%]"><CalendarCheck2 size={14} /><span className="truncate">{club.event}</span></div>
+                <div className="flex items-center gap-1.5"><Users size={14} /><span>{club.members}</span></div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <CreateClubModal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} onCreate={handleCreateClub} />
+      <JoinClubModal isOpen={isJoinOpen} onClose={() => setIsJoinOpen(false)} />
+    </div>
+  );
+};
+
+const ClubDetailsPage = ({ clubId, onBack, onEventSelect }) => {
+  const [activeTab, setActiveTab] = useState('Overview');
+  const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
+  const [members, setMembers] = useState(MOCK_MEMBERS);
+  const [openActionMenuId, setOpenActionMenuId] = useState(null);
+  const club = MOCK_CLUBS.find(c => c.id === clubId);
+  const clubEvents = MOCK_EVENTS.filter(e => e.club === club?.name);
+  if (!club) return null;
+  return (
+    <div className="anim-fade pb-12">
+      <div className={`h-48 w-full ${club.banner} relative overflow-hidden`}>
+        {club.isLogoPattern && <div className="absolute inset-0 opacity-20 flex flex-wrap text-6xl leading-none pt-4">🐘🐘🐘🐘🐘🐘🐘🐘🐘🐘🐘🐘🐘🐘🐘🐘</div>}
+        <div className="absolute top-6 left-6">
+          <button onClick={onBack} className="flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white px-4 py-2 rounded-lg font-medium shadow-sm">
+            <ArrowLeft size={18} /> Back to Clubs
+          </button>
+        </div>
+      </div>
+      <div className="max-w-6xl mx-auto px-8 -mt-12 relative z-10 space-y-8">
+        <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900">{club.name}</h1>
+              <span className={`text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide ${club.badgeColors}`}>{club.type}</span>
+            </div>
+            <p className="text-gray-500 max-w-2xl text-sm leading-relaxed">
+              We are the official {club.name} at Monash University. Dedicated to bringing together students passionate about {club.type.toLowerCase()} activities, networking, and building lifelong friendships.
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <p className="text-2xl font-bold text-gray-900">{club.members}</p>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Members</p>
+            </div>
+            <div className="h-10 w-px bg-gray-200 hidden sm:block"></div>
+            <button onClick={() => setIsLeaveModalOpen(true)} className="text-red-500 hover:bg-red-50 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2">
+              <LogOut size={16} /> <span className="hidden sm:inline">Leave Club</span>
+            </button>
+          </div>
+        </div>
+        <div className="flex gap-8 border-b border-gray-200 px-2 overflow-x-auto">
+          {['Overview', 'Events', 'Meetings', 'Members', 'Settings'].map((tab) => (
+            <button key={tab} onClick={() => setActiveTab(tab)}
+              className={`pb-4 text-sm font-semibold border-b-2 ${activeTab === tab ? 'border-[#1a6b6e] text-[#1a6b6e]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        {activeTab === 'Overview' && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 anim-fade">
+            <div className="lg:col-span-2 space-y-6">
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">About the Club</h3>
+                <div className="space-y-4 text-gray-600 text-sm leading-relaxed">
+                  <p>Welcome to {club.name}! We are a student-run organization at Monash University dedicated to fostering a community around {club.type.toLowerCase()} interests.</p>
+                  <p>Our weekly meetups provide a platform for students to share ideas, collaborate on projects, and expand their horizons outside the classroom.</p>
+                  <p>Join our Discord server to stay up to date with the latest announcements and chat with fellow members!</p>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-6">
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">External Links</h3>
+                <div className="space-y-3">
+                  {club.socials?.discord && (
+                    <a href={club.socials.discord} className="flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:bg-gray-50 text-sm font-medium text-gray-700">
+                      <MessageSquare size={18} className="text-[#5865F2]" /> Discord Server
+                    </a>
+                  )}
+                  {club.socials?.instagram && (
+                    <a href={club.socials.instagram} className="flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:bg-gray-50 text-sm font-medium text-gray-700">
+                      <Instagram size={18} className="text-[#E1306C]" /> Instagram
+                    </a>
+                  )}
+                  {club.socials?.website && (
+                    <a href={club.socials.website} className="flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:bg-gray-50 text-sm font-medium text-gray-700">
+                      <Globe size={18} className="text-gray-500" /> Club Website
+                    </a>
+                  )}
+                  {(!club.socials || (!club.socials.discord && !club.socials.instagram && !club.socials.website)) && (
+                    <p className="text-sm text-gray-500 italic text-center py-4 bg-gray-50 rounded-lg border border-dashed border-gray-200">No external links provided yet.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'Events' && (
+          <div className="space-y-6 anim-fade">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-gray-900">Club Events</h2>
+              <button onClick={() => setIsCreateEventOpen(true)} className="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-lg font-semibold flex items-center gap-2 hover:bg-gray-50 shadow-sm text-sm"><Plus size={16} /> New Event</button>
+            </div>
+            {clubEvents.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {clubEvents.map(event => (
+                  <div key={event.id} onClick={() => onEventSelect(event.id)} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md hover:-translate-y-1 transition-all group flex flex-col cursor-pointer">
+                    <div className={`h-24 ${event.color} relative p-4 flex flex-col justify-between`}>
+                      <div className="flex justify-end">
+                        <button className="text-white/80 hover:text-white bg-black/10 hover:bg-black/20 p-1 rounded"><MoreHorizontal size={16} /></button>
+                      </div>
+                    </div>
+                    <div className="p-5 flex-1 flex flex-col">
+                      <h3 className="font-bold text-lg text-gray-900 leading-tight group-hover:text-[#1a6b6e] mb-4">{event.title}</h3>
+                      <div className="space-y-2 mb-6 flex-1">
+                        <div className="flex items-center gap-2 text-sm text-gray-600 font-medium"><Calendar size={16} className="text-gray-400" />{event.date}</div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600 font-medium"><MapPin size={16} className="text-gray-400" /><span className="truncate">{event.location}</span></div>
+                      </div>
+                      <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
+                        <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${event.badge}`}>{event.status}</span>
+                        <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-500"><Users size={14} />{event.attendees}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-white rounded-xl border border-dashed border-gray-300 p-12 flex flex-col items-center justify-center text-center">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4"><Calendar size={24} className="text-gray-400" /></div>
+                <h3 className="text-lg font-bold text-gray-800 mb-1">No events yet</h3>
+                <p className="text-sm text-gray-500 max-w-sm mb-6">This club hasn't created any events. Create the first event to kick things off!</p>
+                <button onClick={() => setIsCreateEventOpen(true)} className="bg-[#1a6b6e] text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-[#155758] shadow-sm text-sm">Create First Event</button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'Meetings' && (
+          <div className="space-y-6 anim-fade">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Upcoming + past meetings */}
+              <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                  <div className="flex items-center gap-2"><Calendar size={18} className="text-[#1a6b6e]" /><h3 className="font-bold text-gray-800">Committee meetings</h3></div>
+                  <button className="bg-[#1a6b6e] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#155758] shadow-sm flex items-center gap-2"><Plus size={14}/> Schedule meeting</button>
+                </div>
+                <div>
+                  <div className="px-5 pt-4 pb-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Upcoming</div>
+                  <ul className="divide-y divide-gray-100">
+                    {MOCK_MEETINGS.filter(m => m.status === 'upcoming').map(m => (
+                      <li key={m.id} className="px-5 py-3 flex items-center gap-4 hover:bg-gray-50 cursor-pointer group">
+                        <div className="w-10 h-10 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center"><Video size={18}/></div>
+                        <div className="flex-1">
+                          <div className="text-sm font-bold text-gray-900 group-hover:text-[#1a6b6e]">{m.title}</div>
+                          <div className="text-xs text-gray-500 flex items-center gap-3 mt-0.5">
+                            <span className="flex items-center gap-1"><Clock size={11}/> {m.when}</span>
+                            <span className="flex items-center gap-1"><MapPin size={11}/> {m.where}</span>
+                            <span className="flex items-center gap-1"><Users size={11}/> {m.attendees}</span>
+                          </div>
+                        </div>
+                        <button className="text-xs font-semibold text-[#1a6b6e] bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-md">RSVP</button>
+                        <button className="text-gray-400 hover:text-gray-600"><MoreHorizontal size={16}/></button>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="px-5 pt-4 pb-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Past</div>
+                  <ul className="divide-y divide-gray-100">
+                    {MOCK_MEETINGS.filter(m => m.status === 'past').map(m => (
+                      <li key={m.id} className="px-5 py-3 flex items-center gap-4 hover:bg-gray-50 cursor-pointer opacity-70">
+                        <div className="w-10 h-10 rounded-lg bg-gray-100 text-gray-500 flex items-center justify-center"><Calendar size={18}/></div>
+                        <div className="flex-1">
+                          <div className="text-sm font-bold text-gray-700">{m.title}</div>
+                          <div className="text-xs text-gray-500 flex items-center gap-3 mt-0.5">
+                            <span className="flex items-center gap-1"><Clock size={11}/> {m.when}</span>
+                            <span className="flex items-center gap-1"><MapPin size={11}/> {m.where}</span>
+                          </div>
+                        </div>
+                        <button className="text-xs font-semibold text-gray-500 hover:text-[#1a6b6e] flex items-center gap-1"><FileText size={12}/> Minutes</button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              {/* Poll widget */}
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="p-5 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
+                  <Vote size={18} className="text-[#1a6b6e]" />
+                  <h3 className="font-bold text-gray-800">When-can-we-meet poll</h3>
+                </div>
+                <div className="p-5 space-y-3">
+                  <p className="text-sm font-semibold text-gray-900">{MOCK_POLL.question}</p>
+                  <p className="text-xs text-gray-500">Tick all that work for you. Closes Fri 23 May.</p>
+                  {(() => {
+                    const max = Math.max(...MOCK_POLL.options.map(o => o.votes));
+                    return MOCK_POLL.options.map(opt => (
+                      <div key={opt.label} className={`border rounded-lg p-3 cursor-pointer hover:border-[#1a6b6e] ${opt.votes === max ? 'border-teal-200 bg-teal-50/40' : 'border-gray-200'}`}>
+                        <div className="flex justify-between items-center mb-2">
+                          <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 cursor-pointer">
+                            <input type="checkbox" defaultChecked={opt.votes === max} className="w-4 h-4"/>
+                            {opt.label}
+                          </label>
+                          <span className="text-xs font-bold text-gray-500">{opt.votes} votes</span>
+                        </div>
+                        <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                          <div className={`h-full ${opt.votes === max ? 'bg-[#1a6b6e]' : 'bg-gray-300'}`} style={{width: `${(opt.votes / 8) * 100}%`}}></div>
+                        </div>
+                        <div className="flex -space-x-1.5 mt-2">
+                          {opt.voters.map((av, i) => (
+                            <img key={i} src={`https://i.pravatar.cc/150?img=${av}`} className="w-5 h-5 rounded-full border border-white shadow-sm" alt="voter"/>
+                          ))}
+                        </div>
+                      </div>
+                    ));
+                  })()}
+                  <button className="w-full bg-[#1a6b6e] text-white py-2 rounded-lg text-sm font-semibold hover:bg-[#155758] shadow-sm mt-2">Submit my availability</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'Members' && (
+          <div className="space-y-6 anim-fade">
+            <div className="flex items-center justify-between">
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><Search size={16}/></span>
+                <input type="text" placeholder="Search members..." className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-teal-600 text-sm w-64 shadow-sm bg-white" />
+              </div>
+              <button onClick={() => setIsInviteModalOpen(true)} className="bg-[#1a6b6e] text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 hover:bg-[#155758] shadow-sm text-sm"><UserPlus size={16} /> Invite Members</button>
+            </div>
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-visible">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-100 text-xs text-gray-500 uppercase tracking-wider font-semibold">
+                    <th className="px-6 py-4">Member</th>
+                    <th className="px-6 py-4">Role</th>
+                    <th className="px-6 py-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {members.map((member) => (
+                    <tr key={member.id} className="hover:bg-gray-50/50">
+                      <td className="px-6 py-4 flex items-center gap-3">
+                        <img src={member.avatar} alt={member.name} className="w-10 h-10 rounded-full border border-gray-200" />
+                        <div>
+                          <p className="text-sm font-bold text-gray-900">{member.name}</p>
+                          <p className="text-xs text-gray-500 flex items-center gap-1"><Mail size={12}/> {member.email}</p>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full ${member.role === 'Admin' ? 'bg-teal-100 text-teal-700' : member.role === 'Event Manager' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'}`}>
+                          {member.role === 'Admin' && <Shield size={10} />} {member.role}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right relative">
+                        <button onClick={() => setOpenActionMenuId(openActionMenuId === member.id ? null : member.id)} className="text-gray-400 hover:text-teal-600 p-1 relative z-10"><MoreHorizontal size={18} /></button>
+                        {openActionMenuId === member.id && (
+                          <>
+                            <div className="fixed inset-0 z-10" onClick={() => setOpenActionMenuId(null)}></div>
+                            <div className="absolute right-8 top-10 w-48 bg-white rounded-lg shadow-lg border border-gray-100 z-20 py-1 flex flex-col text-left">
+                              <div className="px-3 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-wider">Change Role</div>
+                              <button onClick={() => { setMembers(members.map(m => m.id === member.id ? {...m, role: 'Admin'} : m)); setOpenActionMenuId(null); }} className="px-4 py-2 text-sm text-gray-700 hover:bg-teal-50 hover:text-teal-700 text-left w-full flex items-center gap-2"><Shield size={14} /> Make Admin</button>
+                              <button onClick={() => { setMembers(members.map(m => m.id === member.id ? {...m, role: 'Event Manager'} : m)); setOpenActionMenuId(null); }} className="px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 text-left w-full flex items-center gap-2"><Calendar size={14} /> Make Event Manager</button>
+                              <button onClick={() => { setMembers(members.map(m => m.id === member.id ? {...m, role: 'Member'} : m)); setOpenActionMenuId(null); }} className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 text-left w-full flex items-center gap-2"><Users size={14} /> Make Member</button>
+                              <div className="h-px bg-gray-100 my-1"></div>
+                              <button onClick={() => { setMembers(members.filter(m => m.id !== member.id)); setOpenActionMenuId(null); }} className="px-4 py-2 text-sm text-red-600 hover:bg-red-50 text-left w-full flex items-center gap-2 font-medium"><Trash2 size={14} /> Remove from Club</button>
+                            </div>
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'Settings' && (
+          <div className="max-w-2xl space-y-8 anim-fade">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="p-6 border-b border-gray-100">
+                <h3 className="text-lg font-bold text-gray-900">General Information</h3>
+                <p className="text-sm text-gray-500">Update your club's profile details and banner.</p>
+              </div>
+              <div className="p-6 space-y-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Club Name</label>
+                  <input type="text" defaultValue={club.name} className="w-full border border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-teal-600"/>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Club Category</label>
+                  <select defaultValue={club.type} className="w-full border border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-teal-600 bg-white">
+                    <option>Social</option><option>Academic</option><option>Cultural</option><option>Technology</option><option>Hobby</option><option>Fitness</option>
+                  </select>
+                </div>
+              </div>
+              <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+                <button className="px-5 py-2 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-200">Cancel</button>
+                <button className="bg-[#1a6b6e] text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-[#155758] shadow-sm">Save Changes</button>
+              </div>
+            </div>
+            <div className="bg-red-50 rounded-2xl border border-red-100 overflow-hidden">
+              <div className="p-6">
+                <h3 className="text-lg font-bold text-red-800 mb-1">Danger Zone</h3>
+                <p className="text-sm text-red-600 mb-4">Deleting a club is irreversible. All associated events, tasks, and member data will be permanently removed.</p>
+                <button className="bg-red-600 text-white px-5 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-red-700 shadow-sm"><Trash2 size={16} /> Delete Club</button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      <CreateEventModal isOpen={isCreateEventOpen} onClose={() => setIsCreateEventOpen(false)} predefinedClub={club.name} />
+      <InviteMembersModal isOpen={isInviteModalOpen} onClose={() => setIsInviteModalOpen(false)} clubName={club.name} />
+      <LeaveClubModal isOpen={isLeaveModalOpen} onClose={() => setIsLeaveModalOpen(false)} onLeave={() => { setIsLeaveModalOpen(false); onBack(); }} clubName={club.name} />
+    </div>
+  );
+};
+
+const EventTaskBoardPage = ({ eventId, clubId, onBack }) => {
+  const [activeTab, setActiveTab] = useState('Board');
+  const [kanbanData, setKanbanData] = useState(MOCK_KANBAN);
+  const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
+  const [filterTag, setFilterTag] = useState('All');
+  const [showFilterDropdown, setShowFilterDropdown] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const event = MOCK_EVENTS.find(e => e.id === eventId);
+  const club = MOCK_CLUBS.find(c => c.id === clubId);
+  if (!event) return null;
+
+  const handleCreateTask = (data) => {
+    const tagStyles = { Design: "bg-purple-100 text-purple-700", Finance: "bg-orange-100 text-orange-700", Operations: "bg-pink-100 text-pink-700", Tech: "bg-blue-100 text-blue-700", Logistics: "bg-green-100 text-green-700", Marketing: "bg-red-100 text-red-700" };
+    const newTask = { id: Date.now(), title: data.title, desc: data.desc, tag: data.tag, tagColor: tagStyles[data.tag] || "bg-gray-100 text-gray-700", avatars: ["11"], due: data.due ? new Date(data.due).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : "No Date", colorMark: "bg-[#1a6b6e]", done: data.column === 'done' };
+    setKanbanData(prev => ({ ...prev, [data.column]: [newTask, ...prev[data.column]] }));
+  };
+
+  const getFilteredTasks = (tasks) => filterTag === 'All' ? tasks : tasks.filter(t => t.tag === filterTag);
+  const allTasks = [
+    ...kanbanData.backlog.map(t => ({...t, status: 'Backlog'})),
+    ...kanbanData.inProgress.map(t => ({...t, status: 'In Progress'})),
+    ...kanbanData.review.map(t => ({...t, status: 'Review'})),
+    ...kanbanData.done.map(t => ({...t, status: 'Done'}))
+  ];
+
+  const renderTaskCard = (task, statusName) => {
+    if (task.done) {
+      return (
+        <div key={task.id} onClick={() => setSelectedTask({...task, status: statusName})} className="bg-white p-3 rounded-xl shadow-sm border border-gray-100 cursor-pointer hover:border-gray-300 mb-3">
+          <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wide ${task.tagColor}`}>{task.tag}</span>
+          <div className="mt-2 text-sm font-semibold text-gray-500 line-through">{task.title}</div>
+          <div className="mt-3 flex items-center justify-between">
+            <div className="flex -space-x-1.5">{task.avatars.map((av, i) => (<img key={i} src={`https://i.pravatar.cc/150?img=${av}`} className="w-5 h-5 rounded-full border border-white" alt="avatar"/>))}</div>
+            <span className="text-xs text-green-600 font-semibold flex items-center gap-1"><CheckCircle2 size={12}/> Done</span>
+          </div>
+        </div>
+      );
+    }
+    return (
+      <div key={task.id} onClick={() => setSelectedTask({...task, status: statusName})} className="bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 cursor-pointer hover:shadow-md group mb-3">
+        <div className="flex justify-between items-start mb-2"><span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wide ${task.tagColor}`}>{task.tag}</span></div>
+        <h4 className="text-sm font-bold text-gray-800 leading-snug mb-1 group-hover:text-[#1a6b6e]">{task.title}</h4>
+        {task.desc && <p className="text-xs text-gray-500 leading-snug mb-3 line-clamp-2">{task.desc}</p>}
+        <div className="mt-4 flex items-center justify-between border-t border-gray-50 pt-2">
+          <div className="flex items-center gap-2">
+            <div className={`w-2 h-2 rounded-full ${task.colorMark}`}></div>
+            {task.progress
+              ? <span className="text-xs font-semibold text-gray-600 flex items-center gap-1"><CheckSquare size={12} className="text-gray-400"/> {task.progress}</span>
+              : <span className="text-xs font-semibold text-gray-500 flex items-center gap-1"><Calendar size={12}/> {task.due}</span>}
+          </div>
+          <div className="flex -space-x-1.5">{task.avatars.map((av, i) => (<img key={i} src={`https://i.pravatar.cc/150?img=${av}`} className="w-6 h-6 rounded-full border-2 border-white shadow-sm" alt="avatar"/>))}</div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="flex flex-col h-full bg-[#f5f0eb] anim-fade">
+      <div className="bg-[#174646] text-white px-8 py-5 flex-shrink-0">
+        <div className="flex items-center gap-2 mb-4"><button onClick={onBack} className="text-teal-200 hover:text-white flex items-center text-sm font-semibold"><ArrowLeft size={16} /> Back</button></div>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+          <div>
+            <div className="flex items-center gap-3 mb-1">
+              <h1 className="text-2xl font-bold">{event.title}</h1>
+              <span className="text-xs font-semibold bg-white/20 px-2 py-1 rounded">Task Board • {club?.name}</span>
+            </div>
+            <div className="flex items-center gap-4 text-sm text-teal-100 font-medium">
+              <span className="flex items-center gap-1.5"><Calendar size={14}/> {event.date}</span>
+              <span className="flex items-center gap-1.5"><Users size={14}/> 24 members</span>
+              <span className="flex items-center gap-1.5"><CheckSquare size={14}/> {allTasks.length} tasks</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 relative">
+            <button onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+              className={`bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 border border-white/20 ${filterTag !== 'All' ? 'bg-white/30 border-white/50' : ''}`}>
+              <ListFilter size={16}/> {filterTag === 'All' ? 'Filter' : filterTag}
+            </button>
+            {showFilterDropdown && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setShowFilterDropdown(false)}></div>
+                <div className="absolute top-full right-[104px] mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 z-20 py-1 flex flex-col text-left">
+                  <div className="px-3 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-wider">Filter by Tag</div>
+                  {['All', 'Design', 'Finance', 'Logistics', 'Marketing', 'Operations', 'Tech'].map(tag => (
+                    <button key={tag} onClick={() => { setFilterTag(tag); setShowFilterDropdown(false); }}
+                      className={`px-4 py-2 text-sm text-left w-full hover:bg-gray-50 ${filterTag === tag ? 'text-[#1a6b6e] font-bold bg-teal-50' : 'text-gray-700'}`}>{tag}</button>
+                  ))}
+                </div>
+              </>
+            )}
+            <button onClick={() => setIsCreateTaskOpen(true)} className="bg-white text-[#174646] px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-teal-50 shadow-sm"><Plus size={16}/> Add task</button>
+          </div>
+        </div>
+      </div>
+      <div className="bg-white px-8 border-b border-gray-200 flex gap-5 flex-shrink-0 overflow-x-auto">
+        {['Board', 'List', 'Safety', 'Attendees', 'Transport', 'Budget', 'Contracts', 'Files'].map((tab) => (
+          <button key={tab} onClick={() => setActiveTab(tab)}
+            className={`py-3 text-sm font-semibold border-b-2 whitespace-nowrap ${activeTab === tab ? 'border-[#1a6b6e] text-[#1a6b6e]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
+            {tab}
+          </button>
+        ))}
+        <div className="ml-auto flex items-center gap-3">
+          <div className="w-32 bg-gray-100 h-2 rounded-full overflow-hidden"><div className="bg-green-500 w-[62%] h-full rounded-full"></div></div>
+          <span className="text-xs font-bold text-green-600">62% complete</span>
+        </div>
+      </div>
+
+      {activeTab === 'Board' && (
+        <div className="flex-1 overflow-x-auto overflow-y-hidden p-6 anim-fade">
+          <div className="flex gap-6 h-full items-start min-w-max pb-4">
+            {[
+              { key: 'backlog', label: 'Backlog', dot: 'bg-gray-400', badge: 'bg-gray-200 text-gray-600' },
+              { key: 'inProgress', label: 'In progress', dot: 'bg-yellow-500', badge: 'bg-yellow-100 text-yellow-700' },
+              { key: 'review', label: 'Review', dot: 'bg-blue-500', badge: 'bg-blue-100 text-blue-700' },
+              { key: 'done', label: 'Done', dot: 'bg-green-500', badge: 'bg-green-100 text-green-700' },
+            ].map(col => (
+              <div key={col.key} className="w-[300px] flex flex-col gap-3 max-h-full">
+                <div className="flex items-center justify-between px-1 mb-1">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full ${col.dot}`}></div>
+                    <h3 className="font-bold text-gray-800 text-sm uppercase tracking-wider">{col.label}</h3>
+                    <span className={`${col.badge} text-xs font-bold px-2 py-0.5 rounded-full`}>{getFilteredTasks(kanbanData[col.key]).length}</span>
+                  </div>
+                  <button onClick={() => setIsCreateTaskOpen(true)} className="text-gray-400 hover:text-gray-600"><Plus size={16}/></button>
+                </div>
+                <div className="flex-1 overflow-y-auto pr-1 pb-2">
+                  {getFilteredTasks(kanbanData[col.key]).map(t => renderTaskCard(t, col.label))}
+                  <button onClick={() => setIsCreateTaskOpen(true)} className="w-full mt-2 py-2.5 text-sm font-semibold text-gray-500 bg-gray-50 hover:bg-gray-100 rounded-xl border border-dashed border-gray-300 flex items-center justify-center gap-1"><Plus size={16}/> Add task</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'List' && (
+        <div className="flex-1 overflow-y-auto p-6 anim-fade">
+          <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <table className="w-full text-left">
+              <thead className="bg-gray-50 border-b border-gray-200 text-xs text-gray-500 uppercase tracking-wider font-semibold">
+                <tr><th className="px-6 py-4">Task Name</th><th className="px-6 py-4">Status</th><th className="px-6 py-4">Assignees</th><th className="px-6 py-4">Due Date</th></tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {getFilteredTasks(allTasks).map(t => (
+                  <tr key={t.id} onClick={() => setSelectedTask(t)} className="hover:bg-gray-50 cursor-pointer group">
+                    <td className="px-6 py-4">
+                      <div className="font-semibold text-sm text-gray-800 group-hover:text-teal-700">{t.title}</div>
+                      <div className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wide inline-block mt-1.5 ${t.tagColor}`}>{t.tag}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${t.status === 'Done' ? 'bg-green-100 text-green-700' : t.status === 'In Progress' ? 'bg-yellow-100 text-yellow-700' : t.status === 'Review' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}`}>{t.status}</span>
+                    </td>
+                    <td className="px-6 py-4"><div className="flex -space-x-1.5">{t.avatars.map((av, i) => (<img key={i} src={`https://i.pravatar.cc/150?img=${av}`} className="w-7 h-7 rounded-full border-2 border-white shadow-sm" alt="av"/>))}</div></td>
+                    <td className="px-6 py-4 text-sm font-medium text-gray-500">{t.due || <span className="text-gray-300">-</span>}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'Safety' && (
+        <div className="flex-1 overflow-y-auto p-6 anim-fade">
+          <div className="max-w-6xl mx-auto space-y-6">
+            {/* Safety checklist */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck size={18} className="text-[#1a6b6e]" />
+                  <h3 className="font-bold text-gray-800">Pre-publish safety checklist</h3>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-32 bg-gray-100 h-2 rounded-full overflow-hidden"><div className="bg-yellow-500 h-full" style={{width: `${(MOCK_SAFETY_CHECKS.filter(c=>c.done).length/MOCK_SAFETY_CHECKS.length)*100}%`}}></div></div>
+                  <span className="text-xs font-bold text-yellow-700">{MOCK_SAFETY_CHECKS.filter(c=>c.done).length} / {MOCK_SAFETY_CHECKS.length} cleared</span>
+                </div>
+              </div>
+              <ul className="divide-y divide-gray-100">
+                {MOCK_SAFETY_CHECKS.map(c => (
+                  <li key={c.id} className={`px-5 py-3 flex items-center gap-3 ${c.done ? '' : 'bg-orange-50/40'}`}>
+                    {c.done
+                      ? <CheckCircle2 size={18} className="text-green-600 flex-shrink-0" />
+                      : <XCircle size={18} className="text-orange-600 flex-shrink-0" />}
+                    <div className="flex-1">
+                      <div className="text-sm font-semibold text-gray-900">{c.label}</div>
+                      <div className="text-xs text-gray-500 mt-0.5">{c.detail}</div>
+                    </div>
+                    {!c.done && <button className="text-xs font-bold text-[#1a6b6e] bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-md">Resolve</button>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Hazards + Weather + Emergency contacts */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2"><AlertTriangle size={18} className="text-[#1a6b6e]" /><h3 className="font-bold text-gray-800">Hazards</h3></div>
+                  <button className="text-xs font-semibold text-[#1a6b6e] hover:underline flex items-center gap-1"><Plus size={12}/> Add</button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {MOCK_HAZARDS.map(h => (
+                    <span key={h.label} className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
+                      h.severity === 'high' ? 'bg-red-100 text-red-700 border-red-200' :
+                      h.severity === 'medium' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
+                      'bg-cyan-100 text-cyan-700 border-cyan-200'}`}>{h.label}</span>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500 mt-4">Linked to risk assessment doc · last reviewed 2 May by Aarav K.</p>
+              </div>
+
+              <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2"><Thermometer size={18} className="text-[#1a6b6e]" /><h3 className="font-bold text-gray-800">Forecast</h3></div>
+                  <span className="text-xs text-gray-500">BOM · refreshed 09:14</span>
+                </div>
+                <div className="flex gap-3">
+                  {MOCK_WEATHER.map(w => {
+                    const Icon = w.icon;
+                    return (
+                      <div key={w.day} className="flex-1 bg-sky-50 border border-sky-100 rounded-lg p-3 flex flex-col items-center gap-1 text-sky-700">
+                        <span className="text-xs font-bold">{w.day}</span>
+                        <Icon size={26} className="text-sky-600" />
+                        <span className="text-sm font-bold text-gray-900">{w.temp}</span>
+                        <span className="text-[11px] flex items-center gap-1 text-slate-600"><Wind size={10}/>{w.wind}</span>
+                        <span className="text-[11px] flex items-center gap-1 text-slate-600"><CloudRain size={10}/>{w.rain}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="mt-3 flex items-center gap-1.5 text-xs bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-md px-3 py-2"><Waves size={12}/> Sunday SW 25 km/h — kayak crossing may be reassessed.</div>
+              </div>
+
+              <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
+                <div className="flex items-center gap-2 mb-4"><Phone size={18} className="text-[#1a6b6e]" /><h3 className="font-bold text-gray-800">Emergency contacts</h3></div>
+                <ul className="space-y-2">
+                  {MOCK_EMERGENCY_CONTACTS.map(c => (
+                    <li key={c.name} className="flex justify-between items-center bg-gray-50 rounded-lg px-3 py-2">
+                      <div>
+                        <div className="text-sm font-bold text-gray-900">{c.name}</div>
+                        <div className="text-[11px] text-gray-500">{c.role}</div>
+                      </div>
+                      <a href={`tel:${c.phone}`} className="text-sm font-semibold text-[#1a6b6e] whitespace-nowrap">{c.phone}</a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'Attendees' && (
+        <div className="flex-1 overflow-y-auto p-6 anim-fade">
+          <div className="max-w-6xl mx-auto space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {[
+                { label: 'Going',         value: MOCK_TRIP_ATTENDEES.filter(a=>a.rsvp==='going').length,      sub: 'of 24 cap', icon: Users,        color: 'text-teal-600', bg: 'bg-teal-50' },
+                { label: 'Interested',    value: MOCK_TRIP_ATTENDEES.filter(a=>a.rsvp==='interested').length, sub: 'awaiting decision', icon: Clock,    color: 'text-yellow-600', bg: 'bg-yellow-50' },
+                { label: 'Medical done',  value: `${MOCK_TRIP_ATTENDEES.filter(a=>a.rsvp==='going'&&a.medical).length} / ${MOCK_TRIP_ATTENDEES.filter(a=>a.rsvp==='going').length}`, sub: 'declarations',  icon: Stethoscope, color: 'text-blue-600', bg: 'bg-blue-50' },
+                { label: 'Waivers signed',value: `${MOCK_TRIP_ATTENDEES.filter(a=>a.rsvp==='going'&&a.waiver).length} / ${MOCK_TRIP_ATTENDEES.filter(a=>a.rsvp==='going').length}`,  sub: 'liability',     icon: FileCheck2,  color: 'text-green-600', bg: 'bg-green-50' },
+              ].map((s,i) => {
+                const Icon = s.icon;
+                return (
+                  <div key={i} className="bg-white p-5 rounded-xl shadow-sm border border-gray-200 flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full ${s.bg} ${s.color} flex items-center justify-center`}><Icon size={20}/></div>
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500">{s.label}</p>
+                      <h3 className="text-xl font-bold text-gray-900">{s.value}</h3>
+                      <p className="text-[11px] text-gray-400">{s.sub}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <h3 className="font-bold text-gray-800">RSVP roster & paperwork</h3>
+                <button className="bg-[#1a6b6e] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#155758] shadow-sm flex items-center gap-2"><Mail size={14}/> Nudge missing</button>
+              </div>
+              <table className="w-full text-left">
+                <thead className="bg-gray-50/50 border-b border-gray-200 text-xs text-gray-500 uppercase font-semibold">
+                  <tr>
+                    <th className="px-6 py-3">Member</th>
+                    <th className="px-6 py-3">RSVP</th>
+                    <th className="px-6 py-3 text-center">Medical</th>
+                    <th className="px-6 py-3 text-center">Waiver</th>
+                    <th className="px-6 py-3">Competency</th>
+                    <th className="px-6 py-3 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {MOCK_TRIP_ATTENDEES.map(a => (
+                    <tr key={a.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-3 flex items-center gap-3">
+                        <img src={`https://i.pravatar.cc/150?img=${a.avatar}`} className="w-8 h-8 rounded-full border border-gray-200" alt={a.name}/>
+                        <span className="text-sm font-semibold text-gray-900">{a.name}</span>
+                      </td>
+                      <td className="px-6 py-3">
+                        <span className={`text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide ${
+                          a.rsvp === 'going' ? 'bg-green-100 text-green-700' :
+                          a.rsvp === 'interested' ? 'bg-yellow-100 text-yellow-700' :
+                          'bg-gray-100 text-gray-700'}`}>{a.rsvp.replace('_',' ')}</span>
+                      </td>
+                      <td className="px-6 py-3 text-center">{a.medical ? <CheckCircle2 size={18} className="text-green-600 inline" /> : <XCircle size={18} className="text-orange-500 inline" />}</td>
+                      <td className="px-6 py-3 text-center">{a.waiver ? <CheckCircle2 size={18} className="text-green-600 inline" /> : <XCircle size={18} className="text-orange-500 inline" />}</td>
+                      <td className="px-6 py-3 text-xs text-gray-500">{a.cert || '—'}</td>
+                      <td className="px-6 py-3 text-right">
+                        {(!a.medical || !a.waiver) && a.rsvp === 'going'
+                          ? <button className="text-xs font-bold text-[#1a6b6e] bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-md">Nudge</button>
+                          : <span className="text-xs text-gray-300">—</span>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'Transport' && (
+        <div className="flex-1 overflow-y-auto p-6 anim-fade">
+          <div className="max-w-6xl mx-auto space-y-6">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <div className="flex items-center gap-2"><Truck size={18} className="text-[#1a6b6e]" /><h3 className="font-bold text-gray-800">Vehicle roster</h3></div>
+                <button className="bg-[#1a6b6e] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#155758] shadow-sm flex items-center gap-2"><Plus size={14}/> Add vehicle</button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5 p-5">
+                {MOCK_VEHICLES.map(v => {
+                  const seatsLeft = v.capacity - v.claimed.length;
+                  return (
+                    <div key={v.id} className="border border-gray-200 rounded-xl p-4 flex flex-col gap-2 bg-white">
+                      <div className="flex justify-between items-center">
+                        <h4 className="font-bold text-sm text-gray-900">{v.label}</h4>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${seatsLeft > 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>{seatsLeft > 0 ? `${seatsLeft} seats left` : 'Full'}</span>
+                      </div>
+                      <div className="text-xs text-gray-600"><strong className="text-gray-900">Driver:</strong> {v.driver}</div>
+                      <div className="text-xs text-gray-600 flex items-center gap-1.5"><Calendar size={11}/> Depart {v.depart}</div>
+                      <div className="text-xs text-gray-600 flex items-center gap-1.5"><MapPin size={11}/> {v.pickup}</div>
+                      {v.note && <div className="text-[11px] bg-yellow-50 text-yellow-800 rounded px-2 py-1 self-start">{v.note}</div>}
+                      <div className="grid grid-cols-6 gap-1 mt-2">
+                        {Array.from({length: v.capacity}).map((_, i) => {
+                          const p = v.claimed[i];
+                          const inits = p ? p.split(' ').map(n => n[0]).slice(0,2).join('') : '';
+                          return (
+                            <div key={i} title={p || 'Open seat'} className={`aspect-square rounded text-[9px] font-bold flex items-center justify-center ${p ? 'bg-[#1a6b6e] text-white' : 'bg-gray-50 text-gray-400 border border-dashed border-gray-300'}`}>{inits}</div>
+                          );
+                        })}
+                      </div>
+                      <button disabled={seatsLeft === 0} className={`mt-2 text-xs font-semibold py-2 rounded-lg ${seatsLeft > 0 ? 'bg-[#1a6b6e] text-white hover:bg-[#155758]' : 'bg-gray-100 text-gray-500'}`}>
+                        {seatsLeft > 0 ? 'Claim a seat' : 'Join waitlist'}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <div className="flex items-center gap-2"><UserCheck size={18} className="text-[#1a6b6e]" /><h3 className="font-bold text-gray-800">Departure check-in</h3></div>
+                <span className="text-sm font-bold text-yellow-700">{MOCK_TRIP_ATTENDEES.filter(a=>a.rsvp==='going'&&a.checkedIn).length} / {MOCK_TRIP_ATTENDEES.filter(a=>a.rsvp==='going').length} checked in</span>
+              </div>
+              <ul className="divide-y divide-gray-100">
+                {MOCK_TRIP_ATTENDEES.filter(a => a.rsvp === 'going').map(a => (
+                  <li key={a.id} className="px-5 py-3 flex justify-between items-center hover:bg-gray-50">
+                    <span className="flex items-center gap-3">
+                      <img src={`https://i.pravatar.cc/150?img=${a.avatar}`} className="w-8 h-8 rounded-full border border-gray-200" alt={a.name} />
+                      <span className="text-sm font-semibold text-gray-900">{a.name}</span>
+                    </span>
+                    <button className={`text-xs font-bold px-3 py-1.5 rounded-md flex items-center gap-1 ${a.checkedIn ? 'bg-[#1a6b6e] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+                      {a.checkedIn ? <><CheckCircle2 size={12}/> Checked in</> : 'Mark present'}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'Contracts' && (
+        <div className="flex-1 overflow-y-auto p-6 anim-fade">
+          <div className="max-w-6xl mx-auto space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {[
+                { label: 'Total value',   value: `$${MOCK_CONTRACTS.reduce((s,c)=>s+c.value,0).toLocaleString()}`, icon: DollarSign, color: 'text-blue-600', bg: 'bg-blue-50' },
+                { label: 'Signed',         value: MOCK_CONTRACTS.filter(c=>c.status==='Signed').length,            icon: FileSignature, color: 'text-green-600', bg: 'bg-green-50' },
+                { label: 'In progress',    value: MOCK_CONTRACTS.filter(c=>c.status==='In review' || c.status==='Negotiating').length, icon: Clock, color: 'text-yellow-600', bg: 'bg-yellow-50' },
+                { label: 'Draft',          value: MOCK_CONTRACTS.filter(c=>c.status==='Draft').length,             icon: FileText, color: 'text-gray-600', bg: 'bg-gray-50' },
+              ].map((s,i) => {
+                const Icon = s.icon;
+                return (
+                  <div key={i} className="bg-white p-5 rounded-xl shadow-sm border border-gray-200 flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full ${s.bg} ${s.color} flex items-center justify-center`}><Icon size={20}/></div>
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500">{s.label}</p>
+                      <h3 className="text-xl font-bold text-gray-900">{s.value}</h3>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <div className="flex items-center gap-2"><Briefcase size={18} className="text-[#1a6b6e]" /><h3 className="font-bold text-gray-800">Vendor agreements</h3></div>
+                <button className="bg-[#1a6b6e] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#155758] shadow-sm flex items-center gap-2"><Plus size={14}/> New contract</button>
+              </div>
+              <table className="w-full text-left">
+                <thead className="border-b border-gray-200 text-xs text-gray-500 uppercase font-semibold">
+                  <tr>
+                    <th className="px-6 py-3">Vendor</th>
+                    <th className="px-6 py-3">Type</th>
+                    <th className="px-6 py-3">Status</th>
+                    <th className="px-6 py-3">Deadline</th>
+                    <th className="px-6 py-3 text-right">Value</th>
+                    <th className="px-6 py-3"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {MOCK_CONTRACTS.map(c => (
+                    <tr key={c.id} className="hover:bg-gray-50 cursor-pointer group">
+                      <td className="px-6 py-3">
+                        <div className="text-sm font-bold text-gray-900 group-hover:text-[#1a6b6e]">{c.vendor}</div>
+                        <div className="text-[11px] text-gray-500">{c.contact}</div>
+                      </td>
+                      <td className="px-6 py-3 text-sm text-gray-600">{c.type}</td>
+                      <td className="px-6 py-3">
+                        <span className={`text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide ${
+                          c.status === 'Signed' ? 'bg-green-100 text-green-700' :
+                          c.status === 'In review' ? 'bg-blue-100 text-blue-700' :
+                          c.status === 'Negotiating' ? 'bg-yellow-100 text-yellow-700' :
+                          'bg-gray-100 text-gray-700'}`}>{c.status}</span>
+                      </td>
+                      <td className="px-6 py-3 text-sm text-gray-500">{c.deadline}</td>
+                      <td className="px-6 py-3 text-sm font-bold text-gray-900 text-right">${c.value.toLocaleString()}</td>
+                      <td className="px-6 py-3 text-right"><button className="text-[#1a6b6e] hover:text-[#155758]"><ExternalLink size={14}/></button></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'Budget' && (
+        <div className="flex-1 overflow-y-auto p-6 anim-fade">
+          <div className="max-w-6xl mx-auto space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex items-center gap-4"><div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center"><DollarSign size={24}/></div><div><p className="text-sm font-semibold text-gray-500">Total Budget</p><h3 className="text-2xl font-bold text-gray-900">$5,000</h3></div></div>
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex items-center gap-4"><div className="w-12 h-12 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center"><PieChart size={24}/></div><div><p className="text-sm font-semibold text-gray-500">Total Spent</p><h3 className="text-2xl font-bold text-gray-900">$2,850</h3></div></div>
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex items-center gap-4"><div className="w-12 h-12 bg-green-50 text-green-600 rounded-full flex items-center justify-center"><TrendingUp size={24}/></div><div><p className="text-sm font-semibold text-gray-500">Remaining</p><h3 className="text-2xl font-bold text-green-600">$2,150</h3></div></div>
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <h3 className="font-bold text-gray-800">Expense Breakdown</h3>
+                <button className="bg-[#1a6b6e] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#155758] shadow-sm flex items-center gap-2"><Plus size={16}/> Add Expense</button>
+              </div>
+              <table className="w-full text-left">
+                <thead className="border-b border-gray-200 text-xs text-gray-500 uppercase font-semibold">
+                  <tr><th className="px-6 py-4">Item description</th><th className="px-6 py-4">Category</th><th className="px-6 py-4">Date</th><th className="px-6 py-4">Status</th><th className="px-6 py-4 text-right">Amount</th></tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {MOCK_BUDGET.map(item => (
+                    <tr key={item.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 font-semibold text-sm text-gray-800">{item.item}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600">{item.category}</td>
+                      <td className="px-6 py-4 text-sm text-gray-500">{item.date}</td>
+                      <td className="px-6 py-4"><span className={`text-xs font-bold px-2 py-1 rounded ${item.status === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{item.status}</span></td>
+                      <td className="px-6 py-4 text-sm font-bold text-gray-900 text-right">${item.amount.toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'Files' && (
+        <div className="flex-1 overflow-y-auto p-6 anim-fade flex items-center justify-center">
+          <div className="text-center max-w-md bg-white p-8 rounded-2xl shadow-sm border border-gray-200">
+            <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4"><Folder size={32} /></div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Event Shared Drive</h3>
+            <p className="text-gray-500 text-sm mb-6">All documents, assets, and files for this event are managed in a centralized Google Drive folder.</p>
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 mb-6 flex items-center justify-between">
+              <span className="text-xs text-gray-500 truncate mr-3">https://drive.google.com/drive/folders/1XyZ...</span>
+              <button className="text-teal-600 hover:text-teal-700 text-xs font-semibold px-3 py-1.5 bg-teal-50 rounded-md hover:bg-teal-100">Copy</button>
+            </div>
+            <div className="flex flex-col gap-3">
+              <a href="#" className="w-full bg-[#1a6b6e] text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-[#155758] shadow-sm flex items-center justify-center gap-2"><ExternalLink size={18} /> Open Google Drive</a>
+              <button className="text-teal-600 text-sm font-semibold hover:underline mt-2">Edit Drive Link</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <CreateTaskModal isOpen={isCreateTaskOpen} onClose={() => setIsCreateTaskOpen(false)} onCreate={handleCreateTask} />
+      <TaskDetailsModal isOpen={!!selectedTask} onClose={() => setSelectedTask(null)} task={selectedTask} />
+    </div>
+  );
+};
+
+const EventsPage = () => {
+  const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
+  return (
+    <div className="p-8 max-w-7xl mx-auto space-y-6 anim-fade">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-1">Events</h1>
+          <p className="text-gray-600 text-sm">Manage and discover all activities across your clubs.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><Search size={18}/></span>
+            <input type="text" placeholder="Search events..." className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-[#1a6b6e] text-sm w-64 shadow-sm"/>
+          </div>
+          <button className="p-2.5 border border-gray-200 rounded-lg hover:bg-white text-gray-600 shadow-sm"><Filter size={18} /></button>
+          <button onClick={() => setIsCreateEventOpen(true)} className="bg-[#1a6b6e] hover:bg-[#155758] text-white px-4 py-2.5 rounded-lg font-semibold flex items-center gap-2 shadow-sm text-sm"><Plus size={18} /> Create Event</button>
+        </div>
+      </div>
+      <div className="flex gap-6 border-b border-gray-200">
+        {['All Events', 'Upcoming', 'Drafts', 'Past'].map((tab, i) => (
+          <button key={tab} className={`pb-3 text-sm font-semibold border-b-2 ${i === 0 ? 'border-[#1a6b6e] text-[#1a6b6e]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>{tab}</button>
+        ))}
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pt-2">
+        {MOCK_EVENTS.map((event) => (
+          <div key={event.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md group flex flex-col cursor-pointer">
+            <div className={`h-24 ${event.color} relative p-4 flex flex-col justify-between`}>
+              <div className="flex justify-between items-start">
+                <span className="bg-white/20 backdrop-blur-sm text-white px-2 py-1 rounded text-xs font-bold tracking-wide">{event.club}</span>
+                <button className="text-white/80 hover:text-white bg-black/10 hover:bg-black/20 p-1 rounded"><MoreHorizontal size={16} /></button>
+              </div>
+            </div>
+            <div className="p-5 flex-1 flex flex-col">
+              <h3 className="font-bold text-lg text-gray-900 leading-tight group-hover:text-[#1a6b6e] mb-3 pr-4">{event.title}</h3>
+              <div className="space-y-2 mb-6 flex-1">
+                <div className="flex items-center gap-2 text-sm text-gray-600 font-medium"><Calendar size={16} className="text-gray-400" />{event.date}</div>
+                <div className="flex items-center gap-2 text-sm text-gray-600 font-medium"><MapPin size={16} className="text-gray-400" /><span className="truncate">{event.location}</span></div>
+              </div>
+              <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
+                <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${event.badge}`}>{event.status}</span>
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-500"><Users size={14} />{event.attendees}</div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <CreateEventModal isOpen={isCreateEventOpen} onClose={() => setIsCreateEventOpen(false)} />
+    </div>
+  );
+};
+
+function App() {
+  const [activePage, setActivePage] = useState('dashboard');
+  const [selectedClubId, setSelectedClubId] = useState(null);
+  const [selectedEventId, setSelectedEventId] = useState(null);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  // Re-render lucide icons after every React render
+  useEffect(() => {
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      window.lucide.createIcons();
+    }
+  });
+
+  const handlePageChange = (page) => {
+    setActivePage(page);
+    setShowNotifications(false);
+    if (page !== 'clubs') { setSelectedClubId(null); setSelectedEventId(null); }
+  };
+
+  return (
+    <div className="flex h-screen w-full bg-[#f5f0eb] font-sans overflow-hidden">
+      <Sidebar activePage={activePage} setActivePage={handlePageChange} />
+      <main className="flex-1 ml-[260px] flex flex-col h-screen overflow-hidden">
+        {!selectedEventId && (
+          <header className="h-[72px] bg-white border-b border-gray-200 flex items-center justify-end px-8 flex-shrink-0">
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <button onClick={() => setShowNotifications(!showNotifications)}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center relative ${showNotifications ? 'bg-teal-50 text-teal-600' : 'bg-gray-50 hover:bg-gray-100 text-gray-500'}`}>
+                  <Bell size={20} />
+                  <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                </button>
+                {showNotifications && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)}></div>
+                    <div className="absolute top-full right-0 mt-3 w-80 md:w-96 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50">
+                      <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                        <h3 className="font-bold text-gray-800">Notifications</h3>
+                        <button className="text-xs text-[#1a6b6e] font-semibold hover:underline">Mark all as read</button>
+                      </div>
+                      <div className="max-h-[400px] overflow-y-auto divide-y divide-gray-50">
+                        {MOCK_NOTIFICATIONS.slice(0, 3).map(notif => (
+                          <div key={notif.id} className={`p-4 flex gap-4 hover:bg-gray-50 ${!notif.read ? 'bg-teal-50/30' : ''}`}>
+                            <div className="flex-shrink-0 mt-1">
+                              {notif.type === 'invite' && <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center"><UserPlus size={16}/></div>}
+                              {notif.type === 'task' && <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center"><CheckSquare size={16}/></div>}
+                              {notif.type === 'reminder' && <div className="w-8 h-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center"><Calendar size={16}/></div>}
+                            </div>
+                            <div className="flex-1">
+                              {notif.type === 'invite' && (<>
+                                <p className="text-sm text-gray-800 leading-snug"><span className="font-bold">{notif.sender}</span> invited you to join <span className="font-bold">{notif.club}</span>.</p>
+                                <div className="flex items-center gap-2 mt-3">
+                                  <button className="flex-1 bg-[#1a6b6e] text-white py-1.5 rounded-lg text-xs font-semibold hover:bg-[#155758]">Accept</button>
+                                  <button className="flex-1 bg-gray-100 text-gray-700 py-1.5 rounded-lg text-xs font-semibold hover:bg-gray-200 border border-gray-200">Decline</button>
+                                </div>
+                              </>)}
+                              {notif.type === 'task' && <p className="text-sm text-gray-800 leading-snug">You were assigned a task: <span className="font-medium text-gray-900">"{notif.title}"</span> in <span className="font-medium">{notif.event}</span>.</p>}
+                              {notif.type === 'reminder' && <p className="text-sm text-gray-800 leading-snug">{notif.title}</p>}
+                              <p className="text-[11px] font-bold text-gray-400 mt-1.5 uppercase tracking-wide">{notif.time}</p>
+                            </div>
+                            {!notif.read && <div className="w-2 h-2 rounded-full bg-[#1a6b6e] mt-1.5 flex-shrink-0"></div>}
+                          </div>
+                        ))}
+                      </div>
+                      <div onClick={() => handlePageChange('notifications')} className="p-3 border-t border-gray-100 text-center bg-gray-50 hover:bg-gray-100 cursor-pointer"><span className="text-xs font-bold text-gray-600">View all notifications</span></div>
+                    </div>
+                  </>
+                )}
+              </div>
+              <div className="h-6 w-px bg-gray-200"></div>
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-semibold text-gray-700">{MOCK_USER.name}</span>
+                <img src={MOCK_USER.avatar} alt="Profile" className="w-8 h-8 rounded-full border border-gray-200" />
+              </div>
+            </div>
+          </header>
+        )}
+        <div className="flex-1 overflow-y-auto">
+          {activePage === 'dashboard' && <DashboardPage />}
+          {activePage === 'notifications' && <NotificationsPage />}
+          {activePage === 'clubs' && !selectedClubId && !selectedEventId && (<ClubsPage onClubSelect={(id) => setSelectedClubId(id)} />)}
+          {activePage === 'clubs' && selectedClubId && !selectedEventId && (<ClubDetailsPage clubId={selectedClubId} onBack={() => setSelectedClubId(null)} onEventSelect={(id) => setSelectedEventId(id)} />)}
+          {activePage === 'clubs' && selectedClubId && selectedEventId && (<EventTaskBoardPage eventId={selectedEventId} clubId={selectedClubId} onBack={() => setSelectedEventId(null)} />)}
+          {activePage === 'events' && <EventsPage />}
+          {activePage === 'tasks' && <MyTasksPage />}
+        </div>
+      </main>
+    </div>
+  );
+}
+
+createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

@@ -14,6 +14,7 @@ import {
   Link as LinkIcon,
 } from 'lucide-react';
 import EventCard from '../components/events/EventCard';
+import CreateEventModal from '../components/events/CreateEventModal';
 import MembersTable from '../components/clubs/MembersTable';
 import LeaveClubModal from '../components/clubs/LeaveClubModal';
 import DeleteClubModal from '../components/clubs/DeleteClubModal';
@@ -86,6 +87,7 @@ export default function ClubDetailsPage() {
   const [isLeaveOpen, setIsLeaveOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isInviteOpen, setIsInviteOpen] = useState(false);
+  const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
 
   // API state
   const [club, setClub] = useState<Club | null>(null);
@@ -492,7 +494,10 @@ export default function ClubDetailsPage() {
               <div className="cd-events-header">
                 <h2>Club Events</h2>
                 {canManageEvents && (
-                  <button className="cd-btn-outline">
+                  <button
+                    className="cd-btn-outline"
+                    onClick={() => setIsCreateEventOpen(true)}
+                  >
                     <Plus size={16} /> New Event
                   </button>
                 )}
@@ -529,7 +534,10 @@ export default function ClubDetailsPage() {
                     to kick things off!
                   </p>
                   {canManageEvents && (
-                    <button className="cd-btn-primary">
+                    <button
+                      className="cd-btn-primary"
+                      onClick={() => setIsCreateEventOpen(true)}
+                    >
                       Create First Event
                     </button>
                   )}
@@ -764,6 +772,20 @@ export default function ClubDetailsPage() {
           onSendInvites={handleSendInvitations}
         />
       )}
+
+      <CreateEventModal
+        isOpen={isCreateEventOpen}
+        onClose={() => setIsCreateEventOpen(false)}
+        predefinedClubId={club.club_id}
+        predefinedClubName={club.name}
+        predefinedClubColor={club.club_color ?? undefined}
+        onCreated={(newEvent) => {
+          // Prepend to local list so the new event appears immediately in the
+          // Events tab without a refetch round-trip.
+          setEvents((prev) => [newEvent, ...prev]);
+          setEventsLoaded(true);
+        }}
+      />
     </div>
   );
 }

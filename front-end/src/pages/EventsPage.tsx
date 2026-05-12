@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Filter, Plus } from 'lucide-react';
+import { Search, Filter } from 'lucide-react';
 import EventCard from '../components/events/EventCard';
 import { fetchAllEvents } from '../api/events.api';
 import type { Event } from '../types/events.types';
@@ -141,10 +141,6 @@ return (
 
           <button className="events-filter-btn" aria-label="Filter events">
             <Filter size={18} />
-          </button>
-
-          <button className="events-create-btn">
-            <Plus size={18} /> Create Event
           </button>
         </div>
       </div>
