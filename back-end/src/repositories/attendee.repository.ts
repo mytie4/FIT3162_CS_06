@@ -28,6 +28,7 @@ export async function getAttendeesByEventId(
   const res = await pool.query<Attendee>(
     `${SELECT_ATTENDEE}
      WHERE a.event_id = $1
+       AND a.rsvp_status = 'going'
      ORDER BY a.registered_at ASC`,
     [eventId],
   );
