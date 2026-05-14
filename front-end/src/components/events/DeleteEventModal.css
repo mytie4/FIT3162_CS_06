@@ -1,0 +1,172 @@
+/* DeleteEventModal — destructive-confirm modal. Reuses the .cem-overlay /
+   .cem-card frame from CreateEventModal.css; this file layers on the dem-*
+   classes for the danger styling. */
+
+.dem-card {
+  max-width: 520px;
+}
+
+.dem-header {
+  border-bottom-color: #fee2e2;
+  background: #fff5f5;
+}
+
+.dem-header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dem-icon-wrap {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: #fee2e2;
+  color: #b91c1c;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dem-body {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dem-lead {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #1f2937;
+  line-height: 1.5;
+}
+
+.dem-event-name {
+  font-weight: 700;
+  color: #111827;
+  word-break: break-word;
+}
+
+.dem-cascade {
+  background: #fff5f5;
+  border: 1px solid #fee2e2;
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+
+.dem-cascade-heading {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #991b1b;
+  margin-bottom: 6px;
+}
+
+.dem-cascade-list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.85rem;
+  color: #4b5563;
+  line-height: 1.7;
+}
+
+.dem-confirm-label {
+  font-size: 0.85rem;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.dem-confirm-target {
+  font-family: 'SF Mono', Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: #f3f4f6;
+  color: #111827;
+  padding: 2px 6px;
+  border-radius: 4px;
+  word-break: break-word;
+}
+
+.dem-confirm-input {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.dem-confirm-input:focus {
+  border-color: #b91c1c;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+
+.dem-confirm-input:disabled {
+  background: #f9fafb;
+  cursor: not-allowed;
+}
+
+.dem-error {
+  padding: 10px 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #991b1b;
+  font-size: 0.85rem;
+}
+
+.dem-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 16px 24px;
+  border-top: 1px solid #e5e7eb;
+  background: #fafafa;
+}
+
+.dem-cancel-btn {
+  background: #ffffff;
+  color: #1f2937;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 9px 18px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.dem-cancel-btn:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.dem-cancel-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dem-confirm-btn {
+  background: #dc2626;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 18px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.dem-confirm-btn:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.dem-confirm-btn:disabled {
+  background: #fca5a5;
+  cursor: not-allowed;
+}

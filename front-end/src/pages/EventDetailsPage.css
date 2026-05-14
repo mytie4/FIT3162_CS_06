@@ -80,8 +80,39 @@
   transition: background 0.15s;
 }
 
-.edp-edit-btn:hover {
+.edp-edit-btn:hover:not(:disabled) {
   background: #f0fdfa;
+}
+
+.edp-edit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.edp-delete-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: #fecaca;
+  border: 1px solid rgba(254, 202, 202, 0.5);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.edp-delete-btn:hover:not(:disabled) {
+  background: #dc2626;
+  color: #ffffff;
+  border-color: #dc2626;
+}
+
+.edp-delete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .edp-error {
@@ -426,4 +457,444 @@
   background: #ffffff;
   border-radius: 12px;
   border: 1px dashed #d1d5db;
+}
+
+/* ---- Transport tab ------------------------------------------------------ */
+.transport-add-row {
+  padding: 12px 20px 0;
+}
+
+.transport-form-row {
+  display: flex;
+  gap: 8px;
+}
+
+.transport-form-row > * {
+  flex: 1;
+  min-width: 0;
+}
+
+.transport-driver {
+  padding: 14px 20px;
+  border-bottom: 1px solid #f3f4f6;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.transport-driver:last-child {
+  border-bottom: none;
+}
+
+.transport-driver-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.transport-driver-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.transport-driver-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.transport-driver-meta {
+  margin-top: 2px;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.transport-driver-notes {
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: #4b5563;
+  font-style: italic;
+}
+
+.transport-driver-side {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.transport-seats-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #ecfdf5;
+  color: #047857;
+  white-space: nowrap;
+}
+
+.transport-passengers {
+  border-top: 1px dashed #f3f4f6;
+  padding-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.transport-passengers-empty {
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.transport-passenger-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.transport-passenger {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #f3f4f6;
+  color: #1f2937;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.transport-passenger-remove {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 2px;
+  display: inline-flex;
+}
+
+.transport-passenger-remove:hover:not(:disabled) {
+  color: #dc2626;
+}
+
+.transport-join-btn {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #1a6b6e;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.transport-join-btn:hover:not(:disabled) {
+  background: #155758;
+}
+
+.transport-join-btn:disabled {
+  background: #6b9b9d;
+  cursor: not-allowed;
+}
+
+.transport-full {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* ---- Contracts tab ------------------------------------------------------ */
+.contracts-locked {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  color: #6b7280;
+}
+
+.contracts-locked-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.contracts-locked-text {
+  margin-top: 2px;
+  font-size: 0.85rem;
+}
+
+.contract-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.contract-row:last-child {
+  border-bottom: none;
+}
+
+.contract-row-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.contract-row-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.contract-row-counterparty {
+  margin-top: 2px;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.contract-row-meta {
+  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  font-size: 0.8rem;
+  color: #4b5563;
+}
+
+.contract-row-value {
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.contract-row-date {
+  color: #6b7280;
+}
+
+.contract-row-notes {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: #4b5563;
+  font-style: italic;
+}
+
+.contract-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.contract-status {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+.contract-status--draft {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.contract-status--sent {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.contract-status--signed {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.contract-status--cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* ---- Attendees tab ----------------------------------------------------- */
+.attendee-add-row {
+  padding: 12px 20px 0;
+}
+
+.attendee-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.attendee-row:last-child {
+  border-bottom: none;
+}
+
+.attendee-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  color: #4b5563;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.attendee-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.attendee-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.attendee-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.attendee-meta {
+  margin-top: 2px;
+  font-size: 0.8rem;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.attendee-dot {
+  color: #d1d5db;
+}
+
+.attendee-role {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.attendee-role--president {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.attendee-role--vice_president {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.attendee-picker-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 16px;
+}
+
+.attendee-picker {
+  background: #ffffff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 480px;
+  max-height: min(80vh, 640px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
+}
+
+.attendee-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.attendee-picker-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.attendee-picker-close {
+  background: transparent;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.attendee-picker-close:hover {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+.attendee-picker-search {
+  margin: 12px 20px 0;
+}
+
+.attendee-picker-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.attendee-picker-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.attendee-picker-row:last-child {
+  border-bottom: none;
+}
+
+.attendee-picker-empty {
+  padding: 24px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.9rem;
 }
