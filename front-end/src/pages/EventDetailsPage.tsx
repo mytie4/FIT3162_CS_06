@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Pencil } from 'lucide-react';
+import { ArrowLeft, Pencil, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { fetchEventById } from '../api/events.api';
 import { fetchMyRole } from '../api/clubs.api';
 import EditEventModal from '../components/events/EditEventModal';
+import DeleteEventModal from '../components/events/DeleteEventModal';
 import SafetyTab from '../components/events/SafetyTab';
+import TransportTab from '../components/events/TransportTab';
+import ContractsTab from '../components/events/ContractsTab';
+import AttendeesTab from '../components/events/AttendeesTab';
 import type { Event } from '../types/events.types';
 import type { ClubRole } from '../types/clubs.types';
 import './EventDetailsPage.css';
@@ -23,6 +27,7 @@ export default function EventDetailsPage() {
   const [role, setRole] = useState<ClubRole | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   useEffect(() => {
     if (!params.eventId || !params.clubId) return;
@@ -59,6 +64,7 @@ export default function EventDetailsPage() {
   }, [event, token]);
 
   const canEdit = role === 'president' || role === 'vice_president';
+  const canDelete = canEdit;
 
   return (
     <div className="edp-root">
@@ -73,15 +79,26 @@ export default function EventDetailsPage() {
               {event?.club_name ?? `eventId: ${params.eventId ?? 'unknown'}`}
             </p>
           </div>
-          {event && canEdit && (
+          {event && (canEdit || canDelete) && (
             <div className="edp-header-actions">
-              <button
-                type="button"
-                className="edp-edit-btn"
-                onClick={() => setIsEditOpen(true)}
-              >
-                <Pencil size={14} /> Edit
-              </button>
+              {canEdit && (
+                <button
+                  type="button"
+                  className="edp-edit-btn"
+                  onClick={() => setIsEditOpen(true)}
+                >
+                  <Pencil size={14} /> Edit
+                </button>
+              )}
+              {canDelete && (
+                <button
+                  type="button"
+                  className="edp-delete-btn"
+                  onClick={() => setIsDeleteOpen(true)}
+                >
+                  <Trash2 size={14} /> Delete
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -103,25 +120,51 @@ export default function EventDetailsPage() {
       </nav>
 
       <main className="edp-content">
-        {activeTab === 'Safety' && event ? (
+        {event && activeTab === 'Safety' && (
           <SafetyTab eventId={event.event_id} canEdit={canEdit} />
-        ) : (
-          <div className="edp-placeholder">
-            <h2 className="edp-placeholder-title">{activeTab}</h2>
-            <p className="edp-placeholder-text">Coming soon.</p>
-          </div>
         )}
+        {event && activeTab === 'Transport' && (
+          <TransportTab eventId={event.event_id} canEdit={canEdit} />
+        )}
+        {event && activeTab === 'Contracts' && (
+          <ContractsTab eventId={event.event_id} canEdit={canEdit} />
+        )}
+        {event && activeTab === 'Attendees' && (
+          <AttendeesTab
+            eventId={event.event_id}
+            clubId={event.club_id}
+            canEdit={canEdit}
+          />
+        )}
+        {event &&
+          activeTab !== 'Safety' &&
+          activeTab !== 'Transport' &&
+          activeTab !== 'Contracts' &&
+          activeTab !== 'Attendees' && (
+            <div className="edp-placeholder">
+              <h2 className="edp-placeholder-title">{activeTab}</h2>
+              <p className="edp-placeholder-text">Coming soon.</p>
+            </div>
+          )}
       </main>
 
       {event && (
-        <EditEventModal
-          isOpen={isEditOpen}
-          onClose={() => setIsEditOpen(false)}
-          event={event}
-          onUpdated={(updated) => setEvent(updated)}
-          clubName={event.club_name}
-          clubColor={event.club_color}
-        />
+        <>
+          <EditEventModal
+            isOpen={isEditOpen}
+            onClose={() => setIsEditOpen(false)}
+            event={event}
+            onUpdated={(updated) => setEvent(updated)}
+            clubName={event.club_name}
+            clubColor={event.club_color}
+          />
+          <DeleteEventModal
+            isOpen={isDeleteOpen}
+            onClose={() => setIsDeleteOpen(false)}
+            event={event}
+            onDeleted={() => navigate(`/clubs/${event.club_id}`)}
+          />
+        </>
       )}
     </div>
   );

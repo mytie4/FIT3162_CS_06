@@ -211,7 +211,7 @@ router.put(
  *   delete:
  *    security:
  *     - BearerAuth: []
- *    summary: Delete an event (president only)
+ *    summary: Delete an event (president / vice president only)
  *    tags:
  *     - Events
  *    parameters:
@@ -244,7 +244,7 @@ router.put(
 router.delete(
   '/clubs/:clubId/events/:eventId',
   authMiddleware,
-  requireClubRole('president'),
+  requireClubRole('president', 'vice_president'),
   eventController.deleteEvent,
 );
 
