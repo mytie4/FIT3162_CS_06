@@ -264,9 +264,7 @@ export async function createPassenger(
       LEFT JOIN "Users" u ON u.user_id = i.user_id`,
     [driverId, userId],
   );
-  const inserted = insertRes.rows[0];
-  if (!inserted) return null;
-  return inserted;
+  return insertRes.rows[0] ?? null;
 }
 
 export async function deletePassenger(passengerId: string): Promise<void> {
