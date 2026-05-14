@@ -246,29 +246,27 @@ export async function createPassenger(
         SELECT COUNT(*)::int AS taken
         FROM "Event_Transport_Passengers"
         WHERE driver_id = $1
+      ),
+      inserted AS (
+        INSERT INTO "Event_Transport_Passengers" (driver_id, user_id)
+        SELECT $1, $2
+        FROM locked_driver, seat_count
+        WHERE seat_count.taken < locked_driver.seats_total
+        RETURNING passenger_id, driver_id, user_id, created_at
       )
-      INSERT INTO "Event_Transport_Passengers" (driver_id, user_id)
-      SELECT $1, $2
-      FROM locked_driver, seat_count
-      WHERE seat_count.taken < locked_driver.seats_total
-      RETURNING passenger_id, driver_id, user_id, created_at`,
+      SELECT
+        i.passenger_id,
+        i.driver_id,
+        i.user_id,
+        u.name AS user_name,
+        i.created_at
+      FROM inserted i
+      LEFT JOIN "Users" u ON u.user_id = i.user_id`,
     [driverId, userId],
   );
   const inserted = insertRes.rows[0];
   if (!inserted) return null;
-
-  const nameRes = await pool.query<{ name: string | null }>(
-    `SELECT name FROM "Users" WHERE user_id = $1`,
-    [userId],
-  );
-
-  return {
-    passenger_id: inserted.passenger_id,
-    driver_id: inserted.driver_id,
-    user_id: inserted.user_id,
-    user_name: nameRes.rows[0]?.name ?? null,
-    created_at: inserted.created_at,
-  };
+  return inserted;
 }
 
 export async function deletePassenger(passengerId: string): Promise<void> {
