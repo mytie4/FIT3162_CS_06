@@ -192,6 +192,27 @@ export async function getPassenger(
   return res.rows[0] ?? null;
 }
 
+export async function getPassengerForEvent(
+  eventId: string,
+  userId: string,
+): Promise<TransportPassenger | null> {
+  const res = await pool.query<TransportPassenger>(
+    `SELECT
+        p.passenger_id,
+        p.driver_id,
+        p.user_id,
+        u.name AS user_name,
+        p.created_at
+     FROM "Event_Transport_Passengers" p
+     INNER JOIN "Event_Transport_Drivers" d ON d.driver_id = p.driver_id
+     LEFT JOIN "Users" u ON u.user_id = p.user_id
+     WHERE d.event_id = $1 AND p.user_id = $2
+     LIMIT 1`,
+    [eventId, userId],
+  );
+  return res.rows[0] ?? null;
+}
+
 export async function getPassengerById(
   passengerId: string,
 ): Promise<TransportPassenger | null> {
@@ -213,14 +234,28 @@ export async function getPassengerById(
 export async function createPassenger(
   driverId: string,
   userId: string,
-): Promise<TransportPassenger> {
-  const insertRes = await pool.query<{ passenger_id: string; created_at: string }>(
-    `INSERT INTO "Event_Transport_Passengers" (driver_id, user_id)
-     VALUES ($1, $2)
-     RETURNING passenger_id, created_at`,
+): Promise<TransportPassenger | null> {
+  const insertRes = await pool.query<TransportPassenger>(
+    `WITH locked_driver AS (
+        SELECT driver_id, seats_total
+        FROM "Event_Transport_Drivers"
+        WHERE driver_id = $1
+        FOR UPDATE
+      ),
+      seat_count AS (
+        SELECT COUNT(*)::int AS taken
+        FROM "Event_Transport_Passengers"
+        WHERE driver_id = $1
+      )
+      INSERT INTO "Event_Transport_Passengers" (driver_id, user_id)
+      SELECT $1, $2
+      FROM locked_driver, seat_count
+      WHERE seat_count.taken < locked_driver.seats_total
+      RETURNING passenger_id, driver_id, user_id, created_at`,
     [driverId, userId],
   );
-  const { passenger_id, created_at } = insertRes.rows[0];
+  const inserted = insertRes.rows[0];
+  if (!inserted) return null;
 
   const nameRes = await pool.query<{ name: string | null }>(
     `SELECT name FROM "Users" WHERE user_id = $1`,
@@ -228,11 +263,11 @@ export async function createPassenger(
   );
 
   return {
-    passenger_id,
-    driver_id: driverId,
-    user_id: userId,
+    passenger_id: inserted.passenger_id,
+    driver_id: inserted.driver_id,
+    user_id: inserted.user_id,
     user_name: nameRes.rows[0]?.name ?? null,
-    created_at,
+    created_at: inserted.created_at,
   };
 }
 

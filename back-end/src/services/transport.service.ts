@@ -114,18 +114,17 @@ export async function addPassenger(
     userId = targetUserId;
   }
 
-  const taken = await transportRepo.countPassengersForDriver(driverId);
-  if (taken >= driver.seats_total) {
-    throw new ServiceError(400, 'This car is full.');
-  }
-
   const existing = await transportRepo.getPassengerForEvent(eventId, userId);
   if (existing) {
     throw new ServiceError(409, 'That user is already signed up for this event.');
   }
 
   try {
-    return await transportRepo.createPassenger(driverId, userId);
+    const created = await transportRepo.createPassenger(driverId, userId);
+    if (!created) {
+      throw new ServiceError(400, 'This car is full.');
+    }
+    return created;
   } catch (error: any) {
     if (error?.code === '23505') {
       throw new ServiceError(409, 'That user is already signed up for this event.');
