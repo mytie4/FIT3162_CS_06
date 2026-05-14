@@ -119,12 +119,19 @@ export async function addPassenger(
     throw new ServiceError(400, 'This car is full.');
   }
 
-  const existing = await transportRepo.getPassenger(driverId, userId);
+  const existing = await transportRepo.getPassengerForEvent(eventId, userId);
   if (existing) {
-    throw new ServiceError(409, 'That user is already signed up for this car.');
+    throw new ServiceError(409, 'That user is already signed up for this event.');
   }
 
-  return transportRepo.createPassenger(driverId, userId);
+  try {
+    return await transportRepo.createPassenger(driverId, userId);
+  } catch (error: any) {
+    if (error?.code === '23505') {
+      throw new ServiceError(409, 'That user is already signed up for this event.');
+    }
+    throw error;
+  }
 }
 
 export async function removePassenger(
